@@ -3,17 +3,20 @@ from getPlayableActions import getPlayableActions
 
 
 class QAgent():
+    def getStateMatrix(self):
+        return None
+
     def getRandomState(self):
         result = []
         for i in range(len(self.q.shape)):
             result.append(np.random.randint(0, high=np.max(self.q, axis=i)))
-        return result
+        return tuple(result)
 
     def set_up_rewards(self, end_state):
         rewards_new = np.copy(self.rewards)
 
         # Set goal to be very high reward
-        rewards_new[end_state, end_state] = 999
+        rewards_new[end_state] = 999
 
         return rewards_new
 
@@ -23,19 +26,20 @@ class QAgent():
             playable_actions = getPlayableActions(
                 current_state, self.differentials, self.dt)
             next_state = np.random.choice(playable_actions)
-            temporal_difference = rewards_new[current_state, next_state] + self.gamma * \
-                self.q[next_state, np.argmax(self.q[next_state, ])] - \
-                self.q[current_state, next_state]
-            self.q[current_state, next_state] += self.alpha * \
+            temporal_difference = rewards_new[current_state] + self.gamma * \
+                self.q[np.argmax(self.q[playable_actions])] - \
+                self.q[current_state]
+            self.q[current_state] += self.alpha * \
                 temporal_difference
 
     def get_optimal_route(self, start_state, end_state):
         route = [start_state]
         next_state = start_state
         while next_state != end_state:
-            next_state = np.argmax(self.q[start_state])
+            playable_actions = getPlayableActions(
+                next_state, self.differentials, self.dt)
+            next_state = np.argmax(self.q[playable_actions])
             route.append(next_state)
-            start_state = next_state
 
         return route
 
