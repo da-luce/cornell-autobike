@@ -1,11 +1,8 @@
 import numpy as np
-from getPlayableActions import getPlayableActions
+from HardToWriteFunctions import getPlayableActions, getStateMatrix
 
 
 class QAgent():
-    def getStateMatrix(self):
-        return None
-
     def getRandomState(self):
         result = []
         for i in range(len(self.q.shape)):
