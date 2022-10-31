@@ -1,9 +1,16 @@
+import numpy as np
+
+
 def getPlayableActions(currentState, differentials, timestep):
     """Returns a list of states reachable from [currentState] after time [timestep]
     has elapsed. [currentState] is a list of 5 numbers: x coordinate, y coordinate, 
     x velocity, y velocity, and angle. [differentials] is also 5 numbers, but is the 
     differences between cells in the matrix in SI units. [timestep] is what states are 
     possible after [timestep] amount of time."""
+    acceleration_power = 1  # m/s/s
+    braking_power = 1  # m/s/s
+    max_speed = 10  # m/s
+    max_turning_rate = 45  # deg/s
 
 
 def getStateMatrix():
@@ -11,3 +18,4 @@ def getStateMatrix():
     y coordinate, x velocity, y velocity, angle. The second element is the differences between
     each element of the matrix in SI units. This function should be determined before
     compile-time based on the occupancy grid resolution and other physical factors."""
+    return np.zeros((1000, 1000, 10000, 10000, 360))
