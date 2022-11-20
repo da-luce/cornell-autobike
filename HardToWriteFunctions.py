@@ -39,17 +39,23 @@ def getPlayableActions(currentState, differentials, timestep):
     #calculating max change in y coordinate
     max_y_coord = init_y_coord + (max_S * math.sin(currentState[3]))
 
-    angle_diff_check = counter_max_angle - (clock_max_angle-360)
+    angle_diff_check = counter_max_angle - (clock_max_angle-360) 
 
-    while angle_diff_check/differentials[3]>0:
-        x1 = clock_max_angle/differentials[3] + 
-        return [[[(x, y, z, x1) for x in range(init_x_coord/differentials[0], max_x_coord/differentials[0])] 
-        for y in range(init_y_coord/differentials[1], max_y_coord/differentials[1])]
-        for z in range(min_vel/differentials[2], max_vel/differentials[2])]
+    x1 = clock_max_angle/differentials[3]
 
-        for x1 in range(clock_max_angle/differentials[3], counter_max_angle/differentials[3])]
+    while angle_diff_check>0:
+        if angle_diff_check>counter_max_angle:
+            x1-=1
+            return [[[(x, y, z, x1) for x in range(init_x_coord/differentials[0], max_x_coord/differentials[0])] 
+            for y in range(init_y_coord/differentials[1], max_y_coord/differentials[1])]
+            for z in range(min_vel/differentials[2], max_vel/differentials[2])]
+        else:
+            x1+=1
+            return [[[(x, y, z, x1) for x in range(init_x_coord/differentials[0], max_x_coord/differentials[0])] 
+            for y in range(init_y_coord/differentials[1], max_y_coord/differentials[1])]
+            for z in range(min_vel/differentials[2], max_vel/differentials[2])]
 
-        angle_diff_check/differentials[3]-=1
+        angle_diff_check-=1
 
         
 
