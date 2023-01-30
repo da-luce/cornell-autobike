@@ -1,6 +1,47 @@
 import numpy as np
 import math 
 
+class State:
+
+    """
+    Represents a state
+
+    ...
+
+    Attributes:
+    ___________
+    x : number
+        The x coordinate of the bike
+    y : number
+        The y coordinate of the bike
+    speed : number
+        The speed of the bike (m/s)
+    angle : number
+        Angle of the front wheel relative to the frame (rad)
+    """
+
+    def __init__(self, x, y, speed, angle):
+        self.x = x
+        self.y = y
+        self.speed = speed
+        self.angle = angle
+
+def get_playable_actions(current_state, differentials, timestep):
+
+    """
+    Get list of reachable states.
+
+    Extended description...
+
+    Attributes:
+    current_state (State)   : State object representing the current state
+    differentials (list)    : list of four numbers, differences between cells in Q-matrix in SI units
+    timestep (number?)      : timestep between ?
+
+    Returns:
+    reachable_states        : list of reachable states
+    """
+
 
 def getPlayableActions(currentState, differentials, timestep):
     """Returns a list of states reachable from [currentState] after time [timestep]
