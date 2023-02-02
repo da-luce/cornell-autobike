@@ -1,0 +1,10 @@
+README.md
+pyproject.toml
+setup.cfg
+setup.py
+src/qlearning.egg-info/PKG-INFO
+src/qlearning.egg-info/SOURCES.txt
+src/qlearning.egg-info/dependency_links.txt
+src/qlearning.egg-info/not-zip-safe
+src/qlearning.egg-info/requires.txt
+src/qlearning.egg-info/top_level.txt
