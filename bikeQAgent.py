@@ -56,6 +56,7 @@ class BikeQAgent(QAgent):
             for x1 in range(clock_max_angle/differentials[3], counter_max_angle/differentials[3])]
 
             angle_diff_check/differentials[3] -= 1"""
+        # Temporarily commented out while not compiling
 
         raise NotImplementedError
 
