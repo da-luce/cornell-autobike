@@ -1,30 +1,55 @@
+from dataclasses import dataclass
+from typing import dataclass_transform
 import numpy as np
-import math 
 
+@dataclass
 class State:
 
     """
-    Represents a state
+    Represents state of bike
 
     ...
 
     Attributes:
     ___________
-    x : number
-        The x coordinate of the bike
-    y : number
-        The y coordinate of the bike
-    speed : number
-        The speed of the bike (m/s)
+    position : list
+        Two element list containing the position coordinates of the bike [x, y] (m)
+    velocity: list
+        Two element list containing the velocity components of the bike [x_vel, y_vel] (m/s)
     angle : number
-        Angle of the front wheel relative to the frame (rad)
+        Angle of the front wheel relative to the frame (deg)
     """
 
-    def __init__(self, x, y, speed, angle):
-        self.x = x
-        self.y = y
-        self.speed = speed
+    def __init__(self, position, velocity, angle):
+        self.position = np.array(position[0], position[1])
+        self.velocity = np.array(velocity[0], velocity[1])
         self.angle = angle
+
+    def speed(self):
+        return np.linalg.norm(self.velocity)
+
+@dataclass
+class Differential
+
+    """
+    Represents a differential (difference between two states)
+
+    ...
+    Attributes:
+    position : list
+        Two element list containing the difference in position coordinates (m)
+    velocity: list
+        Two element list containing the difference in velocity components (m/s)
+    angle : number
+        Difference in angle between states (deg)
+    """
+
+    # Construct a new Differential object
+    def __init__(self, position_diff, velocity_diff, angle_diff):
+        self.position_diff = np.array(position_diff[0], position_diff[1])
+        self.velocity_diff = np.array(velocity_diff[0], velocity_diff[1])
+        self.angle_diff = angle_diff
+
 
 def get_playable_actions(current_state, differentials, timestep):
 
@@ -34,72 +59,29 @@ def get_playable_actions(current_state, differentials, timestep):
     Extended description...
 
     Attributes:
-    current_state (State)   : State object representing the current state
-    differentials (list)    : list of four numbers, differences between cells in Q-matrix in SI units
-    timestep (number?)      : timestep between ?
+    current_state (State)           : State object representing the current state
+    differentials (Differential)    : Differential object representing difference between states
+    timestep (number)               : Timestep between computations
 
     Returns:
-    reachable_states        : list of reachable states
+    reachable_states (list of State)    : list of reachable states
     """
 
+    # Constants
+    SPEED_MIN           = 3  # Miniumum possible speed required to keep bike moving (m/s)
+    SPEED_MAX           = 10 # Maximum possible speed of the bike (m/s). Assume speed is always less than this
 
-def getPlayableActions(currentState, differentials, timestep):
-    """Returns a list of states reachable from [currentState] after time [timestep]
-    has elapsed. [currentState] is a list of 4 numbers: x coordinate, y coordinate, 
-    speed, and angle. [differentials] is also 4 numbers, but is the 
-    differences between cells in the matrix in SI units. [timestep] is what states are 
-    possible after [timestep] amount of time."""
-    acceleration_power = 1  # m/s/s
-    braking_power = 1  # m/s/s
-    max_turning_rate = 30  # deg/s 
+    ACCELERATION_MAX    = 1  # Maximum acceleration of the bike (m/s/s)
+    BRAKING_MAX         = 1  # Maximum deacceleration with brakes (m/s/s)
 
-    #calculating max velocity reachable
-    max_vel = currentState[2] + acceleration_power*(timestep)
+    TURN_ANGLE_MAX  = 60 # Maximum turn angle left and right of center +- 60 (deg)
+    TURN_ACC_MAX = max(1, 20 - current_state.speed() * 0.3) # Maximum acceleration of bike's front wheel (def/s)
+    # In theory? the turning acceleration depends on th current velocity of the bike
+    # Currently some bodged example - not based on physics
 
-    #calculating min velocity reachable
-    min_vel = currentState[2] - braking_power*(timestep) 
+    # Calculate bounds
+    speed_min = max(SPEED_MIN, current_state.speed() * ACCELERATION_MAX * timestep) # Minimum reachable speed
+    speed_max = min(SPEED_MAX, current_state.speed() * BRAKING_MAX * timestep) # Maximum reachable velocity
 
-    #calculating max clockwise angle reachable
-    clock_max_angle = (currentState[3]-(max_turning_rate*timestep))%360
-
-    #calculating max counter-clockwise angle reachable
-    counter_max_angle = (currentState[3]+(max_turning_rate*timestep))%360
-
-    #min_x_coordinate
-    init_x_coord = currentState[0]
-
-    #min_y_coordinate
-    init_y_coord = currentState[1]
-
-    #calculating max displacement possible if continuing on same path with max acceleration
-    max_S = currentState[2]*timestep + 0.5*acceleration_power*timestep*timestep
-
-    #calculating max change in x coordinate
-    max_x_coord = init_x_coord + (max_S * math.cos(currentState[3]))
-
-    #calculating max change in y coordinate
-    max_y_coord = init_y_coord + (max_S * math.sin(currentState[3]))
-
-    angle_diff_check = counter_max_angle - (clock_max_angle-360)
-
-    while angle_diff_check/differentials[3]>0:
-        x1 = clock_max_angle/differentials[3] + 
-        return [[[(x, y, z, x1) for x in range(init_x_coord/differentials[0], max_x_coord/differentials[0])] 
-        for y in range(init_y_coord/differentials[1], max_y_coord/differentials[1])]
-        for z in range(min_vel/differentials[2], max_vel/differentials[2])]
-
-        for x1 in range(clock_max_angle/differentials[3], counter_max_angle/differentials[3])]
-
-        angle_diff_check/differentials[3]-=1
-
-        
-
-
-
-
-def getStateMatrix():
-    """Returns a tuple, the first element is a matrix with dimensions: x coordinate, 
-    y coordinate, speed, angle. The second element is the differences between
-    each element of the matrix in SI units. This function should be determined before
-    compile-time based on the occupancy grid resolution and other physical factors."""
-    return np.zeros((1000, 1000, 10000, 10000, 360))
+    clock_angle_max = min(TURN_ANGLE_MAX, current_state.angle + TURN_ACC_MAX * timestep)
+    counter_angle_max = max(-TURN_ANGLE_MAX, current_state.angle - TURN_ACC_MAX * timestep)
