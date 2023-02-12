@@ -1,8 +1,13 @@
 name: Tests
 
 on:
-  - push
-  - pull_request
+  push:
+    branches:
+      - main
+      - 12-testing
+  pull_request:
+    paths-ignore:
+      - '**.md'
 
 jobs:
   test:
