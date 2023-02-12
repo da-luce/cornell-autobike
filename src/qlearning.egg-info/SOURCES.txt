@@ -2,6 +2,8 @@ README.md
 pyproject.toml
 setup.cfg
 setup.py
+src/qlearning/__init__.py
+src/qlearning/py.typed
 src/qlearning.egg-info/PKG-INFO
 src/qlearning.egg-info/SOURCES.txt
 src/qlearning.egg-info/dependency_links.txt
