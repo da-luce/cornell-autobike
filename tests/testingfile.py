@@ -1,12 +1,12 @@
-"""dummy test case just to see if testing configurations work
+# dummy test case just to see if testing configurations work
 
-from qlearning import *"""
+from qlearning import *
 
 
 def dummy_test():
     assert 1 > 0
 
 
-"""if __name__ == "__main__":
+if __name__ == "__main__":
     dummy_test()
-    print("end") """
+    print("end")

@@ -3,3 +3,5 @@ src/qlearning.egg-info
 .coverage
 .tox
 .DS_Store
+.pytest_cache
+.mypy_cache
