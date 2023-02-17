@@ -5,27 +5,7 @@ import matplotlib as mpl
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
 from datetime import datetime
-
-class VectorUtils:
-
-    """
-    Class containing common vector operations
-    """
-    @staticmethod
-    def unit_vector(vector):
-        """
-        Returns the unit vector of the vector.
-        """
-        return vector / np.linalg.norm(vector)
-
-    @staticmethod
-    def angle_between(v1, v2):
-        """
-        Returns the angle in radians between vectors 'v1' and 'v2'
-        """
-        v1_u = VectorUtils.unit_vector(v1)
-        v2_u = VectorUtils.unit_vector(v2)
-        return np.arccos(np.clip(np.dot(v1_u, v2_u), -1.0, 1.0))
+from scipy.stats import gaussian_kde
 
 
 class Model:
@@ -73,6 +53,27 @@ class Model:
     # Figure
     fig, ax = plt.subplots()
 
+    dark = '#0B0B0B'
+    light = '#C9C9C9'
+
+    red = '#ff3333'
+    purple = '#9933ff'
+    orange = '#ff9933'
+    blue = '#33ccff'
+
+    ax.set_facecolor(dark)
+    fig.patch.set_facecolor(dark)
+
+    ax.spines['bottom'].set_color(light)
+    ax.spines['top'].set_color(light)
+    ax.spines['left'].set_color(light)
+    ax.spines['right'].set_color(light)
+    ax.xaxis.label.set_color(light)
+    ax.yaxis.label.set_color(light)
+    ax.tick_params(axis='x', colors=light)
+    ax.tick_params(axis='y', colors=light)
+    ax.grid(linestyle='dashed')
+
     @staticmethod
     # Return updated state based off inputs
     def update_state(current_state, throttle, steering):
@@ -81,10 +82,6 @@ class Model:
         vel_x,vel_y    = current_state.vel_x, current_state.vel_y
         yaw_angle      = current_state.yaw_angle
         steering_angle = current_state.steering_angle
-
-        # Advect bike
-        x = x + vel_x * math.cos(yaw_angle) * Model.DT - vel_y * math.sin(yaw_angle) * Model.DT
-        y = y + vel_x * math.sin(yaw_angle) * Model.DT + vel_y * math.cos(yaw_angle) * Model.DT
 
         yaw = yaw_angle * steering_angle * Model.DT
         yaw = (yaw + np.pi) % (2 * np.pi) - np.pi # Normalize yaw angle
@@ -107,13 +104,15 @@ class Model:
 
         return State(x, y, vel_x, vel_y, yaw, steering)
 
+
     @staticmethod
     # Return all possbile states in next time step
-    def get_possible_states(current_state, differentials):
+    def get_possible_states(current_state, differentials, graph):
 
         start_time = datetime.now()
 
         possible_states = []
+
         # Loop through possible inputs
         for acc in np.arange(Model.ACCELERATION_MIN, Model.ACCELERATION_MAX, 0.1):
             for steer in np.arange(-Model.STEER_ANGLE_MAX, Model.STEER_ANGLE_MAX, 0.1):
@@ -121,18 +120,30 @@ class Model:
                 if not Model.validState(state):
                     continue
                 possible_states.append(state)
-                if True:
-                    state.plot()
+
+        if graph:
+            x = list(o.x for o in possible_states)
+            y = list(o.y for o in possible_states)
+
+            xy = np.vstack([x,y])
+            z = gaussian_kde(xy)(xy)
+
+            Model.ax.scatter(x, y, c=z, s=100, alpha=1)
+            Model.plotBike(current_state)
 
         end_time = datetime.now()
         print('Got all possible states in {}'.format(end_time - start_time))
+
         return possible_states
+
 
     # Check state invariants
     @staticmethod
     def validState(state):
         return Model.SPEED_MIN <= state.speed() <= Model.SPEED_MAX
 
+
+    # Plot bike in certain state
     @staticmethod
     def plotBike(state):
 
@@ -146,23 +157,24 @@ class Model:
         front_axel_y = state.y + Model.DIST_FRONT_AXEL * math.sin(state.yaw_angle)
 
         # Plot center line
-        Model.ax.plot([rear_axel_x, front_axel_x], [rear_axel_y, front_axel_y], marker = 'o')
+        Model.ax.plot([rear_axel_x, front_axel_x], [rear_axel_y, front_axel_y], marker = 'o', color="white")
 
-        rear_wheel = Model.rectangle(rear_axel_x, rear_axel_y, wheel_width, wheel_length, "red", state.yaw_angle)
-        front_wheel = Model.rectangle(front_axel_x, front_axel_y, wheel_width, wheel_length, "blue", state.yaw_angle + state.steering_angle) # Why neg steering?
+        rear_wheel = Model.drawWheel(rear_axel_x, rear_axel_y, wheel_width, wheel_length, Model.red, state.yaw_angle)
+        front_wheel = Model.drawWheel(front_axel_x, front_axel_y, wheel_width, wheel_length, Model.purple, state.yaw_angle + state.steering_angle) # Why neg steering?
 
         Model.ax.add_patch(rear_wheel)
         Model.ax.add_patch(front_wheel)
 
-        Model.ax.plot([state.x, state.x+state.vel_x], [state.y, state.y+state.vel_y], marker='>')
+        Model.ax.plot([state.x, state.x+state.vel_x], [state.y, state.y+state.vel_y], marker='>', color = Model.orange)
 
         Model.ax.set_xlim(-2,5)
         Model.ax.set_ylim(-2,5)
 
+    # Draw a wheel
     @staticmethod
-    def rectangle(centerX, centerY, width, length, color, rotation):
+    def drawWheel(centerX, centerY, width, length, color, rotation):
 
-        rect = patches.Rectangle((centerX - length/2, centerY - width /2), length, width, color = color, alpha = 0.8)
+        rect = patches.Rectangle((centerX - length/2, centerY - width /2), length, width, color = color, alpha = 1)
         ts = Model.ax.transData.transform([centerX, centerY])
         transform = mpl.transforms.Affine2D().rotate_around(centerX, centerY, rotation) + Model.ax.transData
         rect.set_transform(transform)
@@ -199,8 +211,6 @@ class State:
         self.yaw_angle = yaw_angle
         self.steering_angle = steering_angle
 
-        self.slip_angle = VectorUtils.angle_between([x,y], [vel_y, vel_y]) - yaw_angle 
-
     def speed(self):
         return math.sqrt(self.vel_x * self.vel_x + self.vel_y * self.vel_y)
 
@@ -212,7 +222,7 @@ class State:
 
     def plot(self):
         # Model.ax.quiver(self.x, self.y, self.vel_x, self.vel_y, width=0.001, scale=1/(self.speed()*0.01))
-        Model.ax.plot(self.x, self.y, 'o', color = "blue", alpha = 0.25)
+        Model.ax.plot(self.x, self.y, 'o', color = Model.blue, alpha = 0.25)
 
 
 # TODO: is different resolution of x/y components desired?
@@ -238,92 +248,15 @@ class Differential:
         self.velocity_diff = velocity_diff
         self.angle_diff = angle_diff
 
-"""
-def get_playable_actions(current_state, differentials, timestep):
-
-    ###
-    Get list of reachable states.
-
-    Extended description...
-
-    Assumptions:
-        - Constants are constant (e.g. in reality, braking will be impacted by weather conditions)
-        - Motors turning front wheel and moving drive train provide instant torque
-        - Friction involved turning the front wheel and other instances is ignored
-        - It is impossible to accelerate and brake at the same time
-        - Bike never exceeds SPEED_MAX and is never slower than SPEED_MIN
-
-    Attributes:
-    current_state (State)           : State object representing the current state
-    differentials (Differential)    : Differential object representing difference between states
-                                      (Essentially the resolution of the state matrix)
-    timestep (number)               : Timestep between computations
-
-    Returns:
-    reachable_states (list of State)    : list of reachable states
-    ###
-
-    # Constants
-    SPEED_MIN           = 3  # Miniumum possible speed required to keep bike moving (m/s)
-    SPEED_MAX           = 10 # Maximum possible speed of the bike (m/s).
-
-    ACCELERATION_MAX    = 1  # Maximum acceleration of the bike (m/s/s)
-    BRAKING_MAX         = 1  # Maximum deacceleration with brakes (m/s/s)
-
-    TURN_ANGLE_MAX  = 60 # Maximum turn angle left and right of center +- 60 (deg)
-    TURN_ACC_MAX = max(1, 20 - current_state.speed() * 0.3) # Maximum acceleration of bike's front wheel (def/s)
-    # In theory (?) the turning acceleration is limited by the current velocity of the bike and depends on torque of turning motor
-    # E.g. we do dont want to turn the front wheel quickly when the bike is moving fast
-    # Currently some bodged example - not based on physics (or anything really)
-
-    # Calculate bounds
-    speed_min = max(SPEED_MIN, current_state.speed() * ACCELERATION_MAX * timestep) # Minimum reachable speed
-    speed_max = min(SPEED_MAX, current_state.speed() * BRAKING_MAX * timestep) # Maximum reachable velocity
-
-    clock_angle_max = min(TURN_ANGLE_MAX, current_state.angle + TURN_ACC_MAX * timestep)
-    counter_angle_max = max(-TURN_ANGLE_MAX, current_state.angle - TURN_ACC_MAX * timestep)
-
-    # Calculate resolutions based of differentials
-    RES_ACCELERATION = differentials.velocity_diff / 2
-    RES_TURNING = differentials.angle_diff / 2
-
-    # Return all possible states reachable in one timestep
-    # All states reachable by braking
-    # All states reachable by cruising
-    # All states reachable by accelerating
-
-    reachable_states = []
-
-    # Vary amount of acc/breaking
-    for acc in range(-BRAKING_MAX, ACCELERATION_MAX, RES_ACCELERATION):
-
-        speed = current_state.speed() + 0.5 * acc * timestep * timestep
-
-        # If we cannot go that slow/fast, ignore
-        if speed not in range(SPEED_MIN, SPEED_MAX):
-            continue
-
-        # Vary how much we turn
-        for turn in range(-TURN_ACC_MAX, TURN_ACC_MAX, RES_TURNING):
-
-            angle = current_state.angle + 0.5 * turn * timestep * timestep
-
-            # If we cannot turn that far, ignore
-            if angle not in range(-TURN_ANGLE_MAX, TURN_ANGLE_MAX):
-                continue
-
-            velocity = current_state.velocity + np.array(
-                        (0.5 * acc * timestep * timestep) * math.cos(angle),
-                        (0.5 * acc * timestep * timestep) * math.sin(angle)
-                    ) 
-            reachable_states.append(State([],[],angle))
-"""
 
 if __name__ == "__main__":
-    fig = plt.figure()
-    state = State(0, 0, 1, 0, np.radians(0), np.radians(0))
-    Model.plotBike(state)
+
+    # Example state and differential
+    state = State(0, 0, 1, 2, np.radians(90), np.radians(-30))
     differentials = Differential(1,1,1)
-    possible_states = Model.get_possible_states(state, differentials)
+
+    # Calculate and graph possible states 
+    possible_states = Model.get_possible_states(state, differentials, True)
+
     plt.show()
 
