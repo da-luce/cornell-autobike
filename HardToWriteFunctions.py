@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 import matplotlib.patches as patches
 from datetime import datetime
 from scipy.stats import gaussian_kde
-
+from numba import jit
 
 class Model:
 
@@ -41,6 +41,7 @@ class Model:
     SPEED_MAX = 10 # m/s
 
     STEER_ANGLE_MAX = np.radians(37) # rad
+    STEER_ANGLE_DELTA = np.radians(5) # rad
 
     ACCELERATION_MIN = -5 # m/(s^2)
     ACCELERATION_MAX = 5 # m/(s^2)
@@ -49,6 +50,7 @@ class Model:
     STEER_ACC_MAX = 5
 
     DT = 0.5 # (s)
+
 
     # Figure
     fig, ax = plt.subplots()
@@ -83,6 +85,10 @@ class Model:
         yaw_angle      = current_state.yaw_angle
         steering_angle = current_state.steering_angle
 
+        # Advect bike
+        x = x + vel_x * math.cos(yaw_angle) * Model.DT - vel_y * math.sin(yaw_angle) * Model.DT
+        y = y + vel_x * math.sin(yaw_angle) * Model.DT + vel_y * math.cos(yaw_angle) * Model.DT
+
         yaw = yaw_angle * steering_angle * Model.DT
         yaw = (yaw + np.pi) % (2 * np.pi) - np.pi # Normalize yaw angle
 
@@ -105,34 +111,41 @@ class Model:
         return State(x, y, vel_x, vel_y, yaw, steering)
 
 
-    @staticmethod
     # Return all possbile states in next time step
+    @staticmethod
     def get_possible_states(current_state, differentials, graph):
 
         start_time = datetime.now()
 
-        possible_states = []
+        possible_acc = np.arange(Model.ACCELERATION_MIN, Model.ACCELERATION_MAX, 0.25)
+        possible_steer = np.arange(-Model.STEER_ANGLE_DELTA, Model.STEER_ANGLE_DELTA, np.radians(0.5)) 
 
-        # Loop through possible inputs
-        for acc in np.arange(Model.ACCELERATION_MIN, Model.ACCELERATION_MAX, 0.1):
-            for steer in np.arange(-Model.STEER_ANGLE_MAX, Model.STEER_ANGLE_MAX, 0.1):
-                state = Model.update_state(current_state, acc, steer)
-                if not Model.validState(state):
-                    continue
-                possible_states.append(state)
+        states = [Model.update_state(current_state, acc, steer) for acc in possible_acc for steer in possible_steer]
+
+        possible_states = [s for s in states if Model.validState(state)]
+        invalid_states = [s for s in states if not Model.validState(state)]
 
         if graph:
-            x = list(o.x for o in possible_states)
-            y = list(o.y for o in possible_states)
 
-            xy = np.vstack([x,y])
-            z = gaussian_kde(xy)(xy)
+            if len(possible_states) != 0:
+                x = list(o.x for o in possible_states)
+                y = list(o.y for o in possible_states)
 
-            Model.ax.scatter(x, y, c=z, s=100, alpha=1)
+                xy = np.vstack([x,y])
+                z = gaussian_kde(xy)(xy)
+
+                Model.ax.scatter(x, y, c=z, s=100, alpha=1)
+
+            x_inv = list(o.x for o in invalid_states)
+            y_inv = list(o.y for o in invalid_states)
+
+
+            Model.ax.scatter(x_inv, y_inv, c=Model.red, s=100, alpha=0.05)
+
             Model.plotBike(current_state)
 
         end_time = datetime.now()
-        print('Got all possible states in {}'.format(end_time - start_time))
+        print("Got all " + str(len(possible_states)) + " possible states in {}".format(end_time - start_time))
 
         return possible_states
 
@@ -140,7 +153,8 @@ class Model:
     # Check state invariants
     @staticmethod
     def validState(state):
-        return Model.SPEED_MIN <= state.speed() <= Model.SPEED_MAX
+        return (Model.SPEED_MIN <= state.speed() <= Model.SPEED_MAX and 
+                -Model.STEER_ANGLE_MAX <= state.steering_angle <= Model.STEER_ANGLE_MAX)
 
 
     # Plot bike in certain state
@@ -160,7 +174,7 @@ class Model:
         Model.ax.plot([rear_axel_x, front_axel_x], [rear_axel_y, front_axel_y], marker = 'o', color="white")
 
         rear_wheel = Model.drawWheel(rear_axel_x, rear_axel_y, wheel_width, wheel_length, Model.red, state.yaw_angle)
-        front_wheel = Model.drawWheel(front_axel_x, front_axel_y, wheel_width, wheel_length, Model.purple, state.yaw_angle + state.steering_angle) # Why neg steering?
+        front_wheel = Model.drawWheel(front_axel_x, front_axel_y, wheel_width, wheel_length, Model.blue, state.yaw_angle + state.steering_angle) # Why neg steering?
 
         Model.ax.add_patch(rear_wheel)
         Model.ax.add_patch(front_wheel)
@@ -252,11 +266,11 @@ class Differential:
 if __name__ == "__main__":
 
     # Example state and differential
-    state = State(0, 0, 1, 2, np.radians(90), np.radians(-30))
+    state = State(0, 0, 2, 0, np.radians(0), np.radians(0))
     differentials = Differential(1,1,1)
 
     # Calculate and graph possible states 
-    possible_states = Model.get_possible_states(state, differentials, True)
+    possible_states = Model.get_possible_states(state, differentials, False)
 
     plt.show()
 
