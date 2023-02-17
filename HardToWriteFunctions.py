@@ -117,13 +117,14 @@ class Model:
 
         start_time = datetime.now()
 
-        possible_acc = np.arange(Model.ACCELERATION_MIN, Model.ACCELERATION_MAX, 0.25)
+        possible_acc = np.arange(Model.ACCELERATION_MIN, Model.ACCELERATION_MAX, 0.2)
         possible_steer = np.arange(-Model.STEER_ANGLE_DELTA, Model.STEER_ANGLE_DELTA, np.radians(0.5)) 
 
-        states = [Model.update_state(current_state, acc, steer) for acc in possible_acc for steer in possible_steer]
+        iterable = (Model.update_state(current_state, acc, steer) for acc in possible_acc for steer in possible_steer)
+        states = np.fromiter(iterable, State)
 
-        possible_states = [s for s in states if Model.validState(state)]
-        invalid_states = [s for s in states if not Model.validState(state)]
+        valid_iter = (s for s in states if Model.validState(s))
+        possible_states = np.fromiter(valid_iter, State)
 
         if graph:
 
@@ -136,6 +137,8 @@ class Model:
 
                 Model.ax.scatter(x, y, c=z, s=100, alpha=1)
 
+            invalid_iter = (s for s in states if not Model.validState(s)) 
+            invalid_states = np.fromiter(invalid_iter, State)
             x_inv = list(o.x for o in invalid_states)
             y_inv = list(o.y for o in invalid_states)
 
