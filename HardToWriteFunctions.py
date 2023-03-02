@@ -49,7 +49,7 @@ class Model:
     STEER_ACC_MIN = -5
     STEER_ACC_MAX = 5
 
-    DT = 0.5 # (s)
+    DT = 1 # (s)
 
 
     # Figure
@@ -75,6 +75,20 @@ class Model:
     ax.tick_params(axis='x', colors=light)
     ax.tick_params(axis='y', colors=light)
     ax.grid(linestyle='dashed')
+
+    # Determine resolution of input variables manually
+    @staticmethod
+    def get_resolutions(differentials):
+
+        # Variability in acceleration inputs
+        acc_var = differentials.position
+
+        # Variability in steering inputs
+        steer_var = differentials.position
+
+        return (acc_var, steer_var)
+
+
 
     @staticmethod
     # Return updated state based off inputs
@@ -117,7 +131,7 @@ class Model:
 
         start_time = datetime.now()
 
-        possible_acc = np.arange(Model.ACCELERATION_MIN, Model.ACCELERATION_MAX, 0.2)
+        possible_acc = np.arange(Model.ACCELERATION_MIN, Model.ACCELERATION_MAX, 0.1)
         possible_steer = np.arange(-Model.STEER_ANGLE_DELTA, Model.STEER_ANGLE_DELTA, np.radians(0.5)) 
 
         iterable = (Model.update_state(current_state, acc, steer) for acc in possible_acc for steer in possible_steer)
@@ -269,11 +283,11 @@ class Differential:
 if __name__ == "__main__":
 
     # Example state and differential
-    state = State(0, 0, 2, 0, np.radians(0), np.radians(0))
+    state = State(0, 0, 2, 1, np.radians(0), np.radians(0))
     differentials = Differential(1,1,1)
 
     # Calculate and graph possible states 
-    possible_states = Model.get_possible_states(state, differentials, False)
+    possible_states = Model.get_possible_states(state, differentials, True)
 
     plt.show()
 
