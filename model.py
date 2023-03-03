@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 import matplotlib.patches as patches
 from datetime import datetime
 from scipy.stats import gaussian_kde
-from numba import jit
+from numba import jit, float64, boolean
 import time
 
 # CONSTANTS
@@ -27,7 +27,7 @@ SPEED_MIN = 2 # m/s
 SPEED_MAX = 10 # m/s
 
 STEER_ANGLE_MAX = np.radians(37) # rad
-STEER_ANGLE_DELTA = np.radians(5) # rad
+STEER_ANGLE_DELTA = np.radians(1) # rad
 
 ACCELERATION_MIN = -5 # m/(s^2)
 ACCELERATION_MAX = 5 # m/(s^2)
@@ -35,10 +35,20 @@ ACCELERATION_MAX = 5 # m/(s^2)
 STEER_ACC_MIN = -5
 STEER_ACC_MAX = 5
 
-DT = 1 # (s)
+DT = 0.01 # (s)
 
+""""
+A note on @jit decorators:
+    - First position is signature - return(param, param, ...) - of method
+        - Not required but required for pre-compliation in future if used
+    - nopython forces jit to compile to pure byte code (significantly faster)
+    - cache caches compiled functions to reduce overhead on first runs
 
-@jit(nopython=True)
+"""
+
+@jit("float64[:](float64[:], float64, float64)",
+     nopython=True,
+     cache=True)
 def next_state(state, throttle, steering):
 
     """
@@ -78,7 +88,27 @@ def next_state(state, throttle, steering):
     return np.array([x, y, vel_x, vel_y, yaw, steering])
 
 
-@jit(nopython=True)
+@jit("boolean(float64[:])",
+     nopython=True,
+     cache=True)
+def valid_state(state):
+
+    """
+    Return whether a state is allowed
+    """
+
+    vel_x, vel_y = state[2], state[3]
+    steer_angle = state[5]
+
+    speed = np.sqrt(vel_x ** 2 + vel_y ** 2)
+
+    return (SPEED_MIN <= speed<= SPEED_MAX and
+            -STEER_ANGLE_MAX <= steer_angle <= STEER_ANGLE_MAX)
+
+
+@jit("float64[:,:](float64[:])",
+     nopython=True,
+     cache=True)
 def get_possible_states(state):
 
     """
@@ -87,7 +117,7 @@ def get_possible_states(state):
     
     # TODO: should these arrays be initialized outside of function?
     possible_acc = np.arange(ACCELERATION_MIN, ACCELERATION_MAX, 0.1)
-    possible_steer = np.arange(-STEER_ANGLE_DELTA, STEER_ANGLE_DELTA, np.radians(0.5)) 
+    possible_steer = np.arange(-STEER_ANGLE_DELTA, STEER_ANGLE_DELTA, np.radians(0.1)) 
     
     # TODO: should array be allocated outside of function?
     max_size = possible_acc.size * possible_steer.size
@@ -105,20 +135,27 @@ def get_possible_states(state):
     return possible_states[1:index]
 
 
-@jit(nopython=True)
-def valid_state(state):
+
+
+def possible_states_performance(iter):
 
     """
-    Return whether a state is allowed
+    Print mean runtime and standard deviation of get_possible_states()
     """
+    runs = np.empty(iter, float)
 
-    vel_x, vel_y = state[2], state[3]
-    steer_angle = state[5]
+    # Performance appears to be same regardless of test_state
+    test_state = np.array([1000, 1000, 3, 2, np.radians(90), np.radians(-20)])
 
-    speed = np.sqrt(vel_x ** 2 + vel_y ** 2)
+    for i in range(0, iter):
+        start = time.perf_counter()
+        get_possible_states(test_state)
+        end = time.perf_counter()
+        runs[i] = end - start
 
-    return (SPEED_MIN <= speed<= SPEED_MAX and
-            -STEER_ANGLE_MAX <= steer_angle <= STEER_ANGLE_MAX)
+    print("Mean: " + str(np.mean(runs)) + " STD: " + str(np.std(runs)))
+    return
+
 
 # Testing
 if __name__ == "__main__":
@@ -135,5 +172,7 @@ if __name__ == "__main__":
     possible_states = get_possible_states(state)
     end = time.perf_counter()
     print("Elapsed (after compilation) = {}s".format((end - start)))
-    
+
     print("Number of states: " + str(possible_states.shape[0]))
+
+    possible_states_performance(1000)
