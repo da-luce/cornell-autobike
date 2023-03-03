@@ -37,6 +37,7 @@ STEER_ACC_MAX = 5
 
 DT = 1 # (s)
 
+
 @jit(nopython=True)
 def next_state(state, throttle, steering):
 
@@ -48,12 +49,7 @@ def next_state(state, throttle, steering):
     steering: delta in steering angle in radians
     """
 
-    x = state[0]
-    y = state[1]
-    vel_x = state[2]
-    vel_y = state[3]
-    yaw_angle = state[4]
-    steer_angle = state[5]
+    x, y, vel_x, vel_y, yaw_angle, steer_angle = state
 
     # Advect bike
     x = x + vel_x * np.cos(yaw_angle) * DT - vel_y * np.sin(yaw_angle) * DT
@@ -85,19 +81,28 @@ def next_state(state, throttle, steering):
 @jit(nopython=True)
 def get_possible_states(state):
 
+    """
+    Get all possible states
+    """
+    
+    # TODO: should these arrays be initialized outside of function?
     possible_acc = np.arange(ACCELERATION_MIN, ACCELERATION_MAX, 0.1)
     possible_steer = np.arange(-STEER_ANGLE_DELTA, STEER_ANGLE_DELTA, np.radians(0.5)) 
+    
+    # TODO: should array be allocated outside of function?
+    max_size = possible_acc.size * possible_steer.size
+    possible_states = np.empty((max_size, 6), float)
 
-    # Assume 2000 possible states, each 6 elements
-    possible_states = np.empty((2000, 6), float)
-
+    index = 0
     for acc in possible_acc:
         for steer in possible_steer:
                 next = next_state(state, acc, steer)
                 if (valid_state(next)):
-                    np.append(possible_states, next)
+                    possible_states[index] = next
+                    index += 1
 
-    return possible_states
+    # Only return valid states
+    return possible_states[1:index]
 
 
 @jit(nopython=True)
@@ -115,7 +120,7 @@ def valid_state(state):
     return (SPEED_MIN <= speed<= SPEED_MAX and
             -STEER_ANGLE_MAX <= steer_angle <= STEER_ANGLE_MAX)
 
-
+# Testing
 if __name__ == "__main__":
 
     # Example state
@@ -130,5 +135,5 @@ if __name__ == "__main__":
     possible_states = get_possible_states(state)
     end = time.perf_counter()
     print("Elapsed (after compilation) = {}s".format((end - start)))
-
-    print("Number of unique states: " + str(len(np.unique(possible_states))))
+    
+    print("Number of states: " + str(possible_states.shape[0]))
