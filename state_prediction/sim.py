@@ -1,58 +1,28 @@
-from dataclasses import dataclass
-import numpy as np
-import matplotlib as mpl
-import matplotlib.pyplot as plt
-import matplotlib.patches as patches
-from datetime import datetime
-from scipy.stats import gaussian_kde
-from numba import jit, float64, boolean
 import time
-
-# CONSTANTS
-
-# Physical properties
-DIST_REAR_AXEL = 0.85 # m
-DIST_FRONT_AXEL = 0.85 # m
-WHEEL_BASE = DIST_REAR_AXEL + DIST_FRONT_AXEL
-
-MASS = 15 # kg
-
-CORNERING_STIFF_FRONT = 16.0 * 2.0  # N/rad
-CORNERING_STIFF_REAR = 17.0 * 2.0  # N/rad
-
-YAW_INERTIA = 22 # kg/(m^2)
-
-# Input constraints
-SPEED_MIN = 2 # m/s
-SPEED_MAX = 10 # m/s
-
-STEER_ANGLE_MAX = np.radians(37) # rad
-STEER_ANGLE_DELTA = np.radians(1) # rad
-
-ACCELERATION_MIN = -5 # m/(s^2)
-ACCELERATION_MAX = 5 # m/(s^2)
- 
-STEER_ACC_MIN = -5
-STEER_ACC_MAX = 5
-
-DT = 0.01 # (s)
+import numpy as np
+from numba import jit
+from visual import *
+from constants import *
 
 """"
 A note on @jit decorators:
-    - First position is signature - return(param, param, ...) - of method
-        - Not required but required for pre-compliation in future if used
-    - nopython forces jit to compile to pure byte code (significantly faster)
-    - cache caches compiled functions to reduce overhead on first runs
+    - "signature string":   Defines the return type and parameter types for compilation.
+                            Not required with just-in-time compilation, but is necessaryfor
+                            for ahead-of-time compilation if used in future
+    - nopython=True:        Forces jit to compile to pure byte code (significantly faster)
+    - cache=True:           Caches compiled functions in a file to reduce overhead on first 
+                            time runs
 
+Read more: https://numba.pydata.org/numba-doc/latest/reference/types.html
 """
 
-@jit("float64[:](float64[:], float64, float64)",
+@jit("float64[::1](float64[::1], float64, float64)",
      nopython=True,
-     cache=True)
-def next_state(state, throttle, steering):
+     cache=False)
+def next_state_nonlinear(state, throttle, steering):
 
     """
-    Return future state given inputs
+    Nonlinear (dynamic) model of bicycle. Return future state given inputs. Physical model of bike.
 
     state: numpy array representing current state
     throttle: ???
@@ -88,7 +58,7 @@ def next_state(state, throttle, steering):
     return np.array([x, y, vel_x, vel_y, yaw, steering])
 
 
-@jit("boolean(float64[:])",
+@jit("boolean(float64[::1])",
      nopython=True,
      cache=True)
 def valid_state(state):
@@ -106,19 +76,19 @@ def valid_state(state):
             -STEER_ANGLE_MAX <= steer_angle <= STEER_ANGLE_MAX)
 
 
-@jit("float64[:,:](float64[:])",
+@jit("float64[:,::1](float64[::1])",
      nopython=True,
-     cache=True)
+     cache=False)
 def get_possible_states(state):
 
     """
     Get all possible states
     """
-    
+
     # TODO: should these arrays be initialized outside of function?
     possible_acc = np.arange(ACCELERATION_MIN, ACCELERATION_MAX, 0.1)
     possible_steer = np.arange(-STEER_ANGLE_DELTA, STEER_ANGLE_DELTA, np.radians(0.1)) 
-    
+
     # TODO: should array be allocated outside of function?
     max_size = possible_acc.size * possible_steer.size
     possible_states = np.empty((max_size, 6), float)
@@ -126,15 +96,13 @@ def get_possible_states(state):
     index = 0
     for acc in possible_acc:
         for steer in possible_steer:
-                next = next_state(state, acc, steer)
+                next = next_state_nonlinear(state, acc, steer)
                 if (valid_state(next)):
                     possible_states[index] = next
                     index += 1
 
     # Only return valid states
     return possible_states[1:index]
-
-
 
 
 def possible_states_performance(iter):
@@ -153,26 +121,39 @@ def possible_states_performance(iter):
         end = time.perf_counter()
         runs[i] = end - start
 
-    print("Mean: " + str(np.mean(runs)) + " STD: " + str(np.std(runs)))
+    mean = round(np.mean(runs), 5)
+    std = round(np.std(runs), 5)
+
+    print(f"PERFORMANCE\n----------\ntrials: {iter}\nmean: {mean}s\nSTD: {std}s\n")
     return
 
 
+# Run jit functions to compile
+def setup():
+    print("Comiling functions...")
+    state = np.array([0, 0, 2, 1, np.radians(10), np.radians(10)])
+    get_possible_states(state)
+    print("Compilation complete")
+
 # Testing
 if __name__ == "__main__":
+    
+    # Compile functions
+    setup()
 
     # Example state
     state = np.array([0, 0, 2, 1, np.radians(10), np.radians(10)])
 
-    start = time.perf_counter()
+    # Get array of all possible states achievable in DT from current state
     possible_states = get_possible_states(state)
-    end = time.perf_counter()
-    print("Elapsed (before compilation) = {}s".format((end - start)))
 
-    start = time.perf_counter()
-    possible_states = get_possible_states(state)
-    end = time.perf_counter()
-    print("Elapsed (after compilation) = {}s".format((end - start)))
+    # Number of states
+    print("Calculated " + str(possible_states.shape[0]) + " possible states\n")
 
-    print("Number of states: " + str(possible_states.shape[0]))
+    # Performance check
+    possible_states_performance(50000)
 
-    possible_states_performance(1000)
+    # Visualize states
+    plot_states(possible_states)
+    plot_bike(state)
+    show_plot()
