@@ -1,6 +1,10 @@
+"""This module contains simulation constants/settings
+"""
+
 import numpy as np
 
-# Physical properties
+# PHYSICAL PROPERTIES
+
 DIST_REAR_AXEL = 0.85 # m
 DIST_FRONT_AXEL = 0.85 # m
 WHEEL_BASE = DIST_REAR_AXEL + DIST_FRONT_AXEL
@@ -12,7 +16,8 @@ CORNERING_STIFF_REAR = 17.0 * 2.0  # N/rad
 
 YAW_INERTIA = 22 # kg/(m^2)
 
-# Input constraints
+# INPUT CONSTRAINTS
+
 SPEED_MIN = 2 # m/s
 SPEED_MAX = 10 # m/s
 
@@ -26,3 +31,8 @@ STEER_ACC_MIN = -5
 STEER_ACC_MAX = 5
 
 DT = 0.1 # (s)
+
+# DIFFERENTIALS
+
+# position in meters (x/y), velocity in m/s (vel_x/y_vel), yaw angle in rad, steering angle in rad
+DIFFERENTIALS = np.array([0.001, 0.001, 0.001, 0.001, np.radians(0.001), np.radians(0.001)])

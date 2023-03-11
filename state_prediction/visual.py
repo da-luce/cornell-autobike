@@ -2,6 +2,7 @@
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
+from matplotlib.ticker import AutoMinorLocator as minor
 from scipy.stats import gaussian_kde
 import numpy as np
 from constants import *
@@ -28,6 +29,17 @@ ax.tick_params(axis='y', colors=light)
 ax.grid(linestyle='dashed')
 ax.set_aspect('equal', adjustable='box')
 
+"""
+major_spacing = 0.5
+ax.set_xticks(np.arange(-2,5,major_spacing))
+ax.set_xticks(np.arange(-2,5,major_spacing))
+
+minor_spacing = major_spacing/DIFFERENTIALS[0]
+minor_locator = minor(minor_spacing)
+ax.xaxis.set_minor_locator(minor_locator)
+
+plt.grid(which="both")
+"""
 
 # Plot a representation of the bike
 def plot_bike(state):
