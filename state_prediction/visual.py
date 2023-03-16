@@ -105,7 +105,6 @@ def plot_invalid(states):
 
     ax.scatter(x, y, c=red, s=100, alpha=0.05)
 
-
 # Display the plot
 def show_plot():
     plt.show()

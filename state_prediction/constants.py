@@ -31,8 +31,3 @@ STEER_ACC_MIN = -5
 STEER_ACC_MAX = 5
 
 DT = 0.1 # (s)
-
-# DIFFERENTIALS
-
-# position in meters (x/y), velocity in m/s (vel_x/y_vel), yaw angle in rad, steering angle in rad
-DIFFERENTIALS = np.array([0.001, 0.001, 0.001, 0.001, np.radians(0.001), np.radians(0.001)])
