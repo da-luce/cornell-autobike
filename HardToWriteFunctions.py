@@ -97,25 +97,25 @@ diff1 = getStateMatrix()
 print(getPlayableActions(currStateNum1, diff1[1], step1))
 
 #second test case
-currStateNum2 = [1, 1, 1, 90]
-step2 = 2
-diff2 = getStateMatrix()
-print(getPlayableActions(currStateNum2, diff2[1], step2))
+#currStateNum2 = [1, 1, 1, 90]
+#step2 = 2
+#diff2 = getStateMatrix()
+#print(getPlayableActions(currStateNum2, diff2[1], step2))
 
 #third test case
-currStateNum3 = [1, -1, 1, 0]
-step3 = 1
-diff3 = getStateMatrix()
-print(getPlayableActions(currStateNum3, diff3[1], step3))
+#currStateNum3 = [1, -1, 1, 0]
+#step3 = 1
+#diff3 = getStateMatrix()
+#print(getPlayableActions(currStateNum3, diff3[1], step3))
 
 #fourth test case
-currStateNum4 = [2, 6, 2, 0]
-step4 = 5
-diff4 = getStateMatrix()
-print(getPlayableActions(currStateNum4, diff4[1], step4))
+#currStateNum4 = [2, 6, 2, 0]
+#step4 = 5
+#diff4 = getStateMatrix()
+#print(getPlayableActions(currStateNum4, diff4[1], step4))
 
 #fifth test case
-currStateNum5 = [10, 5, 2, 180]
-step5 = 10
-diff5 = getStateMatrix()
-print(getPlayableActions(currStateNum5, diff5[1], step5))
+#currStateNum5 = [10, 5, 2, 180]
+#step5 = 10
+#diff5 = getStateMatrix()
+#print(getPlayableActions(currStateNum5, diff5[1], step5))
