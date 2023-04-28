@@ -1,10 +1,10 @@
-"""This model provides functionality for computing possible states/playable actions
+"""This module provides functionality for computing possible states/playable actions
 
 This module uses numba in order to compile computation heavy tasks just in time:
 
 A note on @jit decorators:
     - "signature string":   Defines the return type and parameter types for compilation.
-                            Not required with just-in-time compilation, but is necessaryfor
+                            Not required with just-in-time compilation, but is necessary for
                             for ahead-of-time compilation if used in future
     - nopython=True:        Forces jit to compile to pure byte code (significantly faster)
     - cache=True:           Caches compiled functions in a file to reduce overhead on first 
@@ -21,10 +21,10 @@ import constants as cst
 
 
 
-@jit("float64[::1](float64[::1], float64, float64)",
+@jit("float64[::1](float64[::1], float64[::1])",
      nopython=True,
      cache=False)
-def next_state_nonlinear(state, throttle, steering):
+def next_state_dynamic(state, inputs):
 
     """Nonlinear (dynamic) model of bicycle
 
@@ -44,6 +44,7 @@ def next_state_nonlinear(state, throttle, steering):
 
     # Unpack state into vairables
     x, y, vel_x, vel_y, yaw_angle, steer_angle = state
+    throttle, steering = inputs
 
     yaw = yaw_angle * steer_angle * cst.DT
     yaw = (yaw + np.pi) % (2 * np.pi) - np.pi # Normalize yaw angle
@@ -147,10 +148,10 @@ def round_state(state, differentials):
 
 
 
-@jit("float64[:,::1](float64[::1], float64[::1], float64, float64)",
+@jit("float64[:,::1](float64[::1], float64[::1], float64[::1])",
      nopython=True,
      cache=False)
-def get_possible_states(state, differentials, throttle_res, steering_res):
+def get_possible_states(state, differentials, res):
 
     """Get all possible states
 
@@ -159,15 +160,18 @@ def get_possible_states(state, differentials, throttle_res, steering_res):
     Args:
         state:
             A six element np.array representing the current state
-        throttle_res:
-            The difference between sequential throttle inputs
-        steering_res:
-            The difference between sequential steering inputs
+        differentials:
+            A six element np.array with the state matrix differentials
+        res:
+            A two element np.array containing input resolutions
+            (`determined with optimize_input_res()`)
 
     Return:
         A 2D np.array of all valid states achievable within one timestep
         given the input resolutions
     """
+
+    throttle_res, steering_res = res
 
     possible_acc = np.arange(cst.ACCELERATION_MIN, cst.ACCELERATION_MAX, throttle_res)
     possible_steer = np.arange(-cst.STEER_ANGLE_DELTA, cst.STEER_ANGLE_DELTA, steering_res)
@@ -181,7 +185,7 @@ def get_possible_states(state, differentials, throttle_res, steering_res):
     for acc in possible_acc:
         for steer in possible_steer:
 
-                next = next_state_nonlinear(state, acc, steer)
+                next = next_state_dynamic(state, np.array([acc, steer]))
 
                 # TODO: check for duplicate arrays
                 if (valid_state(next)):
@@ -197,10 +201,10 @@ def get_possible_states(state, differentials, throttle_res, steering_res):
 
 
 
-@jit("float64[:,::1](float64[:,::1], float64[::1])",
+@jit("float64[:,::1](float64[::1], float64[::1], float64[::1])",
      nopython=True,
      cache=False)
-def get_possible_indicies(states, differentials):
+def get_possible_indicies(state, differentials, res):
 
     """Given an array of states, return the corresponding indicies within the state matrix
 
@@ -209,6 +213,8 @@ def get_possible_indicies(states, differentials):
             A two dimensional array of states
         differentials:
             One dimensional array representing differentials
+        res:
+            A one dimensional array containing input resolutions
 
     Return:
         Corresponding indicides of states within state matrix
@@ -216,20 +222,22 @@ def get_possible_indicies(states, differentials):
     Usage:
         Used in conjunction with `get_possible_states()`
 
-        Example usage:
+        Example usage (outside of package):
 
+        >>> from state_pred import optimize_input_res, get_possible_indicies
         >>> current_state, differentials = ...
-        >>> states = get_possible_states(current_state, differentials, ...)
-        >>> indicies = get_possible_indicies(states, differentials)
+        >>> res = sim.optimize_input_res()
+        >>> indicies = sim.get_possible_indicies(current_state, differentials, res)
     """
 
-    return states / differentials
+    return get_possible_states(state, differentials, res) / differentials
 
 
 
 def possible_states_performance(iter, differentials):
 
     """Print mean runtime and standard deviation of get_possible_states()
+    on a certain set of input resolutions 
 
     Test performance of get_possible_states()
 
@@ -242,16 +250,19 @@ def possible_states_performance(iter, differentials):
     """
 
     # Allocate array to store results of computations
-    runs = np.empty(iter, float)
+    runs = np.empty(iter, dtype=float)
 
     # Performance appears to be same regardless of test_state
     # Thus, we use this dummy state as the initial state for all computations
     test_state = np.array([1000, 1000, 3, 2, np.radians(90), np.radians(-20)])
 
+    # Use optimized inputs
+    res = optimize_input_res()
+
     for i in range(0, iter):
 
         start = time.perf_counter()
-        get_possible_states(test_state, differentials, 0.1, 0.1)
+        get_possible_states(test_state, differentials, res)
         end = time.perf_counter()
 
         runs[i] = end - start
@@ -261,7 +272,7 @@ def possible_states_performance(iter, differentials):
     std = round(np.std(runs), 5)
 
     print(f"PERFORMANCE\n----------\ntrials: {iter}\nmean: {mean}s\nSTD: {std}s\n")
-    return
+    return mean
 
 
 
@@ -272,64 +283,39 @@ def setup():
     print("Comiling functions...")
     state = np.array([0, 0, 2, 1, np.radians(10), np.radians(10)])
     differentials = np.array([1.0,1.0,1.0,1.0,1.0,1.0])
-    get_possible_states(state, differentials, 0.5, 0.5)
+    res = optimize_input_res()
+    get_possible_states(state, differentials, res)
     print("Compilation complete")
 
 
 
-def performance(throttle_res, steering_res):
+def performance(input_res):
+
+    """
+    Return the relative time complexity (total number of loops per call to get_possible_states())
+    of certain input resolutions
+    """
+    throttle_res, steering_res = input_res
 
     throttle_size = np.arange(cst.ACCELERATION_MIN, cst.ACCELERATION_MAX, throttle_res).size
     steer_size = np.arange(-cst.STEER_ANGLE_DELTA, cst.STEER_ANGLE_DELTA, steering_res).size
+
     return throttle_size * steer_size
 
 
+# Return optimized input resolutions
+def optimize_input_res():
 
-def optimize_input_matrix(res, differentials):
+    #differentials, input_size, target_runtime, target_accuracy
 
     """
-    Return
+    differentils: Differentials
+    max_runtime: maximum mean time for get_possible_states() to run in
+    input_size: number of elements in input array
     """
 
-    state = np.array([0, 0, 2, 0, np.radians(0), np.radians(0)])
-
-    throttle_range = np.linspace(0.01, 0.05, res)
-    steering_range = np.flip(np.linspace(np.radians(0.01), np.radians(0.05), res))
-
-    input_matrix = np.empty((res * res, 4))
-
-    i = 0
-    for throttle in throttle_range:
-        for steering in steering_range:
-            performance_m = performance(throttle, steering)
-            possible_states = np.unique(get_possible_states(state, differentials, throttle, steering)).shape[0]
-            input_matrix[i] = np.array([throttle, steering, possible_states, performance_m])
-            i += 1
-
-    percentile = 95
-    index = np.int_((res * res) * (percentile / 100))
-    # Sort by number of possible states
-    """
-    ind = np.argsort(input_matrix[:,2])
-    input_matrix = input_matrix[ind]
-    """
-
-    print(input_matrix[:,0])
-    #input_matrix = input_matrix[:-10]
-
-    import matplotlib.pyplot as plt
-
-    fig = plt.figure()
-    ax = fig.add_subplot(projection='3d')
-
-    x = input_matrix[:,0]
-    y = input_matrix[:,1]
-    z = input_matrix[:,2]
-    c = input_matrix[:,3]
-
-
-    ax.scatter(x, y, z, c = c, cmap='hot', norm = "log")
-    plt.show()
+    # TODO: determine how to actually optimize input resolutions
+    return np.array([0.03, 0.6])
 
 
 
@@ -345,17 +331,17 @@ if __name__ == "__main__":
     # Example differentials
     differentials = np.array([0.001, 0.001, 0.001, 0.001, np.radians(0.0001), np.radians(0.0001)])
 
+    # Example input resolutions
+    res = optimize_input_res()
+
     # Get array of all possible states achievable in DT from current state
-    possible_states = get_possible_states(state, differentials, 0.03, 0.6)
+    possible_states = get_possible_states(state, differentials, res)
 
     # Number of states
     print("Calculated " + str(possible_states.shape[0]) + " possible states\n")
 
     # Performance check
-    possible_states_performance(10000, differentials)
-
-    # Print optimized states
-    optimize_input_matrix(100, differentials)
+    possible_states_performance(100, differentials)
 
     # Visualize states
     vis.plot_states(possible_states)
