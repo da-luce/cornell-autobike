@@ -24,5 +24,6 @@ if __name__ == "__main__":
 
 if __name__ == "__main__":
     dummy_test()
+    dummy_test2()
 
 >>>>>>> c2cc22c (dummy test)
