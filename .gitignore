@@ -5,3 +5,5 @@ src/qlearning.egg-info
 .DS_Store
 .pytest_cache
 .mypy_cache
+.vscode
+build
