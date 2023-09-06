@@ -1,0 +1,9 @@
+services:
+  nav:
+    # Specify build file
+    build:
+      context: .
+      dockerfile: Dockerfile-navigation
+    volumes:
+      # Copy current directroy to /usr/src (working dir) in container
+      - .:/usr/src
