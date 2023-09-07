@@ -1,0 +1,14 @@
+# Autonomous Bicycle - Python Enviorment
+
+# Base image of container
+FROM python:3.10.6-slim
+
+# Set working directory of container
+WORKDIR /usr/app/
+
+# Install pip dependencies
+COPY requirements.txt .
+RUN pip install -r requirements.txt
+
+# Run on container start (not when using docker-compose run, however)
+CMD [ "python", "main.py" ]
