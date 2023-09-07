@@ -20,7 +20,6 @@ import visual as vis
 import constants as cst
 
 
-
 @jit("float64[::1](float64[::1], float64[::1])",
      nopython=True,
      cache=False)
@@ -31,7 +30,7 @@ def next_state_dynamic(state, inputs):
     Return next state of bike given a current state and inputs.
 
     Args:
-        state: 
+        state:
             Six element np.array representing current state
         throttle:
             TODO Not sure about this one
@@ -47,7 +46,7 @@ def next_state_dynamic(state, inputs):
     throttle, steering = inputs
 
     yaw = yaw_angle * steer_angle * cst.DT
-    yaw = (yaw + np.pi) % (2 * np.pi) - np.pi # Normalize yaw angle
+    yaw = (yaw + np.pi) % (2 * np.pi) - np.pi  # Normalize yaw angle
 
     lat_force_front = -cst.CORNERING_STIFF_FRONT * np.arctan(((vel_y + cst.DIST_FRONT_AXEL * steer_angle) / vel_x - steering))
     lat_force_rear = -cst.CORNERING_STIFF_REAR * np.arctan((vel_y - cst.DIST_REAR_AXEL * steer_angle) / vel_x)
@@ -67,7 +66,6 @@ def next_state_dynamic(state, inputs):
     y = y + vel_x * np.sin(yaw_angle) * cst.DT + vel_y * np.cos(yaw_angle) * cst.DT
 
     return np.array([x, y, vel_x, vel_y, yaw, steering])
-
 
 
 @jit("boolean(float64[::1])",
@@ -92,9 +90,8 @@ def valid_state(state):
 
     speed = np.sqrt(vel_x ** 2 + vel_y ** 2)
 
-    return (cst.SPEED_MIN <= speed<= cst.SPEED_MAX and
+    return (cst.SPEED_MIN <= speed <= cst.SPEED_MAX and
             -cst.STEER_ANGLE_MAX <= steer_angle <= cst.STEER_ANGLE_MAX)
-
 
 
 @jit("float64(float64, float64)",
@@ -120,7 +117,6 @@ def round_to_multiple(number, multiple):
     return multiple * round(number / multiple)
 
 
-
 @jit("float64[::1](float64[::1], float64[::1])",
      nopython=True,
      cache=False)
@@ -139,13 +135,12 @@ def round_state(state, differentials):
     # Allocate an empty array to store state
     rounded_state = np.empty((6,), float)
 
-    # For each value in the state, round the value to the 
+    # For each value in the state, round the value to the
     # resolution defined in DIFFERENTIALS
-    for i in np.arange(0,5,1):
+    for i in np.arange(0, 5, 1):
         rounded_state[i] = round_to_multiple(state[i], differentials[i])
 
     return rounded_state
-
 
 
 @jit("float64[:,::1](float64[::1], float64[::1], float64[::1])",
@@ -185,20 +180,19 @@ def get_possible_states(state, differentials, res):
     for acc in possible_acc:
         for steer in possible_steer:
 
-                next = next_state_dynamic(state, np.array([acc, steer]))
+            next = next_state_dynamic(state, np.array([acc, steer]))
 
-                # TODO: check for duplicate arrays
-                if (valid_state(next)):
+            # TODO: check for duplicate arrays
+            if (valid_state(next)):
 
-                    # Round the state to fit within the state matrix
-                    next = round_state(next, differentials)
+                # Round the state to fit within the state matrix
+                next = round_state(next, differentials)
 
-                    possible_states[index] = (next)
-                    index += 1
+                possible_states[index] = (next)
+                index += 1
 
     # Only return valid states
     return possible_states[1:index]
-
 
 
 @jit("float64[:,::1](float64[::1], float64[::1], float64[::1])",
@@ -231,7 +225,6 @@ def get_possible_indicies(state, differentials, res):
     """
 
     return get_possible_states(state, differentials, res) / differentials
-
 
 
 def possible_states_performance(iter, differentials):
@@ -275,18 +268,16 @@ def possible_states_performance(iter, differentials):
     return mean
 
 
-
 def setup():
 
-    """ Run and compile jit functions 
+    """ Run and compile jit functions
     """
     print("Comiling functions...")
     state = np.array([0, 0, 2, 1, np.radians(10), np.radians(10)])
-    differentials = np.array([1.0,1.0,1.0,1.0,1.0,1.0])
+    differentials = np.array([1.0, 1.0, 1.0, 1.0, 1.0, 1.0])
     res = optimize_input_res()
     get_possible_states(state, differentials, res)
     print("Compilation complete")
-
 
 
 def performance(input_res):
@@ -306,7 +297,7 @@ def performance(input_res):
 # Return optimized input resolutions
 def optimize_input_res():
 
-    #differentials, input_size, target_runtime, target_accuracy
+    # differentials, input_size, target_runtime, target_accuracy
 
     """
     differentils: Differentials
@@ -316,7 +307,6 @@ def optimize_input_res():
 
     # TODO: determine how to actually optimize input resolutions
     return np.array([0.03, 0.6])
-
 
 
 # Testing
@@ -346,4 +336,4 @@ if __name__ == "__main__":
     # Visualize states
     vis.plot_states(possible_states)
     vis.plot_bike(state)
-    vis.show_plot()
+    vis.save_plot()

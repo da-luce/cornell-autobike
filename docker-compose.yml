@@ -5,5 +5,6 @@ services:
       context: .
       dockerfile: Dockerfile-navigation
     volumes:
-      # Copy current directroy to /usr/src (working dir) in container
-      - .:/usr/src
+      # Copy entire repository to /usr/app (working dir) in container
+      - .:/usr/app
+ 
