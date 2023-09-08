@@ -123,6 +123,38 @@
 In _theory_ this should be easier as most distros already use Xwindows,
 but I know for a fact that the steps differ compared to Mac.
 
+May have to bind this volume:
+
+```text
+--volume="$HOME/.Xauthority:/root/.Xauthority:rw"
+```
+
+May have to set
+
+```text
+--net=host
+```
+
+or
+
+```text
+--add-host=host.docker.internal:host-gateway
+```
+
+May have to bind x11 socket:
+
+```text
+--volume /tmp/.X11-unix:/tmp/.X11-unix
+```
+
+May have to set DISPLAY to
+
+`--env DISPLAY=unix$DISPLAY` or `--env DISPLAY=$DISPLAY`
+
+I'm not sure. Stack Overflow has a sea of possibilities.
+
+May the odds be ever in your favor...
+
 ### Windows
 
 No clue.
