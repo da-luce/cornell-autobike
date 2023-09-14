@@ -1,0 +1,10 @@
+services:
+  nav:
+    # Specify build file
+    build:
+      context: .
+      dockerfile: Dockerfile-navigation
+    volumes:
+      # Copy entire repository to /usr/app (working dir) in container
+      - .:/usr/app
+ 
