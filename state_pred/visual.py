@@ -1,5 +1,7 @@
 # For visualization
 import matplotlib as mpl
+# mpl.use('TkAgg')
+
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
 from matplotlib.ticker import AutoMinorLocator as minor
@@ -108,5 +110,6 @@ def plot_invalid(states):
 
 # Save the plot locally (work around until figure out window forwarding with
 # Docker)
-def save_plot():
-    plt.savefig("state_prediction.png", format="png")
+def show_plot():
+    # plt.savefig("./state_pred/state_prediction.png", format="png")
+    plt.show()
