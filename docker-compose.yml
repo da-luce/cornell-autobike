@@ -7,4 +7,7 @@ services:
     volumes:
       # Copy entire repository to /usr/app (working dir) in container
       - .:/usr/app
- 
+  ros:
+    build:
+      context: .
+      dockerfile:  Dockerfile-ROS
