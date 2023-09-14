@@ -83,7 +83,6 @@
 
 > Note: you may need to rebuild your image to include the new X11 forwarding
 > code in the Dockerfile. Talk to Dalton if you need help with this.
-
 1. Install [XQuartz](https://www.xquartz.org/) via Homebrew
 
    ```text
