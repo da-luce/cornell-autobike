@@ -81,6 +81,9 @@
 
 ### MacOS
 
+> Note: you may need to rebuild your image to include the new X11 forwarding
+> code in the Dockerfile. Talk to Dalton if you need help with this.
+
 1. Install [XQuartz](https://www.xquartz.org/) via Homebrew
 
    ```text
@@ -158,3 +161,14 @@ May the odds be ever in your favor...
 ### Windows
 
 No clue.
+
+## ROS
+
+To run the ROS container, use
+
+```text
+docker-compose run --rm ros
+```
+
+The container is currently set to run `talker_listener.launch.py` (a demo) by
+default.
