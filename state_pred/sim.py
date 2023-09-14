@@ -336,4 +336,4 @@ if __name__ == "__main__":
     # Visualize states
     vis.plot_states(possible_states)
     vis.plot_bike(state)
-    vis.save_plot()
+    vis.show_plot()
