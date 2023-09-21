@@ -8,7 +8,7 @@ if timeDependent == False:
 
     # Using the most recent reward function available.
 
-    num_states = 20
+    num_states = 1000
     num_actions = 5
 
     # Learning rate. In [0,1]. The higher the learning rate, the faster learning occurs
@@ -17,34 +17,25 @@ if timeDependent == False:
     # Discount factor. In [0,1]. The higher the discount factor, the more important future rewards are
     gamma = 0.9
 
-    currentState = 0
-
+    current_state_sample = 0
     q_matrix_sample = np.zeros((num_states, num_actions))
     end_state_sample = 1000
-    currentAction = np.random.choice(num_actions)
+    current_action_sample = np.random.choice(num_actions)
+    occupancy_grid_sample = np.random.random((num_states, num_actions))
+
+    print(occupancy_grid_sample)
 
     # Updates reward function after every action
-    def reward_function(current_state, end_state, action):
+    def reward_function(current_state, end_state, action, occupancy_grid):
 
-        reward = 0
-
-        # Reward for an optimal action
-        if action + current_state < 0:
-            reward = -1
-        else:
-            reward = 1
-
-        # Reward for reaching the end state
-        if current_state + action == end_state:
-            reward = 999
+        reward = -(occupancy_grid[current_state][action])
 
         return reward
-    
 
     # Temporal Difference learning
-    def update_matrix(q_matrix, current_state, end_state, action, learning_rate, discount_factor):
+    def update_matrix(q_matrix, current_state, end_state, action, learning_rate, discount_factor, occupancy_grid):
 
-        reward = reward_function(current_state, end_state, action)
+        reward = reward_function(current_state, end_state, action, occupancy_grid)
 
         q_matrix[current_state][action] = q_matrix[current_state][action] + learning_rate * \
         (reward + discount_factor * np.max(q_matrix[current_state]) \
@@ -53,14 +44,30 @@ if timeDependent == False:
         return q_matrix
 
     # Loop through the iterations
+    def iterate(q_matrix, current_state, end_state, action, learning_rate, discount_factor, occupancy_grid, iterations):
+        for i in range(iterations):
+            update_matrix(q_matrix, current_state, end_state, action, learning_rate, discount_factor, occupancy_grid)
+            current_state += 1
+    
+        return q_matrix
+
+    # Reset our current q-matrix using the new data
+    def reset_q_matrix(q_matrix, current_state, end_state, action, learning_rate, discount_factor, occupancy_grid, iterations):
+        q_matrix = [[0 for i in range(len(q_matrix[0]))] for j in range(len(q_matrix))]
+        iterate(q_matrix, current_state, end_state, action, learning_rate, discount_factor, occupancy_grid, iterations)
+
+
+    # Sample q-matrix update with 1000 iterations
     iterations = 1000
-    for i in range(iterations):
-        update_matrix(q_matrix_sample, currentState, end_state_sample, currentAction, alpha,
-                      gamma)
+    iterate(q_matrix_sample, current_state_sample, end_state_sample, 
+            current_action_sample, alpha,gamma, occupancy_grid_sample, iterations)
 
-        currentState += 1
+    print(q_matrix_sample)
+    
+    reset_q_matrix(q_matrix_sample, current_state_sample, end_state_sample, 
+            current_action_sample, alpha,gamma, occupancy_grid_sample, iterations)
 
-    print(currentState)
+
 
 """
 else:
