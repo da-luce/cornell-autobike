@@ -332,7 +332,8 @@ if __name__ == "__main__":
     state = np.array([0, 0, 2, 1, np.radians(10), np.radians(10)])
 
     # Example differentials
-    differentials = np.array([0.001, 0.001, 0.001, 0.001, np.radians(0.0001), np.radians(0.0001)])
+    differentials = np.array([0.001, 0.001, 0.001, 0.001,
+                              np.radians(0.0001), np.radians(0.0001)])
 
     # Example input resolutions
     res = optimize_input_res()
