@@ -33,7 +33,7 @@ def next_state_dynamic(state, inputs):
         state:
             Six element np.array representing current state
         throttle:
-            TODO Not sure about this one
+            TODO: Not sure about this one
         steering:
             Delta in steering angle in radians
 
@@ -42,24 +42,33 @@ def next_state_dynamic(state, inputs):
     """
 
     # Unpack state into variables
+
     x, y, vel_x, vel_y, yaw_angle, steer_angle = state
     throttle, steering = inputs
 
     yaw = yaw_angle * steer_angle * cst.DT
     yaw = (yaw + np.pi) % (2 * np.pi) - np.pi  # Normalize yaw angle
 
-    lat_force_front = -cst.CORNERING_STIFF_FRONT * np.arctan(((vel_y + cst.DIST_FRONT_AXEL * steer_angle) / vel_x - steering))
-    lat_force_rear = -cst.CORNERING_STIFF_REAR * np.arctan((vel_y - cst.DIST_REAR_AXEL * steer_angle) / vel_x)
+    lat_force_front = -cst.CORNERING_STIFF_FRONT * \
+        np.arctan((vel_y + cst.DIST_FRONT_AXEL * steer_angle) / (vel_x - steering))
+
+    lat_force_rear = -cst.CORNERING_STIFF_REAR * \
+        np.arctan((vel_y - cst.DIST_REAR_AXEL * steer_angle) / vel_x)
 
     # Aerodynamic and friction coefficients
     R_x = 0.01 * vel_x
     F_aero = 1.36 * vel_x ** 2
     F_load = F_aero + R_x
 
-    vel_x = vel_x + (throttle - lat_force_front * np.sin(steering) / cst.MASS - F_load / cst.MASS + vel_y * steering) * cst.DT
-    vel_y = vel_y + (lat_force_rear / cst.MASS + lat_force_front * np.cos(steering) / cst.MASS - vel_x * steering) * cst.DT
+    vel_x = vel_x + (throttle - lat_force_front * np.sin(steering) / cst.MASS -
+                     F_load / cst.MASS +
+                     vel_y * steering) * cst.DT
 
-    steering = steering + (lat_force_front * cst.DIST_FRONT_AXEL * np.cos(steering) - lat_force_rear * cst.DIST_REAR_AXEL) / cst.YAW_INERTIA * cst.DT
+    vel_y = vel_y + (lat_force_rear / cst.MASS + lat_force_front *
+                     np.cos(steering) / cst.MASS - vel_x * steering) * cst.DT
+
+    steering = steering + (lat_force_front * cst.DIST_FRONT_AXEL * np.cos(steering) -
+                           lat_force_rear * cst.DIST_REAR_AXEL) / cst.YAW_INERTIA * cst.DT
 
     # Advect bike
     x = x + vel_x * np.cos(yaw_angle) * cst.DT - vel_y * np.sin(yaw_angle) * cst.DT
@@ -133,11 +142,11 @@ def round_state(state, differentials):
     """
 
     # Allocate an empty array to store state
-    rounded_state = np.empty((6,), float)
+    rounded_state = np.empty((state.size,), float)
 
     # For each value in the state, round the value to the
     # resolution defined in DIFFERENTIALS
-    for i in np.arange(0, 5, 1):
+    for i in np.arange(0, state.size, 1):
         rounded_state[i] = round_to_multiple(state[i], differentials[i])
 
     return rounded_state
@@ -168,12 +177,16 @@ def get_possible_states(state, differentials, res):
 
     throttle_res, steering_res = res
 
-    possible_acc = np.arange(cst.ACCELERATION_MIN, cst.ACCELERATION_MAX, throttle_res)
-    possible_steer = np.arange(-cst.STEER_ANGLE_DELTA, cst.STEER_ANGLE_DELTA, steering_res)
+    possible_acc = np.arange(cst.ACCELERATION_MIN,
+                             cst.ACCELERATION_MAX,
+                             throttle_res)
+    possible_steer = np.arange(-cst.STEER_ANGLE_DELTA,
+                               cst.STEER_ANGLE_DELTA,
+                               steering_res)
 
     # Allocate an array to store possible states indices
     max_size = possible_acc.size * possible_steer.size
-    possible_states = np.empty((max_size, 6), float)
+    possible_states = np.empty((max_size, state.size), float)
 
     index = 0
 
