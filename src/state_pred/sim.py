@@ -15,12 +15,12 @@ Read more: https://numba.pydata.org/numba-doc/latest/reference/types.html
 
 import time
 import numpy as np
-from numba import jit
+from numba import jit, boolean, float64
 import visual as vis
 import constants as cst
 
 
-@jit("float64[::1](float64[::1], float64[::1])",
+@jit(float64[::1](float64[::1], float64[::1]),
      nopython=True,
      cache=False)
 def next_state_dynamic(state, inputs):
@@ -41,7 +41,7 @@ def next_state_dynamic(state, inputs):
         A six element np.array representing the next/update state
     """
 
-    # Unpack state into vairables
+    # Unpack state into variables
     x, y, vel_x, vel_y, yaw_angle, steer_angle = state
     throttle, steering = inputs
 
@@ -68,7 +68,7 @@ def next_state_dynamic(state, inputs):
     return np.array([x, y, vel_x, vel_y, yaw, steering])
 
 
-@jit("boolean(float64[::1])",
+@jit(boolean(float64[::1]),
      nopython=True,
      cache=True)
 def valid_state(state):
@@ -94,12 +94,12 @@ def valid_state(state):
             -cst.STEER_ANGLE_MAX <= steer_angle <= cst.STEER_ANGLE_MAX)
 
 
-@jit("float64(float64, float64)",
+@jit(float64(float64, float64),
      nopython=True,
      cache=True)
 def round_to_multiple(number, multiple):
 
-    """Rounds a float to the nearest mulitple of a number
+    """Rounds a float to the nearest multiple of a number
 
     Args:
         number:
@@ -117,7 +117,7 @@ def round_to_multiple(number, multiple):
     return multiple * round(number / multiple)
 
 
-@jit("float64[::1](float64[::1], float64[::1])",
+@jit(float64[::1](float64[::1], float64[::1]),
      nopython=True,
      cache=False)
 def round_state(state, differentials):
@@ -129,7 +129,7 @@ def round_state(state, differentials):
             A six element np.array representing a state
 
     Returns:
-        A rounded state that is an element of the state matix
+        A rounded state that is an element of the state matrix
     """
 
     # Allocate an empty array to store state
@@ -143,7 +143,7 @@ def round_state(state, differentials):
     return rounded_state
 
 
-@jit("float64[:,::1](float64[::1], float64[::1], float64[::1])",
+@jit(float64[:, ::1](float64[::1], float64[::1], float64[::1]),
      nopython=True,
      cache=False)
 def get_possible_states(state, differentials, res):
@@ -171,7 +171,7 @@ def get_possible_states(state, differentials, res):
     possible_acc = np.arange(cst.ACCELERATION_MIN, cst.ACCELERATION_MAX, throttle_res)
     possible_steer = np.arange(-cst.STEER_ANGLE_DELTA, cst.STEER_ANGLE_DELTA, steering_res)
 
-    # Allocate an array to store possible states indicies
+    # Allocate an array to store possible states indices
     max_size = possible_acc.size * possible_steer.size
     possible_states = np.empty((max_size, 6), float)
 
@@ -195,12 +195,12 @@ def get_possible_states(state, differentials, res):
     return possible_states[1:index]
 
 
-@jit("float64[:,::1](float64[::1], float64[::1], float64[::1])",
+@jit(float64[:, ::1](float64[::1], float64[::1], float64[::1]),
      nopython=True,
      cache=False)
-def get_possible_indicies(state, differentials, res):
+def get_possible_indices(state, differentials, res):
 
-    """Given an array of states, return the corresponding indicies within the state matrix
+    """Given an array of states, return the corresponding indices within the state matrix
 
     Args:
         states:
@@ -211,17 +211,17 @@ def get_possible_indicies(state, differentials, res):
             A one dimensional array containing input resolutions
 
     Return:
-        Corresponding indicides of states within state matrix
+        Corresponding indices of states within state matrix
 
     Usage:
         Used in conjunction with `get_possible_states()`
 
         Example usage (outside of package):
 
-        >>> from state_pred import optimize_input_res, get_possible_indicies
+        >>> from state_pred import optimize_input_res, get_possible_indices
         >>> current_state, differentials = ...
         >>> res = sim.optimize_input_res()
-        >>> indicies = sim.get_possible_indicies(current_state, differentials, res)
+        >>> indices = sim.get_possible_indices(current_state, differentials, res)
     """
 
     return get_possible_states(state, differentials, res) / differentials
@@ -230,7 +230,7 @@ def get_possible_indicies(state, differentials, res):
 def possible_states_performance(iter, differentials):
 
     """Print mean runtime and standard deviation of get_possible_states()
-    on a certain set of input resolutions 
+    on a certain set of input resolutions
 
     Test performance of get_possible_states()
 
@@ -272,7 +272,7 @@ def setup():
 
     """ Run and compile jit functions
     """
-    print("Comiling functions...")
+    print("Compiling functions...")
     state = np.array([0, 0, 2, 1, np.radians(10), np.radians(10)])
     differentials = np.array([1.0, 1.0, 1.0, 1.0, 1.0, 1.0])
     res = optimize_input_res()
@@ -300,7 +300,7 @@ def optimize_input_res():
     # differentials, input_size, target_runtime, target_accuracy
 
     """
-    differentils: Differentials
+    differentials: Differentials
     max_runtime: maximum mean time for get_possible_states() to run in
     input_size: number of elements in input array
     """
