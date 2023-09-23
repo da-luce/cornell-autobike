@@ -42,7 +42,8 @@
       the given commands
    2. The `--rm` option deletes the container that was created to run the
       commands on exit
-   3. Example: `docker-compose run --rm nav python main.py` will run main.py 🙂
+   3. Example: `docker-compose run --rm nav python src/qlearning/main.py` will
+      run main.py 🙂
 
 ## Tips
 
@@ -117,7 +118,7 @@
    Example:
 
    ```text
-   docker-compose run --rm --env DISPLAY=host.docker.internal:0 nav python state_pred/sim.py
+   docker-compose run --rm --env DISPLAY=host.docker.internal:0 nav python src/state_pred/sim.py
    ```
 
 ### Linux
