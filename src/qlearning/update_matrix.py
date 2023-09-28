@@ -23,8 +23,6 @@ if timeDependent == False:
     current_action_sample = np.random.choice(num_actions)
     occupancy_grid_sample = np.random.random((num_states, num_actions))
 
-    print(occupancy_grid_sample)
-
     # Updates reward function after every action
     def reward_function(current_state, end_state, action, occupancy_grid):
 
@@ -51,9 +49,14 @@ if timeDependent == False:
     
         return q_matrix
 
-    # Reset our current q-matrix using the new data
-    def reset_q_matrix(q_matrix, current_state, end_state, action, learning_rate, discount_factor, occupancy_grid, iterations):
+    # Reset our current q-matrix and use the new data
+    def reset_matrix(q_matrix, current_state, end_state, action, learning_rate, discount_factor, occupancy_grid, iterations):
         q_matrix = [[0 for i in range(len(q_matrix[0]))] for j in range(len(q_matrix))]
+        iterate(q_matrix, current_state, end_state, action, learning_rate, discount_factor, occupancy_grid, iterations)
+    
+    # Keep our current q-matrix and change the occupancy grid
+    def alter_matrix(q_matrix, current_state, end_state, action, learning_rate, discount_factor, occupancy_grid, iterations):
+        occupancy_grid = 0.5 * occupancy_grid
         iterate(q_matrix, current_state, end_state, action, learning_rate, discount_factor, occupancy_grid, iterations)
 
 
@@ -61,14 +64,19 @@ if timeDependent == False:
     iterations = 1000
     iterate(q_matrix_sample, current_state_sample, end_state_sample, 
             current_action_sample, alpha,gamma, occupancy_grid_sample, iterations)
-
     print(q_matrix_sample)
     
-    reset_q_matrix(q_matrix_sample, current_state_sample, end_state_sample, 
+    reset_matrix(q_matrix_sample, current_state_sample, end_state_sample, 
             current_action_sample, alpha,gamma, occupancy_grid_sample, iterations)
+    
+    print(q_matrix_sample)
 
-
-
+    alter_matrix(q_matrix_sample, current_state_sample, end_state_sample, 
+            current_action_sample, alpha,gamma, occupancy_grid_sample, iterations)
+    
+    print(q_matrix_sample)
+    
+    
 """
 else:
 
