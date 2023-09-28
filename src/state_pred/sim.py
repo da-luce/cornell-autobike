@@ -1,14 +1,18 @@
-"""This module provides functionality for computing possible states/playable actions
+"""This module provides functionality for computing possible
+   states/playable actions
 
 This module uses numba in order to compile computation heavy tasks just in time:
 
 A note on @jit decorators:
-    - "signature string":   Defines the return type and parameter types for compilation.
-                            Not required with just-in-time compilation, but is necessary for
-                            for ahead-of-time compilation if used in future
-    - nopython=True:        Forces jit to compile to pure byte code (significantly faster)
-    - cache=True:           Caches compiled functions in a file to reduce overhead on first 
-                            time runs (do not set True for functions that rely on outside variables)
+    - "signature string":   Defines the return type and parameter types for
+                            compilation. Not required with just-in-time
+                            compilation, but is necessary for for ahead-of-time
+                            compilation if used in future
+    - nopython=True:        Forces jit to compile to pure byte code
+                            (significantly faster)
+    - cache=True:           Caches compiled functions in a file to reduce
+                            overhead on first  time runs (do not set True for
+                            functions that rely on outside variables)
 
 Read more: https://numba.pydata.org/numba-doc/latest/reference/types.html
 """
@@ -285,6 +289,7 @@ def setup():
 
     """ Run and compile jit functions
     """
+
     print("Compiling functions...")
     state = np.array([0, 0, 2, 1, np.radians(10), np.radians(10)])
     differentials = np.array([1.0, 1.0, 1.0, 1.0, 1.0, 1.0])
@@ -299,6 +304,7 @@ def performance(input_res):
     Return the relative time complexity (total number of loops per call to get_possible_states())
     of certain input resolutions
     """
+
     throttle_res, steering_res = input_res
 
     throttle_size = np.arange(cst.ACCELERATION_MIN, cst.ACCELERATION_MAX, throttle_res).size

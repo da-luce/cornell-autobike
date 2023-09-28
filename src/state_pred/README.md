@@ -4,6 +4,9 @@
 
 ### Finding possible states
 
+> Note: a basic understanding of the bike [state](#state-representation)
+> and [terminology](#terminology) will aid in comprehending the following
+
 Given the current state of the bike `state = [x,y,ẋ,ẏ,ψ,δ]`, state matrix
 differentials `diff = [∂x,∂y,∂ẋ,∂ẏ,∂ψ,∂δ]`, and input resolutions
 `res = [Δs, Δt]`, determine the possible states with
@@ -40,28 +43,25 @@ res = optimize_input_res()
 possible_states = get_possible_states(state, differentials, res)
 ```
 
-> ℹ️ Continue reading to learn about state, differentials, and input resolutions
-
 ## State Representation
 
-<p align="center">
-  <img src="https://miro.medium.com/v2/resize:fit:720/format:webp/1*A5wYkyE1d_6tg_BUrpMOeg.png" />
-</p>
+![Bike State](../../assets/bike-state.png)
 
 <center>
 
 | Symbol    | Explanation                    | Units |
-|-----------|--------------------------------|-------|
-| $x$       | The x position of the bike     | m     |
-| $y$       | The y position of the bike     | m     |
-| $\dot{x}$ | The x velocity of the bike     | m/s   |
-| $\dot{y}$ | The y velocity of the bike     | m/s   |
-| $\psi$    | The yaw angle of the bike      | rad   |
-| $\delta$  | The steering angle of the bike | rad   |
+| --------- | ------------------------------ | ----- |
+| $x$       | The x position of the bike     | $m$   |
+| $y$       | The y position of the bike     | $m$   |
+| $\dot{x}$ | The x velocity of the bike     | $m/s$ |
+| $\dot{y}$ | The y velocity of the bike     | $m/s$ |
+| $\psi$    | The yaw angle of the bike      | $rad$ |
+| $\delta$  | The steering angle of the bike | $rad$ |
 
 </center>
 
-Effectively, bicycle states are represented as 1D `numpy` arrays of length 6:
+Internally, bicycle states are represented as 1D `numpy` arrays with six
+`float64` elements:
 
 $$[x, y, \dot{x}, \dot{y}, \psi, \delta]$$
 
@@ -76,15 +76,15 @@ The model relies on a variety physical constants of the bike, detailed below:
 
 <center>
 
-| Symbol    | Explanation                    | Units |
-|-----------|--------------------------------|-------|
-| $...$     | ...                            | ...   |
+| Symbol | Explanation | Units |
+| ------ | ----------- | ----- |
+| $...$  | ...         | ...   |
 
 </center>
 
 ### Kinematic Model
 
-A kinematic would be less accurate than a dynamic model, as it ignores the
+A kinematic model is less accurate a dynamic model, as it ignores the
 actual forces acting upon the bike. However, it would also be computationally
 less expensive. More investigation required.  
 
@@ -92,14 +92,15 @@ less expensive. More investigation required.
 
 ### Input
 
-An input is any parameter that we control on the bike. Right now we have two
-inputs: the steering angle (turning the front wheel) and the acceleration (the
-motor on the rear of the wheel)
+An input is any variable that we control on the bike. Currently, we have two
+inputs: the steering angle (altered by turning the front wheel) and the
+acceleration (altered via the motor on the rear rear).
 
 ### Input Delta
 
-At each timestep, we can change the values of certain inputs: this is the *input
-delta*, e.g. how much we turn the front wheel at this timestep  
+At each timestep, we change the values of each input: this is the *input
+delta*. For example, how much we turn the front wheel at this timestep or how
+much we accelerate.  
 
 ### Input Resolution
 
@@ -109,20 +110,6 @@ E.g. if we have an *input resolution* of 1&deg; for the steering angle, we will
 test a range of angles varying by 1&deg; each between the
 minimum and maximum angle that we can turn the wheel at each timestep. (for more
 information, see [Optimization](#optimization))
-
-## Performance
-
-A "functional" approach to state simulation was chosen over an Object Oriented
-programming approach for numerous reasons:
-
-- Python has limited and/or spotty support for object oriented paradigms
-- Representation of states as arrays lend to better readability and more
-  succinct code. i.e. `State.x, State.y, State.vel_x, etc.` vs.
-  `x, y, vel_x, etc. = state`
-- `numpy` provides many helpful, builtin functions for operating on arrays
-- When used in conjunction with `numba`, the functional approach has
-  significantly less memory overhead than the class approach, in addition to far
-  superior performance
 
 ## Optimization
 
