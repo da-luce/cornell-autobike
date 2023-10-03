@@ -13,6 +13,7 @@ RUN pip install -r requirements.txt
 # X11 Server Content
 RUN apt-get update
 RUN apt-get install -y tk       # Required by Matplotlib for GUI
+RUN apt-get install python-gdal # Required by OSMNX
 
 # This stuff is not needed?
 # ENV DISPLAY host.docker.internal:0
