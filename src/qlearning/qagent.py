@@ -39,7 +39,7 @@ class QAgent():
         QAgent.qlearning(self, rewards_new, iterations, end_state)
     
     def alter_matrix(self, rewards_new, iterations, end_state):
-        rewards_new = rewards_new * 2
+        rewards_new = rewards_new * 0.5
         QAgent.qlearning(self, rewards_new, iterations, end_state)
 
 
