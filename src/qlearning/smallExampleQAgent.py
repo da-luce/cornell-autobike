@@ -1,4 +1,4 @@
-from qAgent import QAgent
+from qagent import QAgent
 import numpy as np
 
 
