@@ -33,6 +33,15 @@ class QAgent():
                 self.q[current_state]
             self.q[current_state] += self.alpha * \
                 temporal_difference
+    
+    def reset_matrix(self, rewards_new, iterations, end_state):
+        self.q = [[0 for i in range(len(self.q[0]))] for j in range(len(self.q))]
+        QAgent.qlearning(self, rewards_new, iterations, end_state)
+    
+    def alter_matrix(self, rewards_new, iterations, end_state):
+        rewards_new = rewards_new * 2
+        QAgent.qlearning(self, rewards_new, iterations, end_state)
+
 
     def get_optimal_route(self, start_state, end_state):
         route = [start_state]
