@@ -7,6 +7,13 @@ services:
     volumes:
       # Copy entire repository to /usr/app (working dir) in container
       - .:/usr/app
+  way:
+    build:
+      context: .
+      dockerfile: Dockerfile-OSMnx
+    volumes:
+      # Copy waypoint folder to /usr/app
+      - ./src/waypoints:/usr/app
   ros:
     build:
       context: .

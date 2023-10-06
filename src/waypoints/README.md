@@ -35,3 +35,13 @@ the paths
 * Use [PyrouteLib](https://wiki.openstreetmap.org/wiki/PyrouteLib) to determine
   effective route (it even comes with a cycle mode!)
 * Get waypoints from generated route
+
+New ideas:
+
+**Online:**
+Choose start and end points using <https://github.com/TomSchimansky/TkinterMapView>
+
+Automatically generate bounding box and download data using
+<https://wiki.openstreetmap.org/wiki/Overpass_API>
+
+Proceed with same offline plan...
