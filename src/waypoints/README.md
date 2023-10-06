@@ -45,3 +45,29 @@ Automatically generate bounding box and download data using
 <https://wiki.openstreetmap.org/wiki/Overpass_API>
 
 Proceed with same offline plan...
+
+## Fetching Map Data
+
+In order to run the bike offline, we need street map data downloaded to the
+repository! Use `data_fetch.py` to do this.
+
+Run `data_fetch.py` within a X11 window using the `way` service (see [Docker Setup](/README.md))
+
+For instance, the command on MacOS would be:
+
+```text
+docker-compose run --rm --env DISPLAY=host.docker.internal:0 way python data_fetch.py
+```
+
+Once the GUI has loaded
+
+* Right click to set the start and end positions
+* Close the window to download data to the local file `map.osm`
+
+## Visualizing Map Data
+
+WIP
+
+## Creating a Route
+
+WIP
