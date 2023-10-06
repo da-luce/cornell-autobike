@@ -14,7 +14,7 @@ if status == 'success':
 
 region_name = 'City of Ithaca,New York' 
 
-graph = ox.graph_from_xml("ithaca.osm")
+graph = ox.graph_from_xml("map.osm")
 
 # Plot the streets
 fig = plt.figure()

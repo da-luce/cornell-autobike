@@ -7,3 +7,6 @@ src/qlearning.egg-info
 .mypy_cache
 .vscode
 build
+
+*cache
+*.osm
