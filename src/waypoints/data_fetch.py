@@ -72,6 +72,9 @@ def generate_box(pointA, pointB):
                                    (box[0], box[3])],
                                   name="Bounding Box")
 
+def box_size(bounding_box):
+    return (box[2] - box[1]) * (box[3] - box[0])
+
 generate_box(start_marker.position, end_marker.position)
 
 def set_start(coords):
@@ -111,6 +114,10 @@ box = bounding_box(start_marker.position[0],
                    end_marker.position[0],
                    end_marker.position[1],
                    box_buffer)
+
+if (box_size(box) > 25):
+    print("Your bounding box is too large! (over 25 square degrees)")
+    exit()
 
 box_string = f"{box[0]}, {box[1]}, {box[2]}, {box[3]}"
 
