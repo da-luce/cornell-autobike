@@ -7,6 +7,7 @@ import overpass
 from pyroutelib3 import Router
 import osmnx
 import statistics as stat
+import math
 
 # Parameters
 
@@ -168,6 +169,50 @@ def route(start_pos, end_pos, filepath):
 
     return routeLatLons, (status == 'success')
 
+def node_distance(node_a, node_b):
+    return math.dist(node_a, node_b)
+
+
+# FIXME: this is a really shitty algorithm
+# instead should only start from node_b and use insert to push back?
+# def add_nodes_to_route(route, max_dist):
+
+#     new_route = route
+
+#     for i in range(0, len(route)):
+
+#         node_a = route[i]
+#         node_b = route[i + 1]
+
+#         dist = node_distance(node_a, node_b)
+#         current_node = node_a
+#         j = 1
+
+#         # Add new points along the edge formed by node_a , node_b
+#         while (dist > max_dist):
+
+#             # TODO: perhaps using numpy would be better
+#             x = current_node[0] + (max_dist / dist) * (node_b[0] - current_node[0])
+#             y = current_node[1] + (max_dist / dist) * (node_b[1] - current_node[1])
+
+#             current_node = (x, y)
+#             new_route.insert(current_node, i + j)
+#             j += 1
+
+#             dist = node_distance(current_node, node_b)
+
+def add_nodes_to_route(route, max_dist):
+
+    new_route = route
+
+    for i in range(0, len(route) - 1):
+
+        node_a = route[i]
+        node_b = route[i + 1]
+
+        dist = node_distance(node_a, node_b)
+
+    return new_route
 
 if __name__ == '__main__':
 
@@ -210,7 +255,7 @@ if __name__ == '__main__':
         # For debugging
         print("Generating debug map...", end="", flush=True)
         graph = osmnx.graph_from_xml("map.osm")
-        fig = osmnx.plot_graph(graph)
+        fig = osmnx.plot_graph(graph, node_color='r')
         print("✅")
 
     else:

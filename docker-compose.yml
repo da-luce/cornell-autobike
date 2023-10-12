@@ -17,4 +17,4 @@ services:
   ros:
     build:
       context: .
-      dockerfile:  Dockerfile-ROS
+      dockerfile: Dockerfile-ROS

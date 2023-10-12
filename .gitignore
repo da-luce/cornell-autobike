@@ -10,3 +10,5 @@ build
 
 *cache
 *.osm
+
+anaconda_setup.md
