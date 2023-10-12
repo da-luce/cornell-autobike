@@ -199,6 +199,8 @@ def add_nodes_to_route(route, max_dist):
         # Add new points along the edge formed by node_a , node_b
         while (dist > max_dist):
 
+            # algo as described by
+            # https://math.stackexchange.com/questions/175896/finding-a-point-along-a-line-a-certain-distance-away-from-another-point
             dist_ratio = max_dist / dist
 
             # TODO: perhaps using numpy would be better
