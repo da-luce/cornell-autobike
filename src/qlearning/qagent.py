@@ -1,7 +1,6 @@
 import numpy as np
 from abc import abstractmethod
 
-
 class QAgent():
     @abstractmethod
     def getPlayableActions(self, currentState, differentials, timestep):
@@ -41,7 +40,6 @@ class QAgent():
     def alter_matrix(self, rewards_new, iterations, end_state):
         rewards_new = rewards_new * 0.5
         QAgent.qlearning(self, rewards_new, iterations, end_state)
-
 
     def get_optimal_route(self, start_state, end_state):
         route = [start_state]
