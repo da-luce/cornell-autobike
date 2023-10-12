@@ -169,50 +169,49 @@ def route(start_pos, end_pos, filepath):
 
     return routeLatLons, (status == 'success')
 
-def node_distance(node_a, node_b):
-    return math.dist(node_a, node_b)
-
 
 # FIXME: this is a really shitty algorithm
-# instead should only start from node_b and use insert to push back?
-# def add_nodes_to_route(route, max_dist):
-
-#     new_route = route
-
-#     for i in range(0, len(route)):
-
-#         node_a = route[i]
-#         node_b = route[i + 1]
-
-#         dist = node_distance(node_a, node_b)
-#         current_node = node_a
-#         j = 1
-
-#         # Add new points along the edge formed by node_a , node_b
-#         while (dist > max_dist):
-
-#             # TODO: perhaps using numpy would be better
-#             x = current_node[0] + (max_dist / dist) * (node_b[0] - current_node[0])
-#             y = current_node[1] + (max_dist / dist) * (node_b[1] - current_node[1])
-
-#             current_node = (x, y)
-#             new_route.insert(current_node, i + j)
-#             j += 1
-
-#             dist = node_distance(current_node, node_b)
-
 def add_nodes_to_route(route, max_dist):
 
-    new_route = route
+    def node_distance(node_a, node_b):
+        return math.dist(node_a, node_b)
 
-    for i in range(0, len(route) - 1):
+    i = 0
+    while i < len(route) - 1:
 
         node_a = route[i]
         node_b = route[i + 1]
 
         dist = node_distance(node_a, node_b)
 
-    return new_route
+        # start at node_a and iterate until we are within max_dist of node_b
+        current_node = node_a
+
+        # track how many nodes we have added
+        added_nodes = 0
+
+        # Add new points along the edge formed by node_a , node_b
+        while (dist > max_dist):
+
+            dist_ratio = max_dist / dist
+
+            # TODO: perhaps using numpy would be better
+            lat = (1 - dist_ratio) * current_node[0] + dist_ratio * node_b[0]
+            lon = (1 - dist_ratio) * current_node[1] + dist_ratio * node_b[1]
+
+            current_node = (lat, lon)
+
+            # insert the new node (remember how List.insert works)
+            route.insert(i + added_nodes + 1, current_node)
+
+            added_nodes += 1
+
+            dist = node_distance(current_node, node_b)
+
+        i += 1
+        i += added_nodes  # offset by the added nodes
+
+    return route
 
 if __name__ == '__main__':
 
