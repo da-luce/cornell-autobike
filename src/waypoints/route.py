@@ -173,6 +173,12 @@ def route(start_pos, end_pos, filepath):
 # FIXME: this is a really shitty algorithm
 def add_nodes_to_route(route, max_dist):
 
+    """
+    Added additional nodes to `route` (a of list of tuples (lat, lon)) such that
+    the distance between any two nodes in the route is less than or equivalent
+    to `max_dist`
+    """
+
     def node_distance(node_a, node_b):
         return math.dist(node_a, node_b)
 
