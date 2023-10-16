@@ -176,7 +176,12 @@ def add_nodes_to_route(route, max_dist):
     """
     Added additional nodes to `route` (a of list of tuples (lat, lon)) such that
     the distance between any two nodes in the route is less than or equivalent
-    to `max_dist`
+    to `max_dist`.
+
+    The current implementation simply loops through each pair of points in the
+    original route and adds point a distance `max_dist` away from the first
+    point in the pair until the added point is within `max_dist` of the second
+    point in the pair.
     """
 
     def node_distance(node_a, node_b):
