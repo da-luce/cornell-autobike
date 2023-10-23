@@ -6,16 +6,20 @@ class SmallExampleQAgent(QAgent):
     def __init__(self, alpha, gamma, rewards):
         super().__init__(alpha, gamma, rewards, 1)
 
-    def getPlayableActions(self, currentState, differentials, timestep):
-        playableActions = np.array([[0, 1, 0, 0, 0, 0, 0, 0, 0],
-                                    [1, 0, 1, 0, 1, 0, 0, 0, 0],
-                                    [0, 1, 0, 0, 0, 1, 0, 0, 0],
-                                    [0, 0, 0, 0, 0, 0, 1, 0, 0],
-                                    [0, 1, 0, 0, 0, 0, 0, 1, 0],
-                                    [0, 0, 1, 0, 0, 0, 0, 0, 0],
-                                    [0, 0, 0, 1, 0, 0, 0, 1, 0],
-                                    [0, 0, 0, 0, 1, 0, 1, 0, 1],
-                                    [0, 0, 0, 0, 0, 0, 0, 1, 0]])
+    def getPlayableActions(self, currentState, differentials):
+        playableActions = np.array(
+            [
+                [0, 1, 0, 0, 0, 0, 0, 0, 0],
+                [1, 0, 1, 0, 1, 0, 0, 0, 0],
+                [0, 1, 0, 0, 0, 1, 0, 0, 0],
+                [0, 0, 0, 0, 0, 0, 1, 0, 0],
+                [0, 1, 0, 0, 0, 0, 0, 1, 0],
+                [0, 0, 1, 0, 0, 0, 0, 0, 0],
+                [0, 0, 0, 1, 0, 0, 0, 1, 0],
+                [0, 0, 0, 0, 1, 0, 1, 0, 1],
+                [0, 0, 0, 0, 0, 0, 0, 1, 0],
+            ]
+        )
 
         return np.nonzero(playableActions[currentState])
 
