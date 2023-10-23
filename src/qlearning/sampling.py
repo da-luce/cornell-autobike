@@ -1,8 +1,8 @@
-from qAgent import QAgent
+from Qlearning import Qagent
 import numpy as np
 import math
 import matplotlib.pyplot as plt
-from state_prediction import get_possible_states
+from state_pred import get_possible_states
 
 acceleration_power = 1  # m/s/s
 braking_power = 1  # m/s/s
@@ -27,19 +27,33 @@ total_samples = get_possible_states(curr, diff, high_res)
 sample_size = len(temp)
 total_samples_size = len(total_samples)
 
-res = np.array[]
+acc_res_size = 500
+turn_res_size = 1000
 
-for i in range(0, 100, 0.1):
-  for j in range(0, 5, 0.01):
-    res.append([i, j])
+res_shape = (acc_res_size, turn_res_size) #500 rows for acc_res, 1000 columns for turn_res
 
-densities = np.array[]
+res = np.empty(res_shape)
 
+pos_i = 0
+pos_j = 0
+for i in range(0.1, 100, 0.1):
+  if i>0.1:
+    pos_i+=1
+  for j in range(0.01, 5, 0.01):
+    if j>0.01:
+      pos_j+=1
+    res[pos_i, pos_j] = (i, j)
+
+densities_shape = (acc_res_size*turn_res_size)
+densities = np.empty(densities_shape)
+
+densities_pos=0
 for x in res:
   temp = (get_possible_states(curr, diff, x))
   sample_size = len(temp)
   sample_density = (sample_size/total_samples_size)*100
-  densities.append(sample-density)
+  densities[densities_pos] = sample-density
+  densities_pos+=1
 
 for i in densities:
   print(i)
