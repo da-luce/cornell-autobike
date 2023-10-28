@@ -16,7 +16,9 @@ A note on @jit decorators:
 
 Read more: https://numba.pydata.org/numba-doc/latest/reference/types.html
 """
+import sys
 
+sys.path.append("/usr/app/src/state_pred")
 import time
 import numpy as np
 from numba import jit, boolean, float64
@@ -24,11 +26,8 @@ import visual as vis
 import constants as cst
 
 
-@jit(float64[::1](float64[::1], float64[::1]),
-     nopython=True,
-     cache=False)
+@jit(float64[::1](float64[::1], float64[::1]), nopython=True, cache=False)
 def next_state_dynamic(state, inputs):
-
     """Nonlinear (dynamic) model of bicycle
 
     Return next state of bike given a current state and inputs.
@@ -53,26 +52,49 @@ def next_state_dynamic(state, inputs):
     yaw = yaw_angle * steer_angle * cst.DT
     yaw = (yaw + np.pi) % (2 * np.pi) - np.pi  # Normalize yaw angle
 
-    lat_force_front = -cst.CORNERING_STIFF_FRONT * \
-        np.arctan((vel_y + cst.DIST_FRONT_AXEL * steer_angle) / (vel_x - steering))
+    lat_force_front = -cst.CORNERING_STIFF_FRONT * np.arctan(
+        (vel_y + cst.DIST_FRONT_AXEL * steer_angle) / (vel_x - steering)
+    )
 
-    lat_force_rear = -cst.CORNERING_STIFF_REAR * \
-        np.arctan((vel_y - cst.DIST_REAR_AXEL * steer_angle) / vel_x)
+    lat_force_rear = -cst.CORNERING_STIFF_REAR * np.arctan(
+        (vel_y - cst.DIST_REAR_AXEL * steer_angle) / vel_x
+    )
 
     # Aerodynamic and friction coefficients
     R_x = 0.01 * vel_x
-    F_aero = 1.36 * vel_x ** 2
+    F_aero = 1.36 * vel_x**2
     F_load = F_aero + R_x
 
-    vel_x = vel_x + (throttle - lat_force_front * np.sin(steering) / cst.MASS -
-                     F_load / cst.MASS +
-                     vel_y * steering) * cst.DT
+    vel_x = (
+        vel_x
+        + (
+            throttle
+            - lat_force_front * np.sin(steering) / cst.MASS
+            - F_load / cst.MASS
+            + vel_y * steering
+        )
+        * cst.DT
+    )
 
-    vel_y = vel_y + (lat_force_rear / cst.MASS + lat_force_front *
-                     np.cos(steering) / cst.MASS - vel_x * steering) * cst.DT
+    vel_y = (
+        vel_y
+        + (
+            lat_force_rear / cst.MASS
+            + lat_force_front * np.cos(steering) / cst.MASS
+            - vel_x * steering
+        )
+        * cst.DT
+    )
 
-    steering = steering + (lat_force_front * cst.DIST_FRONT_AXEL * np.cos(steering) -
-                           lat_force_rear * cst.DIST_REAR_AXEL) / cst.YAW_INERTIA * cst.DT
+    steering = (
+        steering
+        + (
+            lat_force_front * cst.DIST_FRONT_AXEL * np.cos(steering)
+            - lat_force_rear * cst.DIST_REAR_AXEL
+        )
+        / cst.YAW_INERTIA
+        * cst.DT
+    )
 
     # Advect bike
     x = x + vel_x * np.cos(yaw_angle) * cst.DT - vel_y * np.sin(yaw_angle) * cst.DT
@@ -81,11 +103,8 @@ def next_state_dynamic(state, inputs):
     return np.array([x, y, vel_x, vel_y, yaw, steering])
 
 
-@jit(boolean(float64[::1]),
-     nopython=True,
-     cache=True)
+@jit(boolean(float64[::1]), nopython=True, cache=True)
 def valid_state(state):
-
     """Whether a state is valid
 
     Args:
@@ -101,17 +120,16 @@ def valid_state(state):
     vel_x, vel_y = state[2], state[3]
     steer_angle = state[5]
 
-    speed = np.sqrt(vel_x ** 2 + vel_y ** 2)
+    speed = np.sqrt(vel_x**2 + vel_y**2)
 
-    return (cst.SPEED_MIN <= speed <= cst.SPEED_MAX and
-            -cst.STEER_ANGLE_MAX <= steer_angle <= cst.STEER_ANGLE_MAX)
+    return (
+        cst.SPEED_MIN <= speed <= cst.SPEED_MAX
+        and -cst.STEER_ANGLE_MAX <= steer_angle <= cst.STEER_ANGLE_MAX
+    )
 
 
-@jit(float64(float64, float64),
-     nopython=True,
-     cache=True)
+@jit(float64(float64, float64), nopython=True, cache=True)
 def round_to_multiple(number, multiple):
-
     """Rounds a float to the nearest multiple of a number
 
     Args:
@@ -130,11 +148,8 @@ def round_to_multiple(number, multiple):
     return multiple * round(number / multiple)
 
 
-@jit(float64[::1](float64[::1], float64[::1]),
-     nopython=True,
-     cache=False)
+@jit(float64[::1](float64[::1], float64[::1]), nopython=True, cache=False)
 def round_state(state, differentials):
-
     """Round a state to "fit" onto the state matrix
 
     Args:
@@ -156,11 +171,12 @@ def round_state(state, differentials):
     return rounded_state
 
 
-@jit(float64[:, ::1](float64[::1], float64[::1], float64[::1]),
-     nopython=True,
-     cache=False)
+@jit(
+    float64[:, ::1](float64[::1], float64[::1], float64[::1]),
+    nopython=True,
+    cache=False,
+)
 def get_possible_states(state, differentials, res):
-
     """Get all possible states
 
     Return all possible states achievable within one timestep
@@ -181,12 +197,10 @@ def get_possible_states(state, differentials, res):
 
     throttle_res, steering_res = res
 
-    possible_acc = np.arange(cst.ACCELERATION_MIN,
-                             cst.ACCELERATION_MAX,
-                             throttle_res)
-    possible_steer = np.arange(-cst.STEER_ANGLE_DELTA,
-                               cst.STEER_ANGLE_DELTA,
-                               steering_res)
+    possible_acc = np.arange(cst.ACCELERATION_MIN, cst.ACCELERATION_MAX, throttle_res)
+    possible_steer = np.arange(
+        -cst.STEER_ANGLE_DELTA, cst.STEER_ANGLE_DELTA, steering_res
+    )
 
     # Allocate an array to store possible states indices
     max_size = possible_acc.size * possible_steer.size
@@ -196,27 +210,26 @@ def get_possible_states(state, differentials, res):
 
     for acc in possible_acc:
         for steer in possible_steer:
-
             next = next_state_dynamic(state, np.array([acc, steer]))
 
             # TODO: check for duplicate arrays
-            if (valid_state(next)):
-
+            if valid_state(next):
                 # Round the state to fit within the state matrix
                 next = round_state(next, differentials)
 
-                possible_states[index] = (next)
+                possible_states[index] = next
                 index += 1
 
     # Only return valid states
     return possible_states[1:index]
 
 
-@jit(float64[:, ::1](float64[::1], float64[::1], float64[::1]),
-     nopython=True,
-     cache=False)
+@jit(
+    float64[:, ::1](float64[::1], float64[::1], float64[::1]),
+    nopython=True,
+    cache=False,
+)
 def get_possible_indices(state, differentials, res):
-
     """Given an array of states, return the corresponding indices within the state matrix
 
     Args:
@@ -245,7 +258,6 @@ def get_possible_indices(state, differentials, res):
 
 
 def possible_states_performance(iter, differentials):
-
     """Print mean runtime and standard deviation of get_possible_states()
     on a certain set of input resolutions
 
@@ -270,7 +282,6 @@ def possible_states_performance(iter, differentials):
     res = optimize_input_res()
 
     for i in range(0, iter):
-
         start = time.perf_counter()
         get_possible_states(test_state, differentials, res)
         end = time.perf_counter()
@@ -286,9 +297,7 @@ def possible_states_performance(iter, differentials):
 
 
 def setup():
-
-    """ Run and compile jit functions
-    """
+    """Run and compile jit functions"""
 
     print("Compiling functions...")
     state = np.array([0, 0, 2, 1, np.radians(10), np.radians(10)])
@@ -299,7 +308,6 @@ def setup():
 
 
 def performance(input_res):
-
     """
     Return the relative time complexity (total number of loops per call to get_possible_states())
     of certain input resolutions
@@ -307,15 +315,18 @@ def performance(input_res):
 
     throttle_res, steering_res = input_res
 
-    throttle_size = np.arange(cst.ACCELERATION_MIN, cst.ACCELERATION_MAX, throttle_res).size
-    steer_size = np.arange(-cst.STEER_ANGLE_DELTA, cst.STEER_ANGLE_DELTA, steering_res).size
+    throttle_size = np.arange(
+        cst.ACCELERATION_MIN, cst.ACCELERATION_MAX, throttle_res
+    ).size
+    steer_size = np.arange(
+        -cst.STEER_ANGLE_DELTA, cst.STEER_ANGLE_DELTA, steering_res
+    ).size
 
     return throttle_size * steer_size
 
 
 # Return optimized input resolutions
 def optimize_input_res():
-
     # differentials, input_size, target_runtime, target_accuracy
 
     """
@@ -330,7 +341,6 @@ def optimize_input_res():
 
 # Testing
 if __name__ == "__main__":
-
     # Compile functions
     setup()
 
@@ -338,8 +348,9 @@ if __name__ == "__main__":
     state = np.array([0, 0, 2, 1, np.radians(10), np.radians(10)])
 
     # Example differentials
-    differentials = np.array([0.001, 0.001, 0.001, 0.001,
-                              np.radians(0.0001), np.radians(0.0001)])
+    differentials = np.array(
+        [0.001, 0.001, 0.001, 0.001, np.radians(0.0001), np.radians(0.0001)]
+    )
 
     # Example input resolutions
     res = optimize_input_res()

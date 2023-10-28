@@ -2,7 +2,6 @@ from qagent import QAgent
 import sys
 
 sys.path.append("/usr/app/src")
-
 from state_pred import sim
 import numpy as np
 

@@ -38,10 +38,9 @@ Importing:
     from state_prediction import get_possible_states, plot_states. plot_bike,
                                  show_plot
 """
-
-import constants
-import sim
-import visual
+from state_pred import constants
+from state_pred import sim
+from state_pred import visual
 import time
 
 # Since we are using Numba, we must run all functions for a first time in order
