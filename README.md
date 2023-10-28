@@ -17,6 +17,17 @@ merge your branch into main.
 
 ![Tests](https://github.com/AriMirsky/Q-Learning/actions/workflows/tests.yml/badge.svg)
 
+### Dealing with Import Issues
+
+If you need to import something from a package that isn't `qlearning` (i.e. from `state_pred` to `qlearning` or `state_pred` to `state_pred`) then at the top of your file put
+
+```python
+import sys
+sys.path.append("/usr/app/src/MYPACKAGE")
+```
+
+Then, you can use imports as you normally would as though you imported that package. See `state_pred/sim.py` for an example.
+
 ## Docker Setup
 
 ### Installing Docker

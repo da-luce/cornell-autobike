@@ -38,7 +38,9 @@ Importing:
     from state_prediction import get_possible_states, plot_states. plot_bike,
                                  show_plot
 """
+import sys
 
+sys.path.append("/usr/app/src/state_pred")
 import constants
 import sim
 import visual
