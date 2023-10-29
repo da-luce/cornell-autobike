@@ -17,11 +17,13 @@ A note on @jit decorators:
 Read more: https://numba.pydata.org/numba-doc/latest/reference/types.html
 """
 
+__version__ = "0.1.0"
+
 import time
 import numpy as np
 from numba import jit, boolean, float64
-import visual as vis
-import constants as cst
+from . import visual as vis
+from . import constants as cst
 
 
 @jit(float64[::1](float64[::1], float64[::1]),
