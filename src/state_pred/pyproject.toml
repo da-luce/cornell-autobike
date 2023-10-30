@@ -3,9 +3,6 @@ requires = ["flit_core >=3.2,<4"]
 build-backend = "flit_core.buildapi"
 
 [project]
-name = "sim"
-authors = [{name = "Sir Robin", email = "robin@camelot.uk"}]
+name = "bike_sim"
+authors = [{name = "Dalton Luce", email = "dcl252@cornell.edu"}]
 dynamic = ["version", "description"]
-
-[project.urls]
-Home = "https://github.com/sirrobin/foobar"

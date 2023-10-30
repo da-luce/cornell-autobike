@@ -4,7 +4,6 @@ build-backend = "flit_core.buildapi"
 
 [project]
 name = "qagent"
-authors = [{name = "Sir Robin", email = "robin@camelot.uk"}]
 dynamic = ["version", "description"]
 
 [project.urls]

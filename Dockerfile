@@ -9,27 +9,24 @@ WORKDIR /usr/app/
 # Add other modules to working directroy
 COPY . .
 
-# TODO: do we need this?
+# TODO: understand why we need this
 ENV PYTHONPATH "${PYTHONPATH}:/usr/app/src"
 
-# Install flit
+# Install flit allow flit to install packages as root
 RUN pip install flit
-
-# Allow flit to install packages as root
 ENV FLIT_ROOT_INSTALL=1
 
 # Install pip dependencies
 COPY requirements.txt .
 RUN pip install -r requirements.txt
 
-# Go to the package directory and then install
+# Install packages
 WORKDIR /usr/app/src/qlearning
 RUN flit install --symlink
-
 WORKDIR /usr/app/src/state_pred
 RUN flit install --symlink
 
-# Set working directory of container
+# Reset working directory of container
 WORKDIR /usr/app/
 
 # GUI backend for python
