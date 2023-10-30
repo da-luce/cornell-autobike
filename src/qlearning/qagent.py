@@ -12,6 +12,7 @@ from abc import abstractmethod
 class QAgent():
     @abstractmethod
     def getPlayableActions(self, currentState, differentials, timestep):
+        print("AAAAA")
         pass
 
     @abstractmethod
