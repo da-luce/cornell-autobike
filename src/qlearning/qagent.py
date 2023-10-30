@@ -33,8 +33,9 @@ class QAgent():
             self.q[current_state] += self.alpha * \
                 temporal_difference
     
-    def reset_matrix(self, rewards_new, iterations, end_state):
-        self.q = [[0 for i in range(len(self.q[0]))] for j in range(len(self.q))]
+    def reset_matrix(self, rewards_new, iterations, end_state, dimensions):
+        shape = tuple([len(self.q)] * dimensions)
+        self.q = np.zeros(shape)
         QAgent.qlearning(self, rewards_new, iterations, end_state)
     
     def alter_matrix(self, rewards_new, iterations, end_state):
