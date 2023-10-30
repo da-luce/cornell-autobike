@@ -39,9 +39,9 @@ Importing:
                                  show_plot
 """
 
-from . import constants
-from . import sim
-from . import visual
+from src.state_pred import constants
+from src.state_pred import sim
+from src.state_pred import visual
 import time
 
 # Since we are using Numba, we must run all functions for a first time in order

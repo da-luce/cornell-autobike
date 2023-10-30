@@ -7,7 +7,10 @@ FROM python:3.10.6-slim
 WORKDIR /usr/app/
 
 # Add other modules to working directroy
-COPY /src .
+COPY . .
+
+# TODO: do we need this?
+ENV PYTHONPATH "${PYTHONPATH}:/usr/app/src"
 
 # Install flit
 RUN pip install flit
@@ -20,10 +23,10 @@ COPY requirements.txt .
 RUN pip install -r requirements.txt
 
 # Go to the package directory and then install
-WORKDIR /usr/app/qlearning
+WORKDIR /usr/app/src/qlearning
 RUN flit install --symlink
 
-WORKDIR /usr/app/state_pred
+WORKDIR /usr/app/src/state_pred
 RUN flit install --symlink
 
 # Set working directory of container
