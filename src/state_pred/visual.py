@@ -7,7 +7,7 @@ import matplotlib.patches as patches
 from matplotlib.ticker import AutoMinorLocator as minor
 from scipy.stats import gaussian_kde
 import numpy as np
-from state_pred import constants as cst
+from src.state_pred import constants as cst
 
 # Colors
 dark = '#0B0B0B'

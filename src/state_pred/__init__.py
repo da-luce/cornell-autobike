@@ -40,7 +40,7 @@ Importing:
 """
 
 import time
-from state_pred.bike_sim import setup
+from src.state_pred.bike_sim import setup
 
 # Since we are using Numba, we must run all functions for a first time in order
 # to compile them. We can do this by running a "fake example"

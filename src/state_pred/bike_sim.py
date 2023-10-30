@@ -22,8 +22,8 @@ __version__ = "0.1.0"
 import time
 import numpy as np
 from numba import jit, boolean, float64
-from state_pred import visual as vis
-from state_pred import constants as cst
+from src.state_pred import visual as vis
+from src.state_pred import constants as cst
 
 
 @jit(float64[::1](float64[::1], float64[::1]),
