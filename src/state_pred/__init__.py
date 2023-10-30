@@ -38,16 +38,13 @@ Importing:
     from state_prediction import get_possible_states, plot_states. plot_bike,
                                  show_plot
 """
-
-from src.state_pred import constants
-from src.state_pred import sim
-from src.state_pred import visual
 import time
+from state_pred.bike_sim import setup
 
 # Since we are using Numba, we must run all functions for a first time in order
 # to compile them. We can do this by running a "fake example"
 print("Compiling functions...")
 start = time.perf_counter()
-sim.setup
+setup()
 end = time.perf_counter()
 print(f"Compilation completed in {end - start}s")

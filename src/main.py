@@ -1,4 +1,4 @@
-from state_pred.sim import get_possible_states, optimize_input_res
+from state_pred.bike_sim import get_possible_states, optimize_input_res
 import numpy as np
 
 # Example state
