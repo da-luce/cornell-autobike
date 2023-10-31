@@ -1,10 +1,3 @@
-"""
-This is qagent.py module.
-This module contains the implementation of Q-learning agent.
-"""
-
-__version__ = "0.1.0"
-
 import numpy as np
 from abc import abstractmethod
 

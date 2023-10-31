@@ -17,7 +17,6 @@ A note on @jit decorators:
 Read more: https://numba.pydata.org/numba-doc/latest/reference/types.html
 """
 
-__version__ = "0.1.0"
 
 import time
 import numpy as np
