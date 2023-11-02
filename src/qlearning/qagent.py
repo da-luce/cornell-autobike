@@ -19,12 +19,12 @@ class QAgent:
         result = []
         for i in range(len(self.q.shape)):
             result.append(np.random.randint(0, high=self.q.shape[i]))
-        return tuple(result)
+        return np.array(result)
 
     def qlearning(self, rewards_new, iterations, end_state):
         for _ in range(iterations):
             current_state = self.getRandomState()
-            if current_state == end_state:
+            if np.all(current_state == end_state):
                 continue
             playable_actions = self.getPlayableActions(
                 current_state, self.differentials

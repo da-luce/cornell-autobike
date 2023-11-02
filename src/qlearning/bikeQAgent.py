@@ -1,8 +1,5 @@
 from qagent import QAgent
-import sys
-
-sys.path.append("/usr/app/src")
-from state_pred import sim
+from src.state_pred.bike_sim import get_possible_states
 import numpy as np
 
 
@@ -19,7 +16,7 @@ class BikeQAgent(QAgent):
             [ACCELERATION_SAMPLING_DENSITY, STEERING_SAMPLING_DENSITY]
         )
 
-        return sim.get_possible_states(currentState, differentials, resolution)
+        return get_possible_states(currentState, differentials, resolution)
 
     def getStateMatrix(self):
         return np.zeros((100, 100, 10, 10, 10, 10)), np.array(
