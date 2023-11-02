@@ -1,8 +1,7 @@
-from Qlearning import Qagent
+from src.state_pred.bike_sim import get_possible_states, optimize_input_res
 import numpy as np
 import math
 import matplotlib.pyplot as plt
-from state_pred import get_possible_states
 
 acceleration_power = 1  # m/s/s
 braking_power = 1  # m/s/s
