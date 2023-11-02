@@ -38,8 +38,8 @@ class QAgent():
         self.q = np.zeros(shape)
         QAgent.qlearning(self, rewards_new, iterations, end_state)
     
-    def alter_matrix(self, rewards_new, iterations, end_state):
-        rewards_new = rewards_new * 0.5
+    def alter_matrix(self, rewards_new, iterations, end_state, scale):
+        rewards_new = rewards_new * scale
         QAgent.qlearning(self, rewards_new, iterations, end_state)
 
     def get_optimal_route(self, start_state, end_state):
