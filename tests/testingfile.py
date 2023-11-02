@@ -1,7 +1,9 @@
-"""dummy test case just to see if testing configurations work
+"""
+dummy test case just to see if testing configurations work
+"""
 
-from qlearning import *"""
-
+# Example import
+from src.qlearning.qagent import QAgent
 
 def dummy_test():
     assert 1 > 0

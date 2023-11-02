@@ -94,7 +94,7 @@ merge your branch into main.
    your working directory to something else, e.g.
 
    ```text
-   docker-compose run --rm --workdir /usr/app/src/state_pred/ nav python sim.py
+   docker-compose run --rm --workdir /usr/app/src/state_pred/ nav python bike_sim.py
    ```
 
 ### X11 Forwarding
@@ -138,7 +138,7 @@ merge your branch into main.
    Example:
 
    ```text
-   docker-compose run --rm --env DISPLAY=host.docker.internal:0 nav python src/state_pred/sim.py
+   docker-compose run --rm --env DISPLAY=host.docker.internal:0 nav python src/state_pred/bike_sim.py
    ```
 
 ##### Helpful Alias
