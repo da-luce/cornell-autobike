@@ -1,26 +1,31 @@
-"""This module provides functionality for computing possible states/playable actions
+"""This module provides functionality for computing possible
+   states/playable actions
 
 This module uses numba in order to compile computation heavy tasks just in time:
 
 A note on @jit decorators:
-    - "signature string":   Defines the return type and parameter types for compilation.
-                            Not required with just-in-time compilation, but is necessary for
-                            for ahead-of-time compilation if used in future
-    - nopython=True:        Forces jit to compile to pure byte code (significantly faster)
-    - cache=True:           Caches compiled functions in a file to reduce overhead on first 
-                            time runs (do not set True for functions that rely on outside variables)
+    - "signature string":   Defines the return type and parameter types for
+                            compilation. Not required with just-in-time
+                            compilation, but is necessary for for ahead-of-time
+                            compilation if used in future
+    - nopython=True:        Forces jit to compile to pure byte code
+                            (significantly faster)
+    - cache=True:           Caches compiled functions in a file to reduce
+                            overhead on first  time runs (do not set True for
+                            functions that rely on outside variables)
 
 Read more: https://numba.pydata.org/numba-doc/latest/reference/types.html
 """
 
+
 import time
 import numpy as np
-from numba import jit
-import visual as vis
-import constants as cst
+from numba import jit, boolean, float64
+from src.state_pred import visual as vis
+from src.state_pred import constants as cst
 
 
-@jit("float64[::1](float64[::1], float64[::1])",
+@jit(float64[::1](float64[::1], float64[::1]),
      nopython=True,
      cache=False)
 def next_state_dynamic(state, inputs):
@@ -33,7 +38,7 @@ def next_state_dynamic(state, inputs):
         state:
             Six element np.array representing current state
         throttle:
-            TODO Not sure about this one
+            TODO: Not sure about this one
         steering:
             Delta in steering angle in radians
 
@@ -41,25 +46,34 @@ def next_state_dynamic(state, inputs):
         A six element np.array representing the next/update state
     """
 
-    # Unpack state into vairables
+    # Unpack state into variables
+
     x, y, vel_x, vel_y, yaw_angle, steer_angle = state
     throttle, steering = inputs
 
     yaw = yaw_angle * steer_angle * cst.DT
     yaw = (yaw + np.pi) % (2 * np.pi) - np.pi  # Normalize yaw angle
 
-    lat_force_front = -cst.CORNERING_STIFF_FRONT * np.arctan(((vel_y + cst.DIST_FRONT_AXEL * steer_angle) / vel_x - steering))
-    lat_force_rear = -cst.CORNERING_STIFF_REAR * np.arctan((vel_y - cst.DIST_REAR_AXEL * steer_angle) / vel_x)
+    lat_force_front = -cst.CORNERING_STIFF_FRONT * \
+        np.arctan((vel_y + cst.DIST_FRONT_AXEL * steer_angle) / (vel_x - steering))
+
+    lat_force_rear = -cst.CORNERING_STIFF_REAR * \
+        np.arctan((vel_y - cst.DIST_REAR_AXEL * steer_angle) / vel_x)
 
     # Aerodynamic and friction coefficients
     R_x = 0.01 * vel_x
     F_aero = 1.36 * vel_x ** 2
     F_load = F_aero + R_x
 
-    vel_x = vel_x + (throttle - lat_force_front * np.sin(steering) / cst.MASS - F_load / cst.MASS + vel_y * steering) * cst.DT
-    vel_y = vel_y + (lat_force_rear / cst.MASS + lat_force_front * np.cos(steering) / cst.MASS - vel_x * steering) * cst.DT
+    vel_x = vel_x + (throttle - lat_force_front * np.sin(steering) / cst.MASS -
+                     F_load / cst.MASS +
+                     vel_y * steering) * cst.DT
 
-    steering = steering + (lat_force_front * cst.DIST_FRONT_AXEL * np.cos(steering) - lat_force_rear * cst.DIST_REAR_AXEL) / cst.YAW_INERTIA * cst.DT
+    vel_y = vel_y + (lat_force_rear / cst.MASS + lat_force_front *
+                     np.cos(steering) / cst.MASS - vel_x * steering) * cst.DT
+
+    steering = steering + (lat_force_front * cst.DIST_FRONT_AXEL * np.cos(steering) -
+                           lat_force_rear * cst.DIST_REAR_AXEL) / cst.YAW_INERTIA * cst.DT
 
     # Advect bike
     x = x + vel_x * np.cos(yaw_angle) * cst.DT - vel_y * np.sin(yaw_angle) * cst.DT
@@ -68,7 +82,7 @@ def next_state_dynamic(state, inputs):
     return np.array([x, y, vel_x, vel_y, yaw, steering])
 
 
-@jit("boolean(float64[::1])",
+@jit(boolean(float64[::1]),
      nopython=True,
      cache=True)
 def valid_state(state):
@@ -94,12 +108,12 @@ def valid_state(state):
             -cst.STEER_ANGLE_MAX <= steer_angle <= cst.STEER_ANGLE_MAX)
 
 
-@jit("float64(float64, float64)",
+@jit(float64(float64, float64),
      nopython=True,
      cache=True)
 def round_to_multiple(number, multiple):
 
-    """Rounds a float to the nearest mulitple of a number
+    """Rounds a float to the nearest multiple of a number
 
     Args:
         number:
@@ -117,7 +131,7 @@ def round_to_multiple(number, multiple):
     return multiple * round(number / multiple)
 
 
-@jit("float64[::1](float64[::1], float64[::1])",
+@jit(float64[::1](float64[::1], float64[::1]),
      nopython=True,
      cache=False)
 def round_state(state, differentials):
@@ -129,21 +143,21 @@ def round_state(state, differentials):
             A six element np.array representing a state
 
     Returns:
-        A rounded state that is an element of the state matix
+        A rounded state that is an element of the state matrix
     """
 
     # Allocate an empty array to store state
-    rounded_state = np.empty((6,), float)
+    rounded_state = np.empty((state.size,), float)
 
     # For each value in the state, round the value to the
     # resolution defined in DIFFERENTIALS
-    for i in np.arange(0, 5, 1):
+    for i in np.arange(0, state.size, 1):
         rounded_state[i] = round_to_multiple(state[i], differentials[i])
 
     return rounded_state
 
 
-@jit("float64[:,::1](float64[::1], float64[::1], float64[::1])",
+@jit(float64[:, ::1](float64[::1], float64[::1], float64[::1]),
      nopython=True,
      cache=False)
 def get_possible_states(state, differentials, res):
@@ -168,12 +182,16 @@ def get_possible_states(state, differentials, res):
 
     throttle_res, steering_res = res
 
-    possible_acc = np.arange(cst.ACCELERATION_MIN, cst.ACCELERATION_MAX, throttle_res)
-    possible_steer = np.arange(-cst.STEER_ANGLE_DELTA, cst.STEER_ANGLE_DELTA, steering_res)
+    possible_acc = np.arange(cst.ACCELERATION_MIN,
+                             cst.ACCELERATION_MAX,
+                             throttle_res)
+    possible_steer = np.arange(-cst.STEER_ANGLE_DELTA,
+                               cst.STEER_ANGLE_DELTA,
+                               steering_res)
 
-    # Allocate an array to store possible states indicies
+    # Allocate an array to store possible states indices
     max_size = possible_acc.size * possible_steer.size
-    possible_states = np.empty((max_size, 6), float)
+    possible_states = np.empty((max_size, state.size), float)
 
     index = 0
 
@@ -195,12 +213,12 @@ def get_possible_states(state, differentials, res):
     return possible_states[1:index]
 
 
-@jit("float64[:,::1](float64[::1], float64[::1], float64[::1])",
+@jit(float64[:, ::1](float64[::1], float64[::1], float64[::1]),
      nopython=True,
      cache=False)
-def get_possible_indicies(state, differentials, res):
+def get_possible_indices(state, differentials, res):
 
-    """Given an array of states, return the corresponding indicies within the state matrix
+    """Given an array of states, return the corresponding indices within the state matrix
 
     Args:
         states:
@@ -211,17 +229,17 @@ def get_possible_indicies(state, differentials, res):
             A one dimensional array containing input resolutions
 
     Return:
-        Corresponding indicides of states within state matrix
+        Corresponding indices of states within state matrix
 
     Usage:
         Used in conjunction with `get_possible_states()`
 
         Example usage (outside of package):
 
-        >>> from state_pred import optimize_input_res, get_possible_indicies
+        >>> from state_pred import optimize_input_res, get_possible_indices
         >>> current_state, differentials = ...
         >>> res = sim.optimize_input_res()
-        >>> indicies = sim.get_possible_indicies(current_state, differentials, res)
+        >>> indices = sim.get_possible_indices(current_state, differentials, res)
     """
 
     return get_possible_states(state, differentials, res) / differentials
@@ -230,7 +248,7 @@ def get_possible_indicies(state, differentials, res):
 def possible_states_performance(iter, differentials):
 
     """Print mean runtime and standard deviation of get_possible_states()
-    on a certain set of input resolutions 
+    on a certain set of input resolutions
 
     Test performance of get_possible_states()
 
@@ -272,12 +290,11 @@ def setup():
 
     """ Run and compile jit functions
     """
-    print("Comiling functions...")
+
     state = np.array([0, 0, 2, 1, np.radians(10), np.radians(10)])
     differentials = np.array([1.0, 1.0, 1.0, 1.0, 1.0, 1.0])
     res = optimize_input_res()
     get_possible_states(state, differentials, res)
-    print("Compilation complete")
 
 
 def performance(input_res):
@@ -286,6 +303,7 @@ def performance(input_res):
     Return the relative time complexity (total number of loops per call to get_possible_states())
     of certain input resolutions
     """
+
     throttle_res, steering_res = input_res
 
     throttle_size = np.arange(cst.ACCELERATION_MIN, cst.ACCELERATION_MAX, throttle_res).size
@@ -300,7 +318,7 @@ def optimize_input_res():
     # differentials, input_size, target_runtime, target_accuracy
 
     """
-    differentils: Differentials
+    differentials: Differentials
     max_runtime: maximum mean time for get_possible_states() to run in
     input_size: number of elements in input array
     """
@@ -313,13 +331,15 @@ def optimize_input_res():
 if __name__ == "__main__":
 
     # Compile functions
-    setup()
+    # setup()
+    # FIXME: no longer needed as should always be running in __innit__.py
 
     # Example state
     state = np.array([0, 0, 2, 1, np.radians(10), np.radians(10)])
 
     # Example differentials
-    differentials = np.array([0.001, 0.001, 0.001, 0.001, np.radians(0.0001), np.radians(0.0001)])
+    differentials = np.array([0.001, 0.001, 0.001, 0.001,
+                              np.radians(0.0001), np.radians(0.0001)])
 
     # Example input resolutions
     res = optimize_input_res()

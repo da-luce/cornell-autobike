@@ -26,7 +26,7 @@ STEER_ANGLE_DELTA = np.radians(1)   # rad
 
 ACCELERATION_MIN = -5   # m/(s^2)
 ACCELERATION_MAX = 10   # m/(s^2)
- 
+
 STEER_ACC_MIN = -5
 STEER_ACC_MAX = 5
 
