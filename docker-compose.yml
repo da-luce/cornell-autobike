@@ -3,11 +3,7 @@ services:
     # Specify build file
     build:
       context: .
-      dockerfile: Dockerfile-navigation
+      dockerfile: Dockerfile
     volumes:
       # Copy entire repository to /usr/app (working dir) in container
       - .:/usr/app
-  ros:
-    build:
-      context: .
-      dockerfile:  Dockerfile-ROS
