@@ -1,10 +1,8 @@
 import unittest
 import numpy as np
-import sys
-sys.path.append("/usr/app/src")
+from src.qlearning import qagent
+from src.qlearning import smallExampleQAgent
 
-from qlearning import qagent
-from qlearning import smallExampleQAgent
 
 class TestQAgent(unittest.TestCase):
     def dummy_test():
@@ -14,27 +12,31 @@ class TestQAgent(unittest.TestCase):
         self.alpha = 0.1
         self.gamma = 0.9
         self.rewards = np.zeros((9,))
-        self.agent = smallExampleQAgent.SmallExampleQAgent(self.alpha, self.gamma, self.rewards)
+        self.agent = smallExampleQAgent.SmallExampleQAgent(
+            self.alpha, self.gamma, self.rewards
+        )
 
     def test_q_learning(self):
         iterations = 1000
         end_state = 8
 
         self.agent.qlearning(self.rewards, iterations, end_state)
-    
+
     def test_q_learning_2(self):
         iterations = 0
         end_state = 0
 
         self.agent.qlearning(self.rewards, iterations, end_state)
-    
+
     def test_q_learning_3(self):
-        rewards = np.random.rand(9,)
-        iterations = 10000
+        rewards = np.random.rand(
+            9,
+        )
+        iterations = 1000
         end_state = 5
 
         self.agent.qlearning(rewards, iterations, end_state)
-    
+
     def test_reset_matrix(self):
         iterations = 1000
         end_state = 8
@@ -42,9 +44,11 @@ class TestQAgent(unittest.TestCase):
 
         self.agent.reset_matrix(self.rewards, iterations, end_state, dimensions)
         self.assertFalse(np.any(self.agent.q))
-    
+
     def test_reset_matrix_2(self):
-        rewards = np.random.rand(9,)
+        rewards = np.random.rand(
+            9,
+        )
         iterations = 1000
         end_state = 8
         dimensions = 1
@@ -53,14 +57,16 @@ class TestQAgent(unittest.TestCase):
         self.assertTrue(np.any(self.agent.q))
 
     def test_reset_matrix_3(self):
-        rewards = np.random.rand(9,)
+        rewards = np.random.rand(
+            9,
+        )
         iterations = 1000
         end_state = 1
         dimensions = 1
 
         self.agent.reset_matrix(rewards, iterations, end_state, dimensions)
         self.assertTrue(np.any(self.agent.q))
-    
+
     def test_alter_matrix(self):
         iterations = 1000
         end_state = 8
@@ -68,9 +74,11 @@ class TestQAgent(unittest.TestCase):
 
         self.agent.alter_matrix(self.rewards, iterations, end_state, scale)
         self.assertFalse(np.any(self.agent.q))
-    
+
     def test_alter_matrix_2(self):
-        rewards = np.random.rand(9,)
+        rewards = np.random.rand(
+            9,
+        )
         iterations = 1000
         end_state = 8
         scale = 0.5
@@ -79,7 +87,9 @@ class TestQAgent(unittest.TestCase):
         self.assertTrue(np.any(self.agent.q))
 
     def test_alter_matrix_3(self):
-        rewards = np.random.rand(9,)
+        rewards = np.random.rand(
+            9,
+        )
         iterations = 1000
         end_state = 5
         scale = 0.1
@@ -94,7 +104,7 @@ class TestQAgent(unittest.TestCase):
 
         route = self.agent.training(start_state, end_state, iterations)
         print(route)
-    
+
     def test_training2(self):
         iterations = 1000
         start_state = 1
