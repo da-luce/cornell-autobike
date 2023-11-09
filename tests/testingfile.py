@@ -30,7 +30,7 @@ class TestQAgent(unittest.TestCase):
     
     def test_q_learning_3(self):
         rewards = np.random.rand(9,)
-        iterations = 100
+        iterations = 10000
         end_state = 5
 
         self.agent.qlearning(rewards, iterations, end_state)
@@ -47,6 +47,15 @@ class TestQAgent(unittest.TestCase):
         rewards = np.random.rand(9,)
         iterations = 1000
         end_state = 8
+        dimensions = 1
+
+        self.agent.reset_matrix(rewards, iterations, end_state, dimensions)
+        self.assertTrue(np.any(self.agent.q))
+
+    def test_reset_matrix_3(self):
+        rewards = np.random.rand(9,)
+        iterations = 1000
+        end_state = 1
         dimensions = 1
 
         self.agent.reset_matrix(rewards, iterations, end_state, dimensions)
@@ -69,30 +78,37 @@ class TestQAgent(unittest.TestCase):
         self.agent.alter_matrix(rewards, iterations, end_state, scale)
         self.assertTrue(np.any(self.agent.q))
 
+    def test_alter_matrix_3(self):
+        rewards = np.random.rand(9,)
+        iterations = 1000
+        end_state = 5
+        scale = 0.1
+
+        self.agent.alter_matrix(rewards, iterations, end_state, scale)
+        self.assertTrue(np.any(self.agent.q))
+
     def test_training(self):
-        iterations = 100
+        iterations = 1000
         start_state = 0
         end_state = 8
 
         route = self.agent.training(start_state, end_state, iterations)
         print(route)
-        #self.assertEqual(route[-1], end_state)
+    
+    def test_training2(self):
+        iterations = 1000
+        start_state = 1
+        end_state = 5
 
+        route = self.agent.training(start_state, end_state, iterations)
+        print(route)
 
-"""  
     def test_get_optimal_route(self):
         start_state = 0
         end_state = 8
         route = self.agent.get_optimal_route(start_state, end_state)
         self.assertTrue(len(route) > 0, "The route is empty.")
         print(f"Route: {route}")
-        self.assertEqual(route[-1], end_state)
-
-    def test_training(self):
-        start_state, end_state, iterations = 0, 8, 100
-        route = self.agent.training(start_state, end_state, iterations)
-        self.assertEqual(route[-1], end_state)
-"""
 
 
 if __name__ == "__main__":
