@@ -1,6 +1,5 @@
 import unittest
 import numpy as np
-from src.qlearning import qagent
 from src.qlearning import smallExampleQAgent
 
 
