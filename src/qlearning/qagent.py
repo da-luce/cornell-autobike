@@ -39,7 +39,7 @@ class QAgent:
 
     def reset_matrix(self, rewards_new, iterations, end_state, dimensions):
         shape = tuple([len(self.q)] * dimensions)
-        self.q = np.zeros(shape)
+        self.q: np.ndarray = np.zeros(shape)
         QAgent.qlearning(self, rewards_new, iterations, end_state)
 
     def alter_matrix(self, rewards_new, iterations, end_state, scale):
@@ -77,4 +77,3 @@ class QAgent:
         self.rewards = rewards
         self.q, self.differentials = self.getStateMatrix()
         self.dt = dt
-        self.q: np.ndarray
