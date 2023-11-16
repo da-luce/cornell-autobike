@@ -77,3 +77,4 @@ class QAgent:
         self.rewards = rewards
         self.q, self.differentials = self.getStateMatrix()
         self.dt = dt
+        self.q: np.ndarray
