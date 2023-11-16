@@ -4,9 +4,7 @@ from src.qlearning import smallExampleQAgent
 
 
 class TestQAgent(unittest.TestCase):
-    def dummy_test():
-        assert 1 > 0
-
+    
     def setUp(self):
         self.alpha = 0.1
         self.gamma = 0.9
