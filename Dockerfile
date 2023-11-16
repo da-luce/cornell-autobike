@@ -24,5 +24,7 @@ RUN flit install --symlink
 RUN apt-get update --fix-missing  # Not sure why we need --fix-missing now
 RUN apt-get install -y tk         # Required by Matplotlib for GUI
 
+RUN apt-get install -y libglib2.0-0
+
 # Run on container start (not when using docker-compose run, however)
 CMD [ "python", "src/main.py" ]

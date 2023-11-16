@@ -18,7 +18,7 @@ class QAgent:
     def getRandomState(self):
         result = []
         for i in range(len(self.q.shape)):
-            result.append(np.random.randint(0, high=self.q.shape[i]))
+            result.append(np.random.uniform(0, high=self.q.shape[i]))
         return np.array(result)
 
     def qlearning(self, rewards_new, iterations, end_state):
