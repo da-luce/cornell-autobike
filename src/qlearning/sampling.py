@@ -114,4 +114,6 @@ ax.set_xlabel("acceleration res")
 ax.set_ylabel("turning res")
 ax.set_zlabel("sampling density")
 ax.view_init(60,35)
-plt.show()
+
+plt.savefig('sampling_plot.png')
+#plt.show()
