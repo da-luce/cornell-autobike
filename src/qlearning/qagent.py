@@ -28,18 +28,11 @@ class QAgent:
         constant_B = 4
         constant_C = 2
 
-        # Calculates the rewards
+        # The reward should increase as we approach the goal and 
+        # decrease as the probability of encountering an object increases.
 
         rewards = (constant_A / math.sqrt((distance**2) + constant_B)) * \
         (1 - (constant_C * occupancy_grid))
-
-        """
-        constant_D = 3
-        constant_F = 3
-
-        rewards_second = constant_A ** (-constant_B * occupancy_grid) + \
-        constant_C * (math.e ** (-constant_F * (constant_D - distance)) - 1)
-        """
 
         return rewards
 
