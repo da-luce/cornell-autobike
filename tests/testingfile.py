@@ -125,6 +125,14 @@ class TestQAgent(unittest.TestCase):
         rewards = self.agent.get_rewards(occupancy_grid = np.zeros((9,)), distance = 2)
         print(f"Rewards: {rewards}")
 
+    def test_get_rewards_3(self):
+        rewards = self.agent.get_rewards(occupancy_grid = np.random.rand(9,), distance = 0)
+        print(f"Rewards: {rewards}")
+    
+    def test_get_rewards_4(self):
+        rewards = self.agent.get_rewards(occupancy_grid = np.zeros((9,)), distance = 0)
+        print(f"Rewards: {rewards}")
+
 
 if __name__ == "__main__":
     unittest.main()
