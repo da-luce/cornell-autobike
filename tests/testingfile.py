@@ -116,7 +116,7 @@ class TestQAgent(unittest.TestCase):
         route = self.agent.get_optimal_route(start_state, end_state)
         self.assertTrue(len(route) > 0, "The route is empty.")
         print(f"Route: {route}")
-
+    
     def test_get_rewards_1(self):
         rewards = self.agent.get_rewards(occupancy_grid = np.random.rand(9,), distance = 2)
         print(f"Rewards: {rewards}")
