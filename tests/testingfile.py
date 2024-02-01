@@ -117,6 +117,26 @@ class TestQAgent(unittest.TestCase):
         self.assertTrue(len(route) > 0, "The route is empty.")
         print(f"Route: {route}")
 
+    def test_get_rewards_1(self):
+        rewards = self.agent.get_rewards(occupancy_grid = np.random.rand(9,), distance = 2)
+        print(f"Rewards: {rewards}")
+
+    def test_get_rewards_2(self):
+        rewards = self.agent.get_rewards(occupancy_grid = np.zeros((9,)), distance = 2)
+        print(f"Rewards: {rewards}")
+
+    def test_get_rewards_3(self):
+        rewards = self.agent.get_rewards(occupancy_grid = np.random.rand(9,), distance = 0)
+        print(f"Rewards: {rewards}")
+    
+    def test_get_rewards_4(self):
+        rewards = self.agent.get_rewards(occupancy_grid = np.zeros((9,)), distance = 0)
+        print(f"Rewards: {rewards}")
+
+    def test_get_rewards_5(self):
+        rewards = self.agent.get_rewards(occupancy_grid = np.random.rand(9,), distance = 200)
+        print(f"Rewards: {rewards}")
+
 
 if __name__ == "__main__":
     unittest.main()
