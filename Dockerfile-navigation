@@ -7,7 +7,7 @@ FROM python:3.10.6-slim
 WORKDIR /usr/app/
 
 # Install pip dependencies
-COPY requirements.txt .
+COPY requirements_nav.txt .
 RUN pip install -r requirements_nav.txt
 
 # X11 Server Content
