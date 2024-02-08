@@ -114,8 +114,20 @@ if __name__ == "__main__":
 
     frameA = gen_grid(SIZE_X, SIZE_Y, time=0)
     frameB = gen_grid(SIZE_X, SIZE_Y, time=0.2)
-    flow = cv2.calcOpticalFlowFarneback(frameA, frameB, None, 0.5, 3, 15, 3, 5, 1.2, 0)
-    flow = scale_flow_vectors(flow)
+    flow = cv2.calcOpticalFlowFarneback(
+        frameA,
+        frameB,
+        None,
+        pyr_scale=0.5,
+        levels=3,
+        winsize=15,
+        iterations=3,
+        poly_n=5,
+        poly_sigma=1.1,
+        flags=cv2.OPTFLOW_FARNEBACK_GAUSSIAN,
+    )
+
+    flow.astype("int16").tofile("./temp")
 
     plt.figure("Frame A")
     plt.imshow(frameA, cmap="gray")
