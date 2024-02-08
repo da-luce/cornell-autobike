@@ -5,7 +5,7 @@ Perlin and other noise related functions. FIXME: stolen from where?
 import numpy as np
 
 
-def perlin(x, y, seed=0):
+def perlin(x: float, y: float, seed: int = 0) -> float:
     def lerp(a, b, x):
         "linear interpolation"
         return a + x * (b - a)
@@ -42,7 +42,7 @@ def perlin(x, y, seed=0):
     return lerp(x1, x2, v)  # FIX2: I also had to reverse x1 and x2 here
 
 
-def sigmoid(x, threshold=0.5, steepness=10):
+def sigmoid(x: float, threshold: float = 0.5, steepness: float = 10) -> float:
     """
     Sigmoid function for smooth thresholding.
 
@@ -54,7 +54,7 @@ def sigmoid(x, threshold=0.5, steepness=10):
     return 1 / (1 + np.exp(-steepness * (x - threshold)))
 
 
-def biased_easing(x, power=4):
+def biased_easing(x: float, power: int = 4) -> float:
     """
     Biased easing function using a power function to skew the distribution.
 

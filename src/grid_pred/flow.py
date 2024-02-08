@@ -7,23 +7,11 @@ from src.grid_pred.grid_gen import gen_grid
 SIZE_X = 64
 SIZE_Y = 64
 
-frameA = gen_grid(SIZE_X, SIZE_Y, time=0)
-frameB = gen_grid(SIZE_X, SIZE_Y, time=0.2)
-
-plt.imshow(frameA, cmap="gray")
-plt.title("Frame A")
-plt.show()
-
-plt.imshow(frameB, cmap="gray")
-plt.title("Frame B")
-plt.show()
-
 # From OpenCV documentation:
-# "The function finds an optical flow for each prev pixel using the [67] algorithm so that
-# 𝚙𝚛𝚎𝚟(y,x)∼𝚗𝚎𝚡𝚝(y+𝚏𝚕𝚘𝚠(y,x)[1],x+𝚏𝚕𝚘𝚠(y,x)[0])"
+# "The function finds an optical flow for each prev pixel using the [67]
+# algorithm so that
+# prev(y,x) = next(y + flow(y,x)[1], x + flow(y,x)[0])"
 #
-
-flow = cv2.calcOpticalFlowFarneback(frameA, frameB, None, 0.5, 3, 15, 3, 5, 1.2, 0)
 
 
 # Function to plot optical flow vectors
@@ -35,8 +23,13 @@ def draw_flow(img, flow, step=4, scale=10):
     :param step: Space between vectors. Lower values mean more density.
     :param scale: Scale factor for visualizing the flow vectors.
     """
+
     # Create a figure
     plt.figure(figsize=(10, 10))
+
+    i, j = 10, 10  # Example pixel coordinates
+    flow_vector = flow[i, j]
+
     # Display the image
     plt.imshow(img, cmap="gray", interpolation="nearest")
     plt.title("Optical Flow Vectors")
@@ -64,7 +57,72 @@ def draw_flow(img, flow, step=4, scale=10):
     plt.show()
 
 
-print(flow)
+def draw_dense_quiver_flow(img, flow, step=1, scale=1e6):
+    """
+    Draw dense optical flow vectors using quiver plot.
+    :param img: Grayscale image to draw on.
+    :param flow: Optical flow vectors (shape: height x width x 2).
+    :param step: Space between vectors. Lower values mean more density.
+    :param scale: Scale factor for visualizing the flow vectors.
+    """
+    # Create a figure for plotting
+    fig, ax = plt.subplots(figsize=(6.4, 4.8))
+    ax.imshow(img, cmap="gray", interpolation="nearest")
+    ax.set_title("Optical Flow Vectors")
+    ax.axis("off")
 
-# Assuming `frameA` and `flow` are defined from your previous code:
-draw_flow(frameA, flow)
+    # Generate a grid of points
+    h, w = img.shape
+    y, x = np.mgrid[step / 2 : h : step, step / 2 : w : step].reshape(2, -1).astype(int)
+    fx, fy = flow[y, x].T
+
+    # Plotting the flow vectors
+    ax.quiver(
+        x, y, fx, fy, color="r", angles="xy", scale_units="xy", scale=scale, width=0.005
+    )
+
+    return fig
+
+
+def scale_flow_vectors(flow):
+    """
+    Scale the optical flow vectors so that the smallest non-zero vector magnitude becomes 1.
+
+    :param flow: A NumPy array of shape (height, width, 2) containing the flow vectors.
+    :return: A NumPy array of the scaled flow vectors.
+    """
+    # Calculate magnitudes of the flow vectors
+    magnitudes = np.sqrt(flow[..., 0] ** 2 + flow[..., 1] ** 2)
+
+    # Find the smallest non-zero magnitude
+    min_nonzero_magnitude = np.min(magnitudes[np.nonzero(magnitudes)])
+
+    # Avoid division by zero in case all vectors are zero
+    if min_nonzero_magnitude == 0:
+        return flow  # Return original flow if all vectors are zero
+
+    # Calculate scaling factor
+    scaling_factor = 1 / min_nonzero_magnitude
+
+    # Scale the flow vectors
+    scaled_flow = flow * scaling_factor
+
+    return scaled_flow
+
+
+if __name__ == "__main__":
+
+    frameA = gen_grid(SIZE_X, SIZE_Y, time=0)
+    frameB = gen_grid(SIZE_X, SIZE_Y, time=0.2)
+    flow = cv2.calcOpticalFlowFarneback(frameA, frameB, None, 0.5, 3, 15, 3, 5, 1.2, 0)
+    flow = scale_flow_vectors(flow)
+
+    plt.figure("Frame A")
+    plt.imshow(frameA, cmap="gray")
+
+    plt.figure("Frame B")
+    plt.imshow(frameB, cmap="gray")
+
+    flows = draw_dense_quiver_flow(frameA, flow)
+
+    plt.show()
