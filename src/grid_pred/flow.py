@@ -4,8 +4,9 @@ import matplotlib.pyplot as plt
 from src.grid_pred.grid_gen import gen_grid
 
 # Occupancy grid
-SIZE_X = 64
-SIZE_Y = 64
+SIZE_X = 128
+SIZE_Y = 128
+TIMESTEP = 0.3
 
 # From OpenCV documentation:
 # "The function finds an optical flow for each prev pixel using the [67]
@@ -110,22 +111,56 @@ def scale_flow_vectors(flow):
     return scaled_flow
 
 
+def predict_grid(image2, flow):
+    """
+    Predict the next grid state based on the optical flow vectors.
+
+    :param image2: The second image (numpy array) from which to predict the next state.
+    :param flow: Optical flow vectors obtained between the first and second images.
+    :return: The predicted third image as a numpy array.
+    """
+    # Initialize an empty array for the predicted image
+    h, w = image2.shape[:2]
+    predicted_image = np.zeros_like(image2)
+
+    # For each pixel in image2, move it according to the flow vector
+    for y in range(h):
+        for x in range(w):
+            flow_x, flow_y = flow[y, x]
+            new_x, new_y = x + np.floor(flow_x * TIMESTEP), y + np.floor(
+                flow_y * TIMESTEP
+            )
+
+            # Convert new_x and new_y to integers for use as indices
+            new_x, new_y = int(new_x), int(new_y)
+
+            # Make sure the new coordinates are within image bounds
+            if 0 <= new_x < w and 0 <= new_y < h:
+                predicted_image[new_y, new_x] = image2[y, x]
+
+    # Smooth and return
+    predicted_image = cv2.blur(predicted_image, (5, 5))
+    return predicted_image
+
+
 if __name__ == "__main__":
 
     frameA = gen_grid(SIZE_X, SIZE_Y, time=0)
-    frameB = gen_grid(SIZE_X, SIZE_Y, time=0.2)
+    frameB = gen_grid(SIZE_X, SIZE_Y, time=0 + TIMESTEP)
     flow = cv2.calcOpticalFlowFarneback(
         frameA,
         frameB,
         None,
         pyr_scale=0.5,
-        levels=3,
-        winsize=15,
-        iterations=3,
-        poly_n=5,
-        poly_sigma=1.1,
+        levels=10,
+        winsize=64,
+        iterations=100,
+        poly_n=10,
+        poly_sigma=1.2,
         flags=cv2.OPTFLOW_FARNEBACK_GAUSSIAN,
     )
+
+    flow = flow * 10e8
 
     flow.astype("int16").tofile("./temp")
 
@@ -134,6 +169,10 @@ if __name__ == "__main__":
 
     plt.figure("Frame B")
     plt.imshow(frameB, cmap="gray")
+
+    frameC = predict_grid(frameB, flow)
+    plt.figure("Frame C")
+    plt.imshow(frameC, cmap="gray")
 
     flows = draw_dense_quiver_flow(frameA, flow)
 

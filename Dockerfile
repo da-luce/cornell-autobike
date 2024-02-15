@@ -13,16 +13,17 @@ COPY . .
 RUN pip install flit
 ENV FLIT_ROOT_INSTALL=1
 
+# GUI backend for python
+RUN apt-get update --fix-missing    # Not sure why we need --fix-missing now
+RUN apt-get install -y tk           # Required by Matplotlib for GUI
+RUN apt-get install -y libglib2.0-0 # Required by openCV for ?
+
 # Install pip dependencies
 COPY requirements.txt .
 RUN pip install -r requirements.txt
 
 # Install packages
 RUN flit install --symlink
-
-# GUI backend for python
-RUN apt-get update --fix-missing  # Not sure why we need --fix-missing now
-RUN apt-get install -y tk         # Required by Matplotlib for GUI
 
 # Run on container start (not when using docker-compose run, however)
 CMD [ "python", "src/main.py" ]
