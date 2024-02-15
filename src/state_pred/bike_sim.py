@@ -326,6 +326,34 @@ def optimize_input_res():
     # TODO: determine how to actually optimize input resolutions
     return np.array([0.03, 0.6])
 
+# Convert multi-dimensional indices of state to a singular index
+def index_conversion(indices, shape):
+    index = 0
+
+    for i in range(len(indices)):
+        index = index * shape[i] + indices[i]
+
+    return index
+
+# Compute Probability Function
+def compute_probability(start_state, action, end_state):
+    return True
+
+# Probability Transition Function
+def transition_probability(states, actions):
+    num_states = len(states)
+    num_actions = len(actions)
+
+    P = np.zeros((num_actions, num_states, num_states))
+
+    for a_i, action in enumerate(actions):
+        for s_i, start_state in enumerate(states):
+            for s_prime_i, end_state in enumerate(states):
+                probability = compute_probability(start_state, action, end_state)
+
+                P[a_i, s_i, s_prime_i] = probability
+
+    return P
 
 # Testing
 if __name__ == "__main__":
