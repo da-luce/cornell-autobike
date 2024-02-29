@@ -326,23 +326,6 @@ def optimize_input_res():
     # TODO: determine how to actually optimize input resolutions
     return np.array([0.03, 0.6])
 
-"""
-
-# Compute Probability Function
-def compute_probability(start_state, action, end_state):
-    next_state = next_state_dynamic(start_state, action)
-
-    # Calculate the Euclidean distance between the end state and the next state
-    state_diff = np.linalg.norm(np.array(end_state) - next_state)
-    variance = 1.0
-
-    # Calculate the probability using a Gaussian distribution
-    probability = np.exp(-0.5 * (state_diff / variance)**2) / np.sqrt(2 * np.pi * variance)
-
-    return probability
-
-"""
-
 # Convert multi-dimensional indices of state to a singular index
 def state_to_index(state, state_shape):
     index = 0
@@ -378,41 +361,47 @@ def index_to_action(index, action_shape):
     for i in range(len(action_shape)-1, -1, -1):
         action.insert(0, index % action_shape[i])
         index = index // action_shape[i]
-        
+
     return action
 
-def generate_transition_matrix(states, actions, state_shape):
-    num_actions = len(actions)
-    num_states = np.prod(state_shape)
-    P = np.zeros((num_actions, num_states, num_states))
-    
-    for a, action in enumerate(actions):
-        for s in range(num_states):
-            state = index_to_state(s, state_shape)
-            next_state = tuple(state + action)
-            next_state_index = state_to_index(next_state, state_shape)
-            P[a, s, next_state_index] = 1.0
-    
-    return P
+# Compute Probability Function
+def compute_probability(action, start_state, end_state):
+    next_state = next_state_dynamic(state_to_index(start_state), action_to_index(action))
 
-"""
-# Probability Transition Function
-def transition_probability(states, actions):
+    # Calculate the Euclidean distance between the end state and the next state
+    state_diff = np.linalg.norm(np.array(end_state) - next_state)
+    variance = 1.0
+
+    # Calculate the probability using a Gaussian distribution
+    probability = np.exp(-0.5 * (state_diff / variance)**2) / np.sqrt(2 * np.pi * variance)
+
+    return probability
+
+
+def generate_transition_matrix(states, actions, state_shape):
     num_states = len(states)
     num_actions = len(actions)
 
     P = np.zeros((num_actions, num_states, num_states))
 
-    for a_i, action in enumerate(actions):
-        for s_i, start_state in enumerate(states):
-            for s_prime_i, end_state in enumerate(states):
-                probability = compute_probability(start_state, action, end_state)
+    for a, action in enumerate(actions):
+        for s in range(num_states):
+            current_state = index_to_state(s, state_shape)
+            next_state = tuple(current_state + action)
+            next_state_index = state_to_index(next_state, state_shape)
 
-                P[a_i, s_i, s_prime_i] = probability
+            P[a, s, next_state_index] = compute_probability(a, s, next_state_index)
 
     return P
 
-"""
+def generate_reward_matrix(states, actions, state_shape):
+    num_states = len(states)
+    num_actions = len(actions)
+    R = np.zeros((num_actions, num_states))
+    
+    # Define reward function TBD
+    
+    return R
 
 # Testing
 if __name__ == "__main__":
