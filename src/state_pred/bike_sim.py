@@ -386,11 +386,11 @@ def generate_transition_matrix(states, actions, state_shape):
 
     for a, action in enumerate(actions):
         for s in range(num_states):
-            current_state = index_to_state(s, state_shape)
-            next_state = tuple(current_state + action)
-            next_state_index = state_to_index(next_state, state_shape)
+            start_state = index_to_state(s, state_shape)
+            end_state = tuple(start_state + action)
+            end_state_index = state_to_index(end_state, state_shape)
 
-            P[a, s, next_state_index] = compute_probability(a, s, next_state_index)
+            P[a, s, end_state_index] = compute_probability(a, s, end_state_index)
 
     return P
 
