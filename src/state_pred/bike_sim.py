@@ -38,7 +38,7 @@ def next_state_dynamic(state, inputs):
         state:
             Six element np.array representing current state
         throttle:
-            TODO: Not sure about this one
+            Acceleration
         steering:
             Delta in steering angle in radians
 
@@ -326,19 +326,76 @@ def optimize_input_res():
     # TODO: determine how to actually optimize input resolutions
     return np.array([0.03, 0.6])
 
-# Convert multi-dimensional indices of state to a singular index
-def index_conversion(indices, shape):
-    index = 0
-
-    for i in range(len(indices)):
-        index = index * shape[i] + indices[i]
-
-    return index
+"""
 
 # Compute Probability Function
 def compute_probability(start_state, action, end_state):
-    return True
+    next_state = next_state_dynamic(start_state, action)
 
+    # Calculate the Euclidean distance between the end state and the next state
+    state_diff = np.linalg.norm(np.array(end_state) - next_state)
+    variance = 1.0
+
+    # Calculate the probability using a Gaussian distribution
+    probability = np.exp(-0.5 * (state_diff / variance)**2) / np.sqrt(2 * np.pi * variance)
+
+    return probability
+
+"""
+
+# Convert multi-dimensional indices of state to a singular index
+def state_to_index(state, state_shape):
+    index = 0
+
+    for i in range(len(state_shape)):
+        index = index * state_shape[i] + state[i]
+
+    return index
+
+# Convert singular index to multi-dimensional indices of state
+def index_to_state(index, state_shape):
+    state = []
+
+    for i in range(len(state_shape)-1, -1, -1):
+        state.insert(0, index % state_shape[i])
+        index = index // state_shape[i]
+
+    return state
+
+# Convert multi-dimensional indices of action to a singular index
+def action_to_index(action, action_shape):
+    index = 0
+
+    for i in range(len(action_shape)):
+        index = index * action_shape[i] + action[i]
+    
+    return index
+
+# Convert singular index to multi-dimensional indices of action
+def index_to_action(index, action_shape):
+    action = []
+
+    for i in range(len(action_shape)-1, -1, -1):
+        action.insert(0, index % action_shape[i])
+        index = index // action_shape[i]
+        
+    return action
+
+def generate_transition_matrix(states, actions, state_shape):
+    num_actions = len(actions)
+    num_states = np.prod(state_shape)
+    P = np.zeros((num_actions, num_states, num_states))
+    
+    for a, action in enumerate(actions):
+        for s in range(num_states):
+            state = index_to_state(s, state_shape)
+            next_state = tuple(state + action)
+            next_state_index = state_to_index(next_state, state_shape)
+            P[a, s, next_state_index] = 1.0
+    
+    return P
+
+"""
 # Probability Transition Function
 def transition_probability(states, actions):
     num_states = len(states)
@@ -354,6 +411,8 @@ def transition_probability(states, actions):
                 P[a_i, s_i, s_prime_i] = probability
 
     return P
+
+"""
 
 # Testing
 if __name__ == "__main__":
