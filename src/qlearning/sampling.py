@@ -2,6 +2,7 @@ from src.state_pred.bike_sim import get_possible_states, optimize_input_res
 import numpy as np
 import math
 import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
 
 acceleration_power = 1  # m/s/s
 braking_power = 1  # m/s/s
@@ -50,43 +51,91 @@ densities = np.zeros((acc_res_size, turn_res_size))
 acc_res = np.zeros(acc_res_size)
 turn_res = np.zeros(turn_res_size)
 
-pos_i, pos_j = 0, 0
-
+vari=0.1
+varj=0.01
 for i in range(turn_res_size):
-  vari=0.1
   for j in range(acc_res_size):
-    varj=0.01
+    #print(vari)
+    #print(varj)
     acc_res[j] = varj
     turn_res[i] = vari
 
     temp = (get_possible_states(curr1, differentials, (np.array([varj, vari]))))
     sample_size = len(temp)
     sample_density = (sample_size/total_samples_size)*100
-    densities[pos_i, pos_j] = sample_density
+    #print(sample_density)
+    densities[i, j] = sample_density
 
     varj+=0.01
-
+  varj=0.01
   vari+=0.1
 
-#print(densities.shape)
+#print(densities)
+# print(densities.shape)
 
 # print(len(acc_res))
 # print(len(turn_res))
 # final_len = len(densities)
 
 
-plt.figure()
-ax = plt.axes(projection="3d")
-ax.scatter(acc_res, turn_res, densities)
+# Assuming acc_res and turn_res are 1D arrays and densities is a 2D array
 
-plt.plot(acc_res, turn_res, densities)
+# Create a meshgrid for acc_res and turn_res
+acc_res_grid, turn_res_grid = np.meshgrid(acc_res, turn_res)
 
-ax.set_xlabel("acceleration res")
-ax.set_ylabel("turning res")
-ax.set_zlabel("sampling density")
-ax.view_init(60,35)
+# Creating a figure for 3D plotting
+fig = plt.figure()
+ax = fig.add_subplot(111, projection='3d')
 
-plt.savefig('sampling_plot5.png')
+# Surface plot
+surf = ax.plot_surface(acc_res_grid, turn_res_grid, densities, cmap='viridis')
+
+# Labels and title
+ax.set_xlabel('Acceleration Res')
+ax.set_ylabel('Turning Res')
+ax.set_zlabel('Sampling Density')
+
+# View angle
+ax.view_init(60, 35)
+
+# Color bar
+fig.colorbar(surf, shrink=0.5, aspect=5)
+
+# Save the plot
+plt.savefig('sampling_density_surface_plot.png')
+
+
+# acc_res_grid, turn_res_grid = np.meshgrid(acc_res, turn_res)
+
+# # Creating a figure
+# fig, ax = plt.subplots()
+
+# # Contour plot
+# contour = ax.contourf(acc_res_grid, turn_res_grid, densities, cmap='viridis')
+
+# # Labels
+# ax.set_xlabel('Acceleration Res')
+# ax.set_ylabel('Turning Res')
+
+# # Color bar
+# fig.colorbar(contour)
+
+# # Save the plot
+# plt.savefig('sampling_density_contour_plot.png')
+
+
+# plt.figure()
+# ax = plt.axes(projection="3d")
+# ax.scatter(acc_res, turn_res, densities)
+
+# plt.plot(acc_res, turn_res, densities)
+
+# ax.set_xlabel("acceleration res")
+# ax.set_ylabel("turning res")
+# ax.set_zlabel("sampling density")
+# ax.view_init(60,35)
+
+# plt.savefig('sampling_plot5.png')
 
 
 #plt.show()
