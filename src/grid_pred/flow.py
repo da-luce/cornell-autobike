@@ -1,6 +1,7 @@
 import numpy as np
 import cv2
 import matplotlib.pyplot as plt
+from matplotlib.animation import FuncAnimation
 from src.grid_pred.grid_gen import gen_grid
 
 # Occupancy grid
@@ -8,11 +9,34 @@ SIZE_X = 128
 SIZE_Y = 128
 TIMESTEP = 0.3
 
+
 # From OpenCV documentation:
 # "The function finds an optical flow for each prev pixel using the [67]
 # algorithm so that
 # prev(y,x) = next(y + flow(y,x)[1], x + flow(y,x)[0])"
-#
+
+
+def draw_flow_heatmap(flow):
+    """
+    Visualize the magnitudes of optical flow vectors as a heatmap.
+    :param flow: Optical flow vectors (shape: height x width x 2).
+    """
+    # Calculate the magnitude of flow vectors
+    magnitude = np.sqrt(flow[..., 0] ** 2 + flow[..., 1] ** 2)
+
+    # Normalize the magnitude to the range [0, 1] for displaying
+    normalized_magnitude = cv2.normalize(magnitude, None, 0, 1, cv2.NORM_MINMAX)
+
+    # Create a figure
+    plt.figure(figsize=(6.4, 4.8))
+
+    # Display the heatmap of magnitudes
+    plt.imshow(normalized_magnitude, cmap="inferno")
+
+    plt.title("Optical Flow Heatmap")
+    plt.axis("off")
+    plt.colorbar(label="Flow Magnitude")
+    plt.show()
 
 
 # Function to plot optical flow vectors
@@ -85,11 +109,12 @@ def draw_dense_quiver_flow(img, flow, step=1, scale=1e6):
     return fig
 
 
-def scale_flow_vectors(flow):
+def scale_flow_vectors(flow, desired_scale=1):
     """
-    Scale the optical flow vectors so that the smallest non-zero vector magnitude becomes 1.
+    Scale the optical flow vectors so that the smallest non-zero vector magnitude becomes the desired scale.
 
     :param flow: A NumPy array of shape (height, width, 2) containing the flow vectors.
+    :param desired_scale: The desired scale for the smallest non-zero vector magnitude.
     :return: A NumPy array of the scaled flow vectors.
     """
     # Calculate magnitudes of the flow vectors
@@ -103,7 +128,7 @@ def scale_flow_vectors(flow):
         return flow  # Return original flow if all vectors are zero
 
     # Calculate scaling factor
-    scaling_factor = 1 / min_nonzero_magnitude
+    scaling_factor = desired_scale / min_nonzero_magnitude
 
     # Scale the flow vectors
     scaled_flow = flow * scaling_factor
@@ -143,37 +168,170 @@ def predict_grid(image2, flow):
     return predicted_image
 
 
-if __name__ == "__main__":
+def predict_grid_modified(image2, flow, TIMESTEP=0.3):
+    """
+    Predict the next grid state based on the optical flow vectors, adding pixel values to the new locations.
 
-    frameA = gen_grid(SIZE_X, SIZE_Y, time=0)
-    frameB = gen_grid(SIZE_X, SIZE_Y, time=0 + TIMESTEP)
-    flow = cv2.calcOpticalFlowFarneback(
-        frameA,
-        frameB,
-        None,
-        pyr_scale=0.5,
-        levels=10,
-        winsize=64,
-        iterations=100,
-        poly_n=10,
-        poly_sigma=1.2,
-        flags=cv2.OPTFLOW_FARNEBACK_GAUSSIAN,
+    :param image2: The second image (numpy array) from which to predict the next state.
+    :param flow: Optical flow vectors obtained between the first and second images.
+    :param TIMESTEP: The time step used for scaling the flow vectors.
+    :return: The predicted third image as a numpy array.
+    """
+    # Initialize an empty array for the predicted image
+    h, w = image2.shape[:2]
+    predicted_image = np.zeros_like(
+        image2, dtype=np.float32
+    )  # Use float32 to prevent overflow during addition
+
+    # For each pixel in image2, add it according to the flow vector
+    for y in range(h):
+        for x in range(w):
+            flow_x, flow_y = flow[y, x]
+            new_x, new_y = x + np.floor(flow_x * TIMESTEP), y + np.floor(
+                flow_y * TIMESTEP
+            )
+
+            # Convert new_x and new_y to integers for use as indices
+            new_x, new_y = int(new_x), int(new_y)
+
+            # Make sure the new coordinates are within image bounds
+            if 0 <= new_x < w and 0 <= new_y < h:
+                predicted_image[new_y, new_x] += image2[
+                    y, x
+                ]  # Add the value to the new location
+
+    # Clip values to ensure they remain within valid range after addition
+    predicted_image = np.clip(predicted_image, 0, 255)
+
+    # Optionally convert predicted_image back to original data type (e.g., uint8)
+    predicted_image = predicted_image.astype(image2.dtype)
+
+    # Smooth and return
+    predicted_image = cv2.blur(predicted_image, (5, 5))
+    return predicted_image
+
+
+def add_contrast(image, alpha=1.0):
+    """
+    Enhance contrast of a float64 image using mathematical operations.
+
+    :param image: Input image (numpy array of dtype float64) with values from 0 to 1.
+    :param alpha: Contrast control (>1.0 gives more contrast, <1.0 reduces contrast).
+                  This function interprets alpha as the steepness of the contrast curve.
+    :return: Contrast enhanced image (numpy array of dtype float64).
+    """
+    # Validate input
+    if image.dtype != np.float64 or np.any(image < 0) or np.any(image > 1):
+        raise ValueError(
+            "Image must be of dtype float64 with values in the range [0, 1]"
+        )
+
+    # Implement a simple contrast enhancement curve that does not require a LUT
+    # This curve is a basic power law transformation, similar in effect to adjusting LUT but suitable for float64 data
+    enhanced_image = (image**alpha) / (image**alpha + (1 - image) ** alpha)
+
+    return enhanced_image
+
+
+def animate(SIZE_X, SIZE_Y, TIMESTEP, num_frames):
+
+    images = [
+        add_contrast(gen_grid(SIZE_X, SIZE_Y, time=i * TIMESTEP), alpha=2.0)
+        for i in range(num_frames + 1)
+    ]
+    flows = []
+
+    # Compute optical flow between consecutive frames
+    for i in range(num_frames):
+        flow = cv2.calcOpticalFlowFarneback(
+            images[i],
+            images[i + 1],
+            None,
+            pyr_scale=0.2,
+            levels=10,
+            winsize=24,
+            iterations=100,
+            poly_n=5,
+            poly_sigma=1.2,
+            flags=0,
+        )
+        flows.append(flow)
+
+    fig, ax = plt.subplots(1, 2, figsize=(12, 6))
+
+    def update(frame_num):
+        """Update function for the animation."""
+        # Clear previous content
+        ax[0].clear()
+        ax[1].clear()
+
+        # Display the current frame
+        ax[0].imshow(images[frame_num], cmap="gray")
+        ax[0].set_title("Frame")
+
+        # Display the flow magnitude as a heatmap
+        magnitude = np.sqrt(
+            flows[frame_num][..., 0] ** 2 + flows[frame_num][..., 1] ** 2
+        )
+        normalized_magnitude = cv2.normalize(magnitude, None, 0, 1, cv2.NORM_MINMAX)
+        ax[1].imshow(normalized_magnitude, cmap="inferno")
+        ax[1].set_title("Optical Flow Heatmap")
+
+        # Hide axes
+        for a in ax:
+            a.axis("off")
+
+    ani = FuncAnimation(
+        fig,
+        update,
+        frames=num_frames,
+        repeat=True,
+        interval=64,
+        repeat_delay=256,
     )
 
-    flow = flow * 10e8
-
-    flow.astype("int16").tofile("./temp")
-
-    plt.figure("Frame A")
-    plt.imshow(frameA, cmap="gray")
-
-    plt.figure("Frame B")
-    plt.imshow(frameB, cmap="gray")
-
-    frameC = predict_grid(frameB, flow)
-    plt.figure("Frame C")
-    plt.imshow(frameC, cmap="gray")
-
-    flows = draw_dense_quiver_flow(frameA, flow)
-
     plt.show()
+
+
+if __name__ == "__main__":
+
+    # a = gen_grid(SIZE_X, SIZE_Y, time=0)
+    # b = gen_grid(SIZE_X, SIZE_Y, time=0 + TIMESTEP)
+
+    # # Process frames
+    # frameA = add_contrast(a, alpha=2.0)
+    # frameB = add_contrast(b, alpha=2.0)
+
+    # flow = cv2.calcOpticalFlowFarneback(
+    #     frameA,
+    #     frameB,
+    #     None,
+    #     pyr_scale=0.1,
+    #     levels=100,
+    #     winsize=64,
+    #     iterations=1000,
+    #     poly_n=5,
+    #     poly_sigma=1.2,
+    #     flags=cv2.OPTFLOW_FARNEBACK_GAUSSIAN,
+    # )
+
+    # # flow = flow * 10e7
+    # flow = scale_flow_vectors(flow, 0.001)
+
+    # flow.astype("int16").tofile("./temp")
+
+    # plt.figure("Frame A")
+    # plt.imshow(frameA, cmap="gray")
+
+    # plt.figure("Frame B")
+    # plt.imshow(frameB, cmap="gray")
+
+    # frameC = predict_grid_modified(frameB, flow)
+    # plt.figure("Frame C")
+    # plt.imshow(frameC, cmap="gray")
+
+    # draw_flow_heatmap(flow)
+
+    # plt.show()
+    SIZE_X, SIZE_Y, TIMESTEP, num_frames = 128, 128, 0.25, 200
+    animate(SIZE_X, SIZE_Y, TIMESTEP, num_frames)
