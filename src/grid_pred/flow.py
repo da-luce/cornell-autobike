@@ -233,10 +233,68 @@ def add_contrast(image, alpha=1.0):
     return enhanced_image
 
 
+def enhance_flow_contrast(flow, alpha=16, threshold=0.3):
+    """
+    Enhance the contrast of an optical flow field by adjusting the magnitudes of flow vectors
+    using a smooth step function.
+
+    :param flow: A NumPy array of shape (height, width, 2) containing the flow vectors.
+    :param alpha: Contrast control parameter (>1.0 gives more contrast, <1.0 gives less contrast).
+                  This parameter controls the steepness of the sigmoid-like function.
+    :param threshold: Magnitude threshold as a fraction of the maximum magnitude in the flow field.
+                      Magnitudes below this threshold are lowered, and magnitudes above are raised.
+    :return: A NumPy array of the same shape as `flow`, with adjusted magnitudes.
+    """
+    # Calculate the magnitude and direction of the flow vectors
+    magnitude = np.sqrt(flow[..., 0] ** 2 + flow[..., 1] ** 2)
+    direction = np.arctan2(flow[..., 1], flow[..., 0])
+
+    # Normalize magnitudes to the range [0, 1]
+    max_magnitude = np.max(magnitude)
+    norm_magnitude = magnitude / max_magnitude
+
+    # Apply smooth step function
+    enhanced_norm_magnitude = 1 / (1 + np.exp(-alpha * (norm_magnitude - threshold)))
+
+    # Scale back up to original max magnitude
+    enhanced_magnitude = enhanced_norm_magnitude * max_magnitude
+
+    # Reconstruct enhanced flow vectors
+    enhanced_flow = np.zeros_like(flow)
+    enhanced_flow[..., 0] = enhanced_magnitude * np.cos(direction)
+    enhanced_flow[..., 1] = enhanced_magnitude * np.sin(direction)
+
+    return enhanced_flow
+
+
+def gaussian_blur_flow(flow, kernel_size=(5, 5), sigma=100):
+    """
+    Apply Gaussian blur to the optical flow field.
+
+    :param flow: A NumPy array of shape (height, width, 2) containing the flow vectors.
+    :param kernel_size: Size of the Gaussian kernel (tuple of integers).
+    :param sigma: Standard deviation of the Gaussian kernel. If sigma is zero, it is computed as
+                  `(kernel_size - 1) / 6`.
+    :return: A NumPy array of the same shape as `flow`, with Gaussian blurred flow vectors.
+    """
+    # Split the flow vectors into x and y components
+    flow_x = flow[..., 0]
+    flow_y = flow[..., 1]
+
+    # Apply Gaussian blur to x and y components separately
+    flow_x_blurred = cv2.GaussianBlur(flow_x, kernel_size, sigma)
+    flow_y_blurred = cv2.GaussianBlur(flow_y, kernel_size, sigma)
+
+    # Reconstruct the blurred flow vectors
+    blurred_flow = np.stack((flow_x_blurred, flow_y_blurred), axis=-1)
+
+    return blurred_flow
+
+
 def animate(SIZE_X, SIZE_Y, TIMESTEP, num_frames):
 
     images = [
-        add_contrast(gen_grid(SIZE_X, SIZE_Y, time=i * TIMESTEP), alpha=2.0)
+        add_contrast(gen_grid(SIZE_X, SIZE_Y, time=i * TIMESTEP), alpha=20.0)
         for i in range(num_frames + 1)
     ]
     flows = []
@@ -247,14 +305,18 @@ def animate(SIZE_X, SIZE_Y, TIMESTEP, num_frames):
             images[i],
             images[i + 1],
             None,
-            pyr_scale=0.2,
+            pyr_scale=0.5,
             levels=10,
-            winsize=24,
-            iterations=100,
+            winsize=128,
+            iterations=3,
             poly_n=5,
             poly_sigma=1.2,
-            flags=0,
+            flags=cv2.OPTFLOW_FARNEBACK_GAUSSIAN,
         )
+        # add contrast
+        # flow = gaussian_blur_flow(flow, sigma=100)
+        # flow = enhance_flow_contrast(flow, threshold=0.6)
+
         flows.append(flow)
 
     fig, ax = plt.subplots(1, 2, figsize=(12, 6))
@@ -333,5 +395,5 @@ if __name__ == "__main__":
     # draw_flow_heatmap(flow)
 
     # plt.show()
-    SIZE_X, SIZE_Y, TIMESTEP, num_frames = 128, 128, 0.25, 200
+    SIZE_X, SIZE_Y, TIMESTEP, num_frames = 128, 128, 0.01, 248
     animate(SIZE_X, SIZE_Y, TIMESTEP, num_frames)
