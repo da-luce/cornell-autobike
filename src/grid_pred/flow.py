@@ -9,6 +9,48 @@ SIZE_X = 128
 SIZE_Y = 128
 TIMESTEP = 0.3
 
+import numpy as np
+
+
+def add_zero_border(image, border_size):
+    """
+    Adds a border of 0.0 values around the image.
+
+    Parameters:
+    - image: NumPy array of the image.
+    - border_size: Integer or tuple specifying the size of the border. If an integer is provided,
+                   the same border size is used on all sides. If a tuple of four integers is provided,
+                   they specify the size of the border on the top, bottom, left, and right, respectively.
+
+    Returns:
+    - A new image with the added border.
+    """
+
+    # If border_size is a single integer, convert it to a tuple (top, bottom, left, right)
+    if isinstance(border_size, int):
+        border_size = (border_size, border_size, border_size, border_size)
+
+    # Unpack the border sizes
+    top, bottom, left, right = border_size
+
+    # Get the shape of the original image
+    original_height, original_width = image.shape[:2]
+
+    # Calculate the shape of the new image
+    new_height = original_height + top + bottom
+    new_width = original_width + left + right
+
+    # Create a new image filled with zeros
+    if image.ndim == 2:  # Grayscale image
+        new_image = np.zeros((new_height, new_width), dtype=image.dtype)
+    else:  # Color image
+        new_image = np.zeros((new_height, new_width, image.shape[2]), dtype=image.dtype)
+
+    # Copy the original image into the center of the new image
+    new_image[top : top + original_height, left : left + original_width] = image
+
+    return new_image
+
 
 # From OpenCV documentation:
 # "The function finds an optical flow for each prev pixel using the [67]
@@ -170,7 +212,8 @@ def predict_grid(image2, flow):
 
 def predict_grid_modified(image2, flow, TIMESTEP=0.3):
     """
-    Predict the next grid state based on the optical flow vectors, adding pixel values to the new locations.
+    Predict the next grid state based on the optical flow vectors, adding pixel
+    values to the new locations.
 
     :param image2: The second image (numpy array) from which to predict the next state.
     :param flow: Optical flow vectors obtained between the first and second images.
@@ -355,10 +398,117 @@ def animate(SIZE_X, SIZE_Y, TIMESTEP, num_frames):
     plt.show()
 
 
+def trim_border(array, size):
+    """
+    Trims or removes a specified border from an array.
+
+    Parameters:
+    - array: A 2D or 3D NumPy array from which the border will be removed.
+             The first two dimensions are treated as spatial dimensions.
+    - top: The size of the border to remove from the top.
+    - bottom: The size of the border to remove from the bottom.
+    - left: The size of the border to remove from the left.
+    - right: The size of the border to remove from the right.
+
+    Returns:
+    - A new array with the specified border removed.
+    """
+
+    if array.ndim not in [2, 3]:
+        raise ValueError("Array must be 2D or 3D.")
+
+    # Calculate the new boundaries of the array
+    new_top = size
+    new_bottom = array.shape[0] - size
+    new_left = size
+    new_right = array.shape[1] - size
+
+    # Trim the border
+    trimmed_array = array[new_top:new_bottom, new_left:new_right]
+
+    return trimmed_array
+
+
+# Ultimate prediction function
+def predict(image_a, image_b):
+
+    # Add zero borders
+    BORDER_WIDTH = 20
+    image_a_ext = add_zero_border(image_a, BORDER_WIDTH)
+    image_b_ext = add_zero_border(image_b, BORDER_WIDTH)
+
+    # TODO: change resolution
+
+    # Predict velocities
+    flow = cv2.calcOpticalFlowFarneback(
+        image_a_ext,
+        image_b_ext,
+        None,
+        pyr_scale=0.5,
+        levels=10,
+        winsize=128,
+        iterations=3,
+        poly_n=5,
+        poly_sigma=1.2,
+        flags=cv2.OPTFLOW_FARNEBACK_GAUSSIAN,
+    )
+
+    # TODO: normalize velocities
+
+    # Binarize image
+    THRESHOLD = 0.5
+    image_b_mask = np.where(image_b_ext >= THRESHOLD, 1, 0)
+
+    # Mask velocities
+    flow_masked = flow * np.expand_dims(image_b_mask, axis=-1)
+
+    # Predict future grid
+    prediction = predict_grid_modified(image_b, flow)
+
+    # Trim border
+    prediction_trimmed = trim_border(prediction, BORDER_WIDTH)
+
+    # PLOTTING
+
+    # Plotting
+    fig, axs = plt.subplots(1, 5, figsize=(20, 4))
+
+    # Display image_a
+    axs[0].imshow(image_a, cmap="gray")
+    axs[0].set_title("Image A")
+    axs[0].axis("off")
+
+    # Display image_b
+    axs[1].imshow(image_b, cmap="gray")
+    axs[1].set_title("Image B")
+    axs[1].axis("off")
+
+    # Display magnitude of predicted velocities
+    magnitude = np.sqrt(flow_masked[..., 0] ** 2 + flow_masked[..., 1] ** 2)
+    axs[2].imshow(magnitude, cmap="hot")
+    axs[2].set_title("Predicted Velocities")
+    axs[2].axis("off")
+
+    # Display image_b mask
+    axs[3].imshow(image_b_mask, cmap="gray")
+    axs[3].set_title("Image B Mask")
+    axs[3].axis("off")
+
+    # Display predicted grid
+    axs[4].imshow(prediction_trimmed, cmap="gray")
+    axs[4].set_title("Predicted Grid")
+    axs[4].axis("off")
+
+    plt.show()
+
+    return prediction_trimmed
+
+
 if __name__ == "__main__":
 
-    # a = gen_grid(SIZE_X, SIZE_Y, time=0)
-    # b = gen_grid(SIZE_X, SIZE_Y, time=0 + TIMESTEP)
+    a = gen_grid(SIZE_X, SIZE_Y, time=0)
+    b = gen_grid(SIZE_X, SIZE_Y, time=0 + TIMESTEP)
+    predict(a, b)
 
     # # Process frames
     # frameA = add_contrast(a, alpha=2.0)
@@ -395,5 +545,5 @@ if __name__ == "__main__":
     # draw_flow_heatmap(flow)
 
     # plt.show()
-    SIZE_X, SIZE_Y, TIMESTEP, num_frames = 128, 128, 0.01, 248
-    animate(SIZE_X, SIZE_Y, TIMESTEP, num_frames)
+    # SIZE_X, SIZE_Y, TIMESTEP, num_frames = 128, 128, 0.01, 248
+    # animate(SIZE_X, SIZE_Y, TIMESTEP, num_frames)
