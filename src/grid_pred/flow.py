@@ -3,11 +3,14 @@ import cv2
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
 from src.grid_pred.grid_gen import gen_grid
+from src.grid_pred.vec import (
+    sigmoid,
+    blur_field,
+    blur_dir,
+    unify_flow_magnitudes,
+    advect_grid_bilinear,
+)
 
-# Occupancy grid
-SIZE_X = 128
-SIZE_Y = 128
-TIMESTEP = 0.3
 
 import numpy as np
 
@@ -398,6 +401,46 @@ def animate(SIZE_X, SIZE_Y, TIMESTEP, num_frames):
     plt.show()
 
 
+def advect_grid(image, flow):
+    """
+    Advect an image based on the provided flow field by looping over the flow field,
+    then adding the original image's pixel values according to the flow vectors.
+
+    Parameters:
+    - image: A 2D numpy array representing the image.
+    - flow: A 3D numpy array of shape (height, width, 2) representing the flow field.
+
+    Returns:
+    - A new 2D numpy array representing the advected image with accumulated values.
+    """
+
+    # Get the dimensions of the image
+    height, width = image.shape
+
+    # Create an output image initialized with zeros
+    advected_image = np.zeros_like(
+        image, dtype=np.float32
+    )  # Use float32 to handle accumulations
+
+    # Loop over each pixel in the flow field
+    for y in range(height):
+        for x in range(width):
+            flow_vector = flow[y, x]
+            # Calculate the source position for this flow vector
+            from_y = int(round(y - flow_vector[1]))
+            from_x = int(round(x - flow_vector[0]))
+
+            # Check if the source position is within the bounds of the original image
+            if 0 <= from_x < width and 0 <= from_y < height:
+                # Add the value of the source pixel to the destination pixel
+                advected_image[y, x] += image[from_y, from_x]
+
+    # Convert the advected_image back to the original data type, e.g., uint8, clipping values to ensure they are valid
+    advected_image = np.clip(advected_image, 0, 255).astype(image.dtype)
+
+    return advected_image
+
+
 def trim_border(array, size):
     """
     Trims or removes a specified border from an array.
@@ -431,6 +474,9 @@ def trim_border(array, size):
 
 # Ultimate prediction function
 def predict(image_a, image_b):
+    """
+    Velocity grid prediction pipeline
+    """
 
     # Add zero borders
     BORDER_WIDTH = 20
@@ -446,7 +492,7 @@ def predict(image_a, image_b):
         None,
         pyr_scale=0.5,
         levels=10,
-        winsize=128,
+        winsize=image_a_ext.shape[0],  # Use edge length for prediction
         iterations=3,
         poly_n=5,
         poly_sigma=1.2,
@@ -454,16 +500,19 @@ def predict(image_a, image_b):
     )
 
     # TODO: normalize velocities
+    # flow = blur_dir(flow)
+    flow = unify_flow_magnitudes(flow)
+    flow = np.multiply(flow, 5e8)
 
     # Binarize image
-    THRESHOLD = 0.5
-    image_b_mask = np.where(image_b_ext >= THRESHOLD, 1, 0)
+    THRESHOLD = 0.3
+    image_b_mask = sigmoid(image_b_ext, alpha=10, beta=0.4)
 
     # Mask velocities
     flow_masked = flow * np.expand_dims(image_b_mask, axis=-1)
 
     # Predict future grid
-    prediction = predict_grid_modified(image_b, flow)
+    prediction = advect_grid_bilinear(image_b_mask, flow_masked)
 
     # Trim border
     prediction_trimmed = trim_border(prediction, BORDER_WIDTH)
@@ -485,7 +534,7 @@ def predict(image_a, image_b):
 
     # Display magnitude of predicted velocities
     magnitude = np.sqrt(flow_masked[..., 0] ** 2 + flow_masked[..., 1] ** 2)
-    axs[2].imshow(magnitude, cmap="hot")
+    axs[2].imshow(magnitude, cmap="magma")
     axs[2].set_title("Predicted Velocities")
     axs[2].axis("off")
 
@@ -495,8 +544,8 @@ def predict(image_a, image_b):
     axs[3].axis("off")
 
     # Display predicted grid
-    axs[4].imshow(prediction_trimmed, cmap="gray")
-    axs[4].set_title("Predicted Grid")
+    axs[4].imshow(prediction, cmap="gray")
+    axs[4].set_title("Predicted Grid Trimmed")
     axs[4].axis("off")
 
     plt.show()
@@ -505,6 +554,11 @@ def predict(image_a, image_b):
 
 
 if __name__ == "__main__":
+
+    # Occupancy grid
+    SIZE_X = 128
+    SIZE_Y = 128
+    TIMESTEP = 0.5
 
     a = gen_grid(SIZE_X, SIZE_Y, time=0)
     b = gen_grid(SIZE_X, SIZE_Y, time=0 + TIMESTEP)
