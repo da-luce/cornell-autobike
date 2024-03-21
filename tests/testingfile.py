@@ -1,7 +1,10 @@
 import unittest
 import numpy as np
 from src.qlearning import smallExampleQAgent
-
+from src.state_pred.bike_sim import optimize_input_res
+from src.state_pred.bike_sim import get_possible_states
+from src.state_pred.bike_sim import generate_reward_matrix
+from src.state_pred.bike_sim import generate_transition_matrix
 
 class TestQAgent(unittest.TestCase):
     
@@ -136,6 +139,23 @@ class TestQAgent(unittest.TestCase):
     def test_get_rewards_5(self):
         rewards = self.agent.get_rewards(occupancy_grid = np.random.rand(9,), distance = 200)
         print(f"Rewards: {rewards}")
+
+class TestBikeSim(unittest.TestCase):
+
+    def setUp(self):
+        self.state = np.array([0, 0, 2, 1, np.radians(10), np.radians(10)])
+        self.differentials = np.array([0.001, 0.001, 0.001, 0.001,
+                              np.radians(0.0001), np.radians(0.0001)])
+        self.res = optimize_input_res()
+
+    def test_possible_states(self):
+        possible_states = self.get_possible_states(self.state, self.differentials, self.res)
+        print("Calculated " + str(possible_states.shape[0]) + " possible states\n")
+
+
+    def test_compute_probability(self):
+
+
 
 
 if __name__ == "__main__":

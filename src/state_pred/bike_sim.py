@@ -374,9 +374,7 @@ def compute_probability(action, start_state, end_state):
 
     # Calculate the probability using a Gaussian distribution
     probability = np.exp(-0.5 * (state_diff / variance)**2) / np.sqrt(2 * np.pi * variance)
-
     return probability
-
 
 def generate_transition_matrix(states, actions, state_shape):
     num_states = len(states)
@@ -394,13 +392,25 @@ def generate_transition_matrix(states, actions, state_shape):
 
     return P
 
-def generate_reward_matrix(states, actions, state_shape):
-    num_states = len(states)
-    num_actions = len(actions)
+def generate_reward_matrix(actions, state_shape, goal_state, obstacle_probability):
+    num_states = np.prod(state_shape)
+    num_actions = np.prod([len(a) for a in actions])
+    
+    # Initialize the reward matrix
     R = np.zeros((num_actions, num_states))
     
-    # Define reward function TBD
-    
+    for state_index in range(num_states):
+        # Convert the state index back to state variables
+        state = index_to_state(state_index, state_shape)
+        goal_distance = np.linalg.norm(np.array(state[:2]) - np.array(goal_state[:2]))
+        
+        # Combine rewards: negative distance
+        reward = -goal_distance * obstacle_probability
+        
+        # Assign this reward to all actions for this state
+        for action_index in range(num_actions):
+            R[action_index, state_index] = reward
+            
     return R
 
 # Testing
