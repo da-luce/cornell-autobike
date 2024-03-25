@@ -171,7 +171,12 @@ def advect_grid_bilinear(image, flow):
                     advected_image[yi, xi] += image[y, x] * wxi * wyi
 
     # Normalize the image to prevent intensity increase due to overlap
-    advected_image /= advected_image.max() / image.max()
+    #advected_image /= advected_image.max() / image.max()
+    maximum = image.max()
+    for y in range(height):
+        for x in range(width):
+            if advected_image[y, x] > maximum:
+                advected_image[y, x] = maximum
 
     # Return the advected image with the original data type
     return advected_image.astype(image.dtype)
