@@ -53,7 +53,7 @@ turn_res = np.zeros(turn_res_size)
 
 vari=0.1
 varj=0.01
-for i in range(turn_res_size):
+for i in range(turn_res_size): #primary nested loop responsible for density computation
   for j in range(acc_res_size):
     #print(vari)
     #print(varj)
@@ -105,23 +105,23 @@ fig.colorbar(surf, shrink=0.5, aspect=5)
 plt.savefig('sampling_density_surface_plot.png')
 
 
-# acc_res_grid, turn_res_grid = np.meshgrid(acc_res, turn_res)
+acc_res_grid, turn_res_grid = np.meshgrid(acc_res, turn_res)
 
-# # Creating a figure
-# fig, ax = plt.subplots()
+# Creating a figure
+fig, ax = plt.subplots()
 
-# # Contour plot
-# contour = ax.contourf(acc_res_grid, turn_res_grid, densities, cmap='viridis')
+# Contour plot
+contour = ax.contourf(acc_res_grid, turn_res_grid, densities, cmap='viridis')
 
-# # Labels
-# ax.set_xlabel('Acceleration Res')
-# ax.set_ylabel('Turning Res')
+# Labels
+ax.set_xlabel('Acceleration Res')
+ax.set_ylabel('Turning Res')
 
-# # Color bar
-# fig.colorbar(contour)
+# Color bar
+fig.colorbar(contour)
 
-# # Save the plot
-# plt.savefig('sampling_density_contour_plot.png')
+# Save the plot
+plt.savefig('sampling_density_contour_plot.png')
 
 
 # plt.figure()
@@ -138,7 +138,7 @@ plt.savefig('sampling_density_surface_plot.png')
 # plt.savefig('sampling_plot5.png')
 
 
-#plt.show()
+# plt.show()
 
 
 
