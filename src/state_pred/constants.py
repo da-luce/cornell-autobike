@@ -22,7 +22,7 @@ SPEED_MIN = 2       # m/s
 SPEED_MAX = 10      # m/s
 
 STEER_ANGLE_MAX = np.radians(37)    # rad
-STEER_ANGLE_DELTA = np.radians(1)   # rad
+STEER_ANGLE_DELTA = np.radians(45)   # rad
 
 ACCELERATION_MIN = -5   # m/(s^2)
 ACCELERATION_MAX = 10   # m/(s^2)
