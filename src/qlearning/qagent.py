@@ -1,10 +1,12 @@
 import numpy as np
+import math
 from abc import abstractmethod
 
 
-class QAgent():
+class QAgent:
     @abstractmethod
     def getPlayableActions(self, currentState, differentials, timestep):
+        print("AAAAA")
         pass
 
     @abstractmethod
@@ -20,6 +22,19 @@ class QAgent():
         for i in range(len(self.q.shape)):
             result.append(np.random.randint(0, high=self.q.shape[i]))
         return tuple(result)
+    
+    def get_rewards(self, occupancy_grid, distance):
+        constant_A = 1
+        constant_B = 4
+        constant_C = 2
+
+        # The reward should increase as we approach the goal and 
+        # decrease as the probability of encountering an object increases.
+
+        rewards = (constant_A / math.sqrt((distance**2) + constant_B)) * \
+        (1 - (constant_C * occupancy_grid))
+
+        return rewards
 
     def qlearning(self, rewards_new, iterations, end_state):
         for _ in range(iterations):
@@ -27,24 +42,38 @@ class QAgent():
             if current_state == end_state:
                 continue
             playable_actions = self.getPlayableActions(
-                current_state, self.differentials, self.dt)
-            temporal_difference = rewards_new[current_state] + self.gamma * \
-                np.amax(self.q[playable_actions]) - \
-                self.q[current_state]
-            self.q[current_state] += self.alpha * \
-                temporal_difference
+                current_state, self.differentials, self.dt
+            )
+            temporal_difference = (
+                rewards_new[current_state]
+                + self.gamma * np.amax(self.q[playable_actions])
+                - self.q[current_state]
+            )
+            self.q[current_state] += self.alpha * temporal_difference
+
+    def reset_matrix(self, rewards_new, iterations, end_state, dimensions):
+        shape = tuple([len(self.q)] * dimensions)
+        self.q: np.ndarray = np.zeros(shape)
+        QAgent.qlearning(self, rewards_new, iterations, end_state)
+
+    def alter_matrix(self, rewards_new, iterations, end_state, scale):
+        rewards_new = rewards_new * scale
+        QAgent.qlearning(self, rewards_new, iterations, end_state)
 
     def get_optimal_route(self, start_state, end_state):
         route = [start_state]
         next_state = start_state
         while next_state != end_state:
             playable_actions = self.getPlayableActions(
-                next_state, self.differentials, self.dt)
+                next_state, self.differentials, self.dt
+            )
             t1 = self.q[playable_actions]
             t2 = np.argmax(self.q[playable_actions])
             t3 = playable_actions[0]
-            next_state = playable_actions[0][np.argmax(
-                self.q[playable_actions])]
+            next_state = playable_actions[0][np.argmax(self.q[playable_actions])]
+            if next_state in route:
+                route.append(next_state)
+                break
             route.append(next_state)
 
         return route

@@ -1,21 +1,25 @@
-from qagent import QAgent
+from src.qlearning import qagent
 import numpy as np
 
 
-class SmallExampleQAgent(QAgent):
+class SmallExampleQAgent(qagent.QAgent):
     def __init__(self, alpha, gamma, rewards):
         super().__init__(alpha, gamma, rewards, 1)
 
     def getPlayableActions(self, currentState, differentials, timestep):
-        playableActions = np.array([[0, 1, 0, 0, 0, 0, 0, 0, 0],
-                                    [1, 0, 1, 0, 1, 0, 0, 0, 0],
-                                    [0, 1, 0, 0, 0, 1, 0, 0, 0],
-                                    [0, 0, 0, 0, 0, 0, 1, 0, 0],
-                                    [0, 1, 0, 0, 0, 0, 0, 1, 0],
-                                    [0, 0, 1, 0, 0, 0, 0, 0, 0],
-                                    [0, 0, 0, 1, 0, 0, 0, 1, 0],
-                                    [0, 0, 0, 0, 1, 0, 1, 0, 1],
-                                    [0, 0, 0, 0, 0, 0, 0, 1, 0]])
+        playableActions = np.array(
+            [
+                [0, 1, 0, 0, 0, 0, 0, 0, 0],
+                [1, 0, 1, 0, 1, 0, 0, 0, 0],
+                [0, 1, 0, 0, 0, 1, 0, 0, 0],
+                [0, 0, 0, 0, 0, 0, 1, 0, 0],
+                [0, 1, 0, 0, 0, 0, 0, 1, 0],
+                [0, 0, 1, 0, 0, 0, 0, 0, 0],
+                [0, 0, 0, 1, 0, 0, 0, 1, 0],
+                [0, 0, 0, 0, 1, 0, 1, 0, 1],
+                [0, 0, 0, 0, 0, 0, 0, 1, 0],
+            ]
+        )
 
         return np.nonzero(playableActions[currentState])
 

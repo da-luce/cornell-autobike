@@ -94,7 +94,7 @@ merge your branch into main.
    your working directory to something else, e.g.
 
    ```text
-   docker-compose run --rm --workdir /usr/app/src/state_pred/ nav python sim.py
+   docker-compose run --rm --workdir /usr/app/src/state_pred/ nav python bike_sim.py
    ```
 
 ### X11 Forwarding
@@ -138,8 +138,32 @@ merge your branch into main.
    Example:
 
    ```text
-   docker-compose run --rm --env DISPLAY=host.docker.internal:0 nav python src/state_pred/sim.py
+   docker-compose run --rm --env DISPLAY=host.docker.internal:0 nav python src/state_pred/bike_sim.py
    ```
+
+##### Helpful Alias
+
+First, add the following to `.bashrc` or equivalent:
+
+```bash
+if command -v xhost &> /dev/null then
+    xhost +localhost
+fi
+```
+
+This will add the localhost to xhost when an xterm window is opened.
+Now, for the magic alias:
+
+```bash
+alias qlearn="open -a Xquartz ; docker-compose run --rm --env DISPLAY=host.docker.internal:0"
+```
+
+This alias can now be used as: `qlearn [service] [commands]`. For example:
+`qlearn nav python src/state_pred/bike_sim.py`.
+
+> Note: this command may fail on the first or second try while Xquartz is
+> still opening
+> TODO: can this be improved?
 
 #### Linux
 

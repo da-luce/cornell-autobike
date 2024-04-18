@@ -1,4 +1,8 @@
 __pycache__
+Q-Learning.iml
+misc.xml
+modules.xml
+vcs.xml
 src/qlearning.egg-info
 .coverage
 .tox

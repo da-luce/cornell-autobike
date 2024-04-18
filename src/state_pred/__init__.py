@@ -39,15 +39,13 @@ Importing:
                                  show_plot
 """
 
-import constants
-import sim
-import visual
 import time
+from src.state_pred.bike_sim import setup
 
 # Since we are using Numba, we must run all functions for a first time in order
 # to compile them. We can do this by running a "fake example"
 print("Compiling functions...")
 start = time.perf_counter()
-sim.setup
+setup()
 end = time.perf_counter()
 print(f"Compilation completed in {end - start}s")
