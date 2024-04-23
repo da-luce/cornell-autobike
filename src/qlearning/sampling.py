@@ -4,12 +4,12 @@ import math
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 
-acceleration_power = 1  # m/s/s
-braking_power = 1  # m/s/s
-max_turning_rate = 30  # deg/s
+acceleration_power = 1  # m/s^2
+braking_power = 1  # -m/s^2
+max_turning_rate = 0.5181  # rad/s
 
 #potential range of ACC-RES: 0.01 to 5.00
-#potential range of TURNING-RES: 0.1 to 100.0
+#potential range of TURNING-RES: 0.01 to 100.0
 
 #plot in 2d matrix with arrays of acc and turning
 #acc_res, turning_res, density of states that combo results in
@@ -18,7 +18,7 @@ max_turning_rate = 30  # deg/s
 # init_turning_res = 0.1
 
 acc_ult = 0.01
-turning_ult = 0.1
+turning_ult = 0.01
 
 #states are reprsented as a np.array with 6 elements:  
     #np.array([x_position  (m), 
@@ -42,14 +42,14 @@ total_samples = get_possible_states(curr1, differentials, high_res)
 total_samples_size = len(total_samples)
 #print(total_samples_size)
 
-acc_res_size = 100
-turn_res_size = 100
+acc_res_size = 160
+turn_res_size = 160
 
 densities = np.zeros((acc_res_size, turn_res_size))
 acc_res = np.zeros(acc_res_size)
 turn_res = np.zeros(turn_res_size)
 
-vari=0.1
+vari=0.01
 varj=0.01
 for i in range(turn_res_size): #primary nested loop responsible for density computation
   for j in range(acc_res_size):
@@ -66,7 +66,7 @@ for i in range(turn_res_size): #primary nested loop responsible for density comp
 
     varj+=0.01
   varj=0.01
-  vari+=0.1
+  vari+=0.01
 
 #print(densities)
 #print(densities.shape)
@@ -85,8 +85,10 @@ acc_res_grid, turn_res_grid = np.meshgrid((acc_res), (turn_res))
 densities = np.where(densities > 1e-10, densities, -10)
 np.log(densities, out=densities, where=densities > 0)
 
+
+#alternate way to transform densities into log given below; seems to have some errors in computation
+
 # safe = np.clip(densities, 1e-10, None)
-    
 # densities = np.where(densities > 1e-10, np.log(safe), 0)
     
 # Example usage
