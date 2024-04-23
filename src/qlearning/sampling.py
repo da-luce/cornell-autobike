@@ -42,10 +42,8 @@ total_samples = get_possible_states(curr1, differentials, high_res)
 total_samples_size = len(total_samples)
 #print(total_samples_size)
 
-acc_res_size = 1000
-turn_res_size = 1000
-
-#res_shape = (acc_res_size, turn_res_size) #500 rows for acc_res, 1000 columns for turn_res
+acc_res_size = 100
+turn_res_size = 100
 
 densities = np.zeros((acc_res_size, turn_res_size))
 acc_res = np.zeros(acc_res_size)
@@ -71,9 +69,9 @@ for i in range(turn_res_size): #primary nested loop responsible for density comp
   vari+=0.1
 
 #print(densities)
-# print(densities.shape)
+#print(densities.shape)
 
-# print(len(acc_res))
+#print(len(acc_res))
 # print(len(turn_res))
 # final_len = len(densities)
 
@@ -81,7 +79,17 @@ for i in range(turn_res_size): #primary nested loop responsible for density comp
 # Assuming acc_res and turn_res are 1D arrays and densities is a 2D array
 
 # Create a meshgrid for acc_res and turn_res
-acc_res_grid, turn_res_grid = np.meshgrid(acc_res, turn_res)
+# acc_res_grid, turn_res_grid = np.meshgrid(np.log(acc_res), np.log(turn_res))
+acc_res_grid, turn_res_grid = np.meshgrid((acc_res), (turn_res))
+
+densities = np.where(densities > 1e-10, densities, -10)
+np.log(densities, out=densities, where=densities > 0)
+
+# safe = np.clip(densities, 1e-10, None)
+    
+# densities = np.where(densities > 1e-10, np.log(safe), 0)
+    
+# Example usage
 
 # Creating a figure for 3D plotting
 fig = plt.figure()
@@ -105,7 +113,7 @@ fig.colorbar(surf, shrink=0.5, aspect=5)
 plt.savefig('sampling_density_surface_plot.png')
 
 
-acc_res_grid, turn_res_grid = np.meshgrid(acc_res, turn_res)
+
 
 # Creating a figure
 fig, ax = plt.subplots()
@@ -123,6 +131,20 @@ fig.colorbar(contour)
 # Save the plot
 plt.savefig('sampling_density_contour_plot.png')
 
+
+
+
+
+# plt.figure()
+# ax = plt.axes(projection="3d")
+
+# ax.scatter(acc_res, turn_res, densities)
+# plt.plot(acc_res, turn_res, densities)
+# ax.set_xlabel("acceleration res")
+# ax.set_ylabel("turning res")
+# ax.set_zlabel("sampling density")
+# ax.view_init(60,35)
+# plt.savefig('sampling_plot5.png')
 
 # plt.figure()
 # ax = plt.axes(projection="3d")
