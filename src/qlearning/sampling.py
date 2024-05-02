@@ -42,8 +42,8 @@ total_samples = get_possible_states(curr1, differentials, high_res)
 total_samples_size = len(total_samples)
 #print(total_samples_size)
 
-acc_res_size = 80
-turn_res_size = 80
+acc_res_size = 60
+turn_res_size = 60
 
 densities = np.zeros((acc_res_size, turn_res_size))
 acc_res = np.zeros(acc_res_size)
@@ -75,12 +75,25 @@ for i in range(turn_res_size): #primary nested loop responsible for density comp
 # print(len(turn_res))
 # final_len = len(densities)
 
+#adding additional version of turning and acc res arrays with number of points sampled 
+#base case of pi/4 radians (for turning res) and 20 m/s^2 (for acc res) - max values
+points_sampled_acc_res = np.zeros_like(acc_res)
+for i in range(len(acc_res)):
+  temp = acc_res[i]
+  points_sampled_acc_res[i] = np.floor(20/temp)
+
+points_sampled_turn_res = np.zeros_like(turn_res)
+for i in range(len(turn_res)):
+  temp = turn_res[i]
+  points_sampled_turn_res[i] = np.floor(0.8/temp)
+
+
 
 # Assuming acc_res and turn_res are 1D arrays and densities is a 2D array
 
 # Create a meshgrid for acc_res and turn_res
 # acc_res_grid, turn_res_grid = np.meshgrid(np.log(acc_res), np.log(turn_res))
-acc_res_grid, turn_res_grid = np.meshgrid((acc_res), (turn_res))
+acc_res_grid, turn_res_grid = np.meshgrid((points_sampled_acc_res), (points_sampled_turn_res))
 
 densities = np.where(densities > 1e-10, densities, -10)
 np.log(densities, out=densities, where=densities > 0)
@@ -101,8 +114,8 @@ ax = fig.add_subplot(111, projection='3d')
 surf = ax.plot_surface(acc_res_grid, turn_res_grid, densities, cmap='viridis')
 
 # Labels and title
-ax.set_xlabel('Acceleration Res')
-ax.set_ylabel('Turning Res')
+ax.set_xlabel('Number of Points sampled using Acc Res')
+ax.set_ylabel('Number of Points sampled using Turning Res')
 ax.set_zlabel('Sampling Density')
 
 # View angle
@@ -112,7 +125,8 @@ ax.view_init(60, 35)
 fig.colorbar(surf, shrink=0.5, aspect=5)
 
 # Save the plot
-plt.savefig('sampling_density_surface_plot.png')
+plt.show(block=True)
+#plt.savefig('sampling_density_surface_plot.png')
 
 
 
@@ -124,14 +138,14 @@ fig, ax = plt.subplots()
 contour = ax.contourf(acc_res_grid, turn_res_grid, densities, cmap='viridis')
 
 # Labels
-ax.set_xlabel('Acceleration Res')
-ax.set_ylabel('Turning Res')
+ax.set_xlabel('Number of Points sampled using Acc Res')
+ax.set_ylabel('Number of Points sampled using Turning Res')
 
 # Color bar
 fig.colorbar(contour)
 
 # Save the plot
-plt.savefig('sampling_density_contour_plot.png')
+#plt.savefig('sampling_density_contour_plot.png')
 
 
 
