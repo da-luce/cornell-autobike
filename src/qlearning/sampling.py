@@ -8,8 +8,8 @@ acceleration_power = 1  # m/s^2
 braking_power = 1  # -m/s^2
 max_turning_rate = 0.5181  # rad/s
 
-#potential range of ACC-RES: 0.01 to 5.00
-#potential range of TURNING-RES: 0.01 to 100.0
+#potential range of ACC-RES: 0.01 to 1.60
+#potential range of TURNING-RES: 0.01 to 1.60
 
 #plot in 2d matrix with arrays of acc and turning
 #acc_res, turning_res, density of states that combo results in
@@ -42,8 +42,8 @@ total_samples = get_possible_states(curr1, differentials, high_res)
 total_samples_size = len(total_samples)
 #print(total_samples_size)
 
-acc_res_size = 160
-turn_res_size = 160
+acc_res_size = 80
+turn_res_size = 80
 
 densities = np.zeros((acc_res_size, turn_res_size))
 acc_res = np.zeros(acc_res_size)
@@ -64,7 +64,7 @@ for i in range(turn_res_size): #primary nested loop responsible for density comp
     #print(sample_density)
     densities[i, j] = sample_density
 
-    varj+=0.01
+    varj+=0.25
   varj=0.01
   vari+=0.01
 
