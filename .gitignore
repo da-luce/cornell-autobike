@@ -11,3 +11,8 @@ src/qlearning.egg-info
 .mypy_cache
 .vscode
 build
+
+*cache
+*.osm
+
+anaconda_setup.md
