@@ -62,7 +62,7 @@ docker-compose run --rm --env DISPLAY=host.docker.internal:0 way python data_fet
 Once the GUI has loaded
 
 * Right click to set the start and end positions
-* Close the window to download data to the local file `map.osm`
+* Close the window to download data to the local file `src/waypoints/map.osm`
 
 ## Visualizing Map Data
 

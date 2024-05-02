@@ -1,4 +1,4 @@
-# Fetch and write data to map.osm
+# Fetch and write data to src/waypoints/map.osm
 # TODO: add command line args
 
 import tkinter
@@ -260,13 +260,13 @@ if __name__ == '__main__':
         response = fetch_data(start_marker.position, end_marker.position)
         print("✅")
 
-        print("Writing data to map.osm...", end="", flush=True)
-        write_to_disk(response, "map.osm")
+        print("Writing data to src/waypoints/map.osm...", end="", flush=True)
+        write_to_disk(response, "src/waypoints/map.osm")
         print("✅")
 
         # For debugging
         print("Generating debug map...", end="", flush=True)
-        graph = osmnx.graph_from_xml("map.osm")
+        graph = osmnx.graph_from_xml("src/waypoints/map.osm")
         fig = osmnx.plot_graph(graph, node_color='r')
         print("✅")
 
@@ -275,7 +275,7 @@ if __name__ == '__main__':
 
     # Route the bike!
     print("Routing bike...", end="", flush=True)
-    route, success = route(start_marker.position, end_marker.position, "map.osm")
+    route, success = route(start_marker.position, end_marker.position, "src/waypoints/map.osm")
     if (success and len(route) > 1):
         print("✅")
         print(route)
