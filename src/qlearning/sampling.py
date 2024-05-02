@@ -80,12 +80,12 @@ for i in range(turn_res_size): #primary nested loop responsible for density comp
 points_sampled_acc_res = np.zeros_like(acc_res)
 for i in range(len(acc_res)):
   temp = acc_res[i]
-  points_sampled_acc_res[i] = np.floor(20/temp)
+  points_sampled_acc_res[i] = np.floor(15/temp)
 
 points_sampled_turn_res = np.zeros_like(turn_res)
 for i in range(len(turn_res)):
   temp = turn_res[i]
-  points_sampled_turn_res[i] = np.floor(0.8/temp)
+  points_sampled_turn_res[i] = np.floor(0.6/temp)
 
 
 
