@@ -1,9 +1,0 @@
-FROM gboeing/osmnx:latest
-
-WORKDIR /usr/app/
-
-# Install pip dependencies
-COPY requirements_way.txt .
-RUN pip install -r requirements_way.txt
-
-CMD [ "python" ]

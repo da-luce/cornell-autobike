@@ -1,3 +1,0 @@
-pyroutelib3==1.7.2
-tkintermapview==1.29
-overpass==0.7
