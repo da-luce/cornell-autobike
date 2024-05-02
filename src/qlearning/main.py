@@ -1,4 +1,4 @@
-import smallExampleQAgent
+from src.qlearning import smallExampleQAgent
 import numpy as np
 
 if __name__ == "__main__":

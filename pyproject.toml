@@ -1,6 +1,14 @@
+# TODO: perhaps a better build system?
+# TODO: clean here
+
 [build-system]
-requires = ["setuptools>=42.0", "wheel"]
-build-backend = "setuptools.build_meta"
+requires = ["flit_core >=3.2,<4"]
+build-backend = "flit_core.buildapi"
+
+[project]
+name = "src"
+authors = [{name = "Cornell Autobike", email = "cu_autobike@cornell.edu"}]
+dynamic = ["version", "description"]
 
 [tool.pytest.ini_options]
 addopts = "--cov=qlearning"
