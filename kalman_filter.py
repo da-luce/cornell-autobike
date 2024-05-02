@@ -13,8 +13,6 @@ filter.x = np.zeros((dim_x, 1))
 filter.P *= 1 # TO DO: change constant
 filter.R *= 1 #measurement noise matrix TO DO: change constant depending on data from GPS
 filter.Q *= 1 #process noise matrix TO DO: change constant
-#dimensions 6 by 6 numpy array
-#after some time, what is the position, velocity, angle? how to calculate entries by hand
 filter.F = np.array([[1, 0, t, 0, 0, 0],
                      [0, 1, 0, t, 0, 0],
                      [0, 0, 1, 0, 0, 0],
