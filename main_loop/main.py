@@ -3,6 +3,7 @@ import numpy as np
 import qlearning/bikeQAgent.py
 import qlearning/qagent.py
 import main_loop/check_waypoint.py
+from smbus2 import SMBus
 
 def main():
     # Initialize state
@@ -76,8 +77,11 @@ def get_steering_angle(state):
     return steering_angle
 
 # Sends steering angle data to controls
-def output_data(steering_angle):
-    return
+def output_data(steering_angle):   
+    address = 80 #to change
+    bus_number = 0 #to change
+    with SMBus(bus_number) as bus:
+        bus.write_i2c_block_data(address, 0, steering_angle)
 
 if __name__ == "__main__":
     main()
