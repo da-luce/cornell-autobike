@@ -26,6 +26,5 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install tox tox-gh-actions
-    - name: Test with tox
-      run: tox
+    - name: Test with inbuilt python
+      run: docker-compose run --rm --env DISPLAY=host.docker.internal:0 nav python tests/testingfile.py
