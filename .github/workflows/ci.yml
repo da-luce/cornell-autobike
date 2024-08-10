@@ -1,0 +1,48 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    # We only need to test on one OS as we are using Docker
+    runs-on: ubuntu-latest
+
+    steps:
+      # Checkout  code
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+        # Build Docker image
+      - name: Build Docker image
+        run: docker build -t software-image .
+
+      # Run Black formatting check
+      - name: Black formatting check
+        run: docker run --rm software-image black --check --config pyproject.toml .
+
+      # Run Flake8 linting
+      - name: Flake8 linting
+        run: docker run --rm software-image flake8 --config pyproject.toml .
+
+      # Run Pylint linting
+      - name: Pylint linting
+        run: docker run --rm software-image pylint --rcfile=pyproject.toml .
+
+      # Run Pytest with code coverage
+      - name: Pytest with code coverage
+        run: docker run --rm software-image pytest --cov=./
+
+      # Upload to codecov
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v3
+        with:
+          files: ./coverage.xml
+          fail_ci_if_error: true
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}

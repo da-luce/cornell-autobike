@@ -6,26 +6,22 @@ FROM gboeing/osmnx:latest
 
 # Set working directory of container
 WORKDIR /usr/app/
-
-# Add other modules to working directroy
 COPY . .
+ENV PYTHONPATH="/usr/app/src:${PYTHONPATH}"
 
-# Install flit allow flit to install packages as root
-RUN pip install flit
-ENV FLIT_ROOT_INSTALL=1
-
-# Install pip dependencies
-COPY requirements.txt .
+# Install pip dependencies defined in pyproject.toml
 USER root
-RUN pip install -r requirements.txt
+RUN pip install --upgrade pip setuptools wheel
+RUN pip install .
 
 # Install packages
-RUN flit install --symlink
+# RUN flit install --symlink
 
 # GUI backend for python
 RUN apt-get update --fix-missing  # Not sure why we need --fix-missing now
 RUN apt-get install -y tk         # Required by Matplotlib for GUI
+
 USER 1001
 
 # Run on container start (not when using docker-compose run, however)
-CMD [ "python", "src/main.py" ]
+CMD ["/bin/bash"]

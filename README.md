@@ -1,5 +1,9 @@
 # Q-Learning
 
+[![codecov](https://codecov.io/gh/da-luce/Q-Learning/graph/badge.svg?token=DG2EJ0SJPB)](https://codecov.io/gh/da-luce/Q-Learning)
+
+![Build Status](https://github.com/da-luce/Q-Learning/actions/workflows/ci.yml/badge.svg)
+
 ## Usage
 
 Run main.py, making sure that qagent.py is importing getPlayableActions and
@@ -14,8 +18,6 @@ repository with `cd Q-Learning`. Create a new branch with
 are adding, without the <>. Then, write the feature. Lastly, go to
 `https://github.com/AriMirsky/Q-Learning/pulls` and create a pull request to
 merge your branch into main.
-
-![Tests](https://github.com/AriMirsky/Q-Learning/actions/workflows/tests.yml/badge.svg)
 
 ## Docker Setup
 

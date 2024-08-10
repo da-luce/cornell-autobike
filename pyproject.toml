@@ -1,20 +1,57 @@
-# TODO: perhaps a better build system?
-# TODO: clean here
-
 [build-system]
-requires = ["flit_core >=3.2,<4"]
-build-backend = "flit_core.buildapi"
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
 
 [project]
-name = "src"
-authors = [{name = "Cornell Autobike", email = "cu_autobike@cornell.edu"}]
-dynamic = ["version", "description"]
+name = "autobike_software"
+version = "0.0.1"
+description = "A sample project with specified dependencies"
+authors = [{ name = "Cornell Autobike", email = "cu_autobike@cornell.edu" }]
+dependencies = [
+	# Essential
+	"pip==23.2.1",
+	"numpy==1.23.5",
+	"scipy==1.10.0",
+	"numba",
+	"matplotlib==3.6.3",
+	"requests",
+
+	# Libs for mapping and routing
+	"pyroutelib3==1.7.2",
+	"tkintermapview==1.29",
+	"overpass==0.7",
+
+	# Testing and code quality tools
+	"pytest>=6.0",
+	"pytest-cov>=2.0",
+	"mypy>=0.910",
+	"flake8>=3.9",
+
+	# Misc
+	"pykalman",
+]
+
+[tool.setuptools]
+# packages = ["my_package"] # Replace with the actual package(s) in your project
+zip-safe = false
 
 [tool.pytest.ini_options]
-addopts = "--cov=qlearning"
-testpaths = [
-	"tests",
-]
+testpaths = ["tests"]
+addopts = "--verbose"
+
+[tool.black]
+line-length = 88
+target-version = ['py39']
+skip-string-normalization = true
+
+[tool.flake8]
+max-line-length = 88
+exclude = ".git,__pycache__,build,dist"
+ignore = ["E203", "E266", "E501", "W503"]
+
+[tool.pylint]
+disable = []
+max-line-length = 88
 
 [tool.mypy]
 mypy_path = "src"

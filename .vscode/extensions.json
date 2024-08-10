@@ -1,0 +1,10 @@
+{
+    "recommendations": [
+        "ms-python.python",             // Python support
+        "ms-python.black-formatter",    // Black formatter
+        "ms-python.flake8",             // Flake8 linter
+        "ms-python.isort",              // Import sorting
+        "ms-python.pylint",             // Pylint linter
+        "editorconfig.editorconfig"     // Consistent styles between IDEs
+    ]
+}
