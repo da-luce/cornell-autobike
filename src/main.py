@@ -3,6 +3,10 @@ import numpy as np
 
 
 def main():
+    """
+    Main loop
+    """
+
     # Initialize state
     current_state = [0, 0, 0, 0, 0, 0, 0]
 
@@ -29,35 +33,47 @@ def main():
 
 
 def calculate_moving_average(state, data):
-    # take average of current state and gps data
+    """
+    take average of current state and gps data
+    """
 
     return
 
 
-# Receives data from GPS
 def get_gps():
+    """
+    Receives data from GPS
+    """
     return
 
 
-# Receives data from vision
 def get_vision():
+    """
+    Receives data from vision
+    """
     return
 
 
-# Updates state given GPS data
 def update_state(state, gps):
+    """
+    Updates state given GPS data
+    """
     return state
 
 
-# Returns optimal steering angle
 def get_steering_angle(state):
+    """
+    Returns optimal steering angle
+    """
     steering_angle = 0.0
 
     return steering_angle
 
 
-# Sends steering angle data to controls
 def output_data(steering_angle):
+    """
+    Sends steering angle data to controls
+    """
     return
 
 

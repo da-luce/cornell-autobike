@@ -7,29 +7,22 @@ name = "autobike_software"
 version = "0.0.1"
 description = "A sample project with specified dependencies"
 authors = [{ name = "Cornell Autobike", email = "cu_autobike@cornell.edu" }]
+# FIXME: flake8 cannot parse this with comments or closing bracket on new line!
 dependencies = [
-	# Essential
 	"pip==23.2.1",
 	"numpy==1.23.5",
 	"scipy==1.10.0",
 	"numba",
 	"matplotlib==3.6.3",
 	"requests",
-
-	# Libs for mapping and routing
 	"pyroutelib3==1.7.2",
 	"tkintermapview==1.29",
 	"overpass==0.7",
-
-	# Testing and code quality tools
 	"pytest>=6.0",
 	"pytest-cov>=2.0",
 	"mypy>=0.910",
 	"flake8>=3.9",
-
-	# Misc
-	"pykalman",
-]
+	"pykalman" ]
 
 [tool.setuptools]
 # packages = ["my_package"] # Replace with the actual package(s) in your project
@@ -41,7 +34,7 @@ addopts = "--verbose"
 
 [tool.black]
 line-length = 88
-target-version = ['py39']
+target-version = ["py39"]
 skip-string-normalization = true
 
 [tool.flake8]
@@ -50,7 +43,7 @@ exclude = ".git,__pycache__,build,dist"
 ignore = ["E203", "E266", "E501", "W503"]
 
 [tool.pylint]
-disable = []
+disable = ["W0511"]
 max-line-length = 88
 
 [tool.mypy]

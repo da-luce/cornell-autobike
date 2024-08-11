@@ -59,16 +59,16 @@ def next_state_dynamic(state, inputs):
     )
 
     # Aerodynamic and friction coefficients
-    R_x = 0.01 * vel_x
-    F_aero = 1.36 * vel_x**2
-    F_load = F_aero + R_x
+    r_x = 0.01 * vel_x
+    f_aero = 1.36 * vel_x**2
+    f_load = f_aero + r_x
 
     vel_x = (
         vel_x
         + (
             throttle
             - lat_force_front * np.sin(steering) / cst.MASS
-            - F_load / cst.MASS
+            - f_load / cst.MASS
             + vel_y * steering
         )
         * cst.DT
@@ -209,15 +209,15 @@ def get_possible_states(state, differentials, res):
     for acc in possible_acc:
         for steer in possible_steer:
 
-            next = next_state_dynamic(state, np.array([acc, steer]))
+            next_state = next_state_dynamic(state, np.array([acc, steer]))
 
             # TODO: check for duplicate arrays
-            if valid_state(next):
+            if valid_state(next_state):
 
                 # Round the state to fit within the state matrix
-                next = round_state(next, differentials)
+                next_state = round_state(next_state, differentials)
 
-                possible_states[index] = next
+                possible_states[index] = next_state
                 index += 1
 
     # Only return valid states
@@ -257,7 +257,7 @@ def get_possible_indices(state, differentials, res):
     return get_possible_states(state, differentials, res) / differentials
 
 
-def possible_states_performance(iter, differentials):
+def possible_states_performance(iters, differentials):
     """Print mean runtime and standard deviation of get_possible_states()
     on a certain set of input resolutions
 
@@ -272,7 +272,7 @@ def possible_states_performance(iter, differentials):
     """
 
     # Allocate array to store results of computations
-    runs = np.empty(iter, dtype=float)
+    runs = np.empty(iters, dtype=float)
 
     # Performance appears to be same regardless of test_state
     # Thus, we use this dummy state as the initial state for all computations
@@ -281,7 +281,7 @@ def possible_states_performance(iter, differentials):
     # Use optimized inputs
     res = optimize_input_res()
 
-    for i in range(0, iter):
+    for i in range(0, iters):
 
         start = time.perf_counter()
         get_possible_states(test_state, differentials, res)
@@ -293,7 +293,7 @@ def possible_states_performance(iter, differentials):
     mean = round(np.mean(runs), 5)
     std = round(np.std(runs), 5)
 
-    print(f"PERFORMANCE\n----------\ntrials: {iter}\nmean: {mean}s\nSTD: {std}s\n")
+    print(f"PERFORMANCE\n----------\ntrials: {iters}\nmean: {mean}s\nSTD: {std}s\n")
     return mean
 
 
@@ -347,26 +347,26 @@ if __name__ == "__main__":
     # FIXME: no longer needed as should always be running in __innit__.py
 
     # Example state
-    state = np.array([0, 0, 1, -2, np.radians(-10), np.radians(-20)])
+    test_state = np.array([0, 0, 1, -2, np.radians(-10), np.radians(-20)])
 
     # Example differentials
-    differentials = np.array(
+    test_differentials = np.array(
         [0.001, 0.001, 0.001, 0.001, np.radians(0.001), np.radians(0.001)]
     )
 
     # Example input resolutions
-    res = optimize_input_res()
+    test_res = optimize_input_res()
 
     # Get array of all possible states achievable in DT from current state
-    possible_states = get_possible_states(state, differentials, res)
+    test_possible_states = get_possible_states(test_state, test_differentials, test_res)
 
     # Number of states
-    print("Calculated " + str(possible_states.shape[0]) + " possible states\n")
+    print("Calculated " + str(test_possible_states.shape[0]) + " possible states\n")
 
     # Performance check
-    possible_states_performance(100, differentials)
+    possible_states_performance(100, test_differentials)
 
     # Visualize states
-    vis.plot_states(possible_states)
-    vis.plot_bike(state)
+    vis.plot_states(test_possible_states)
+    vis.plot_bike(test_state)
     vis.show_plot()

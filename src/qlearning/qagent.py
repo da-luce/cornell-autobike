@@ -22,17 +22,18 @@ class QAgent:
         for i in range(len(self.q.shape)):
             result.append(np.random.randint(0, high=self.q.shape[i]))
         return tuple(result)
-    
+
     def get_rewards(self, occupancy_grid, distance):
         constant_A = 1
         constant_B = 4
         constant_C = 2
 
-        # The reward should increase as we approach the goal and 
+        # The reward should increase as we approach the goal and
         # decrease as the probability of encountering an object increases.
 
-        rewards = (constant_A / math.sqrt((distance**2) + constant_B)) * \
-        (1 - (constant_C * occupancy_grid))
+        rewards = (constant_A / math.sqrt((distance**2) + constant_B)) * (
+            1 - (constant_C * occupancy_grid)
+        )
 
         return rewards
 

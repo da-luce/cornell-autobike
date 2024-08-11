@@ -1,14 +1,12 @@
 {
     // Python formatting and linting
-    "flake8.args": [
-        "--config=pyproject.toml"
-    ],
     "black-formatter.args": [
         "--config", "pyproject.toml"
     ],
     "pylint.args": [
         "--rcfile=pyproject.toml"
     ],
+    "sort-imports.on-save": true,
 
     // Editor
     "editor.formatOnSave": true,

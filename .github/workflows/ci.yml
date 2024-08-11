@@ -20,23 +20,19 @@ jobs:
 
         # Build Docker image
       - name: Build Docker image
-        run: docker build -t software-image .
+        run: docker build -t autobike:workflow .
 
       # Run Black formatting check
       - name: Black formatting check
-        run: docker run --rm software-image black --check --config pyproject.toml .
-
-      # Run Flake8 linting
-      - name: Flake8 linting
-        run: docker run --rm software-image flake8 --config pyproject.toml .
+        run: docker run --rm autobike:workflow black --check --config pyproject.toml .
 
       # Run Pylint linting
       - name: Pylint linting
-        run: docker run --rm software-image pylint --rcfile=pyproject.toml .
+        run: docker run --rm autobike:workflow pylint --rcfile=pyproject.toml src/
 
       # Run Pytest with code coverage
       - name: Pytest with code coverage
-        run: docker run --rm software-image pytest --cov=./
+        run: docker run --rm autobike:workflow pytest --cov=./ --cov-report=xml
 
       # Upload to codecov
       - name: Upload coverage to Codecov

@@ -18,16 +18,16 @@ class BikeQAgent(QAgent):
         max_turning_rate = 30  # deg/s
 
         # calculating max velocity reachable
-        max_vel = currentState[2] + acceleration_power*(timestep)
+        max_vel = currentState[2] + acceleration_power * (timestep)
 
         # calculating min velocity reachable
-        min_vel = currentState[2] - braking_power*(timestep)
+        min_vel = currentState[2] - braking_power * (timestep)
 
         # calculating max clockwise angle reachable
-        clock_max_angle = (currentState[3]-(max_turning_rate*timestep)) % 360
+        clock_max_angle = (currentState[3] - (max_turning_rate * timestep)) % 360
 
         # calculating max counter-clockwise angle reachable
-        counter_max_angle = (currentState[3]+(max_turning_rate*timestep)) % 360
+        counter_max_angle = (currentState[3] + (max_turning_rate * timestep)) % 360
 
         # min_x_coordinate
         init_x_coord = currentState[0]
@@ -36,8 +36,9 @@ class BikeQAgent(QAgent):
         init_y_coord = currentState[1]
 
         # calculating max displacement possible if continuing on same path with max acceleration
-        max_S = currentState[2]*timestep + 0.5 * \
-            acceleration_power*timestep*timestep
+        max_S = (
+            currentState[2] * timestep + 0.5 * acceleration_power * timestep * timestep
+        )
 
         # calculating max change in x coordinate
         max_x_coord = init_x_coord + (max_S * math.cos(currentState[3]))
@@ -45,7 +46,7 @@ class BikeQAgent(QAgent):
         # calculating max change in y coordinate
         max_y_coord = init_y_coord + (max_S * math.sin(currentState[3]))
 
-        angle_diff_check = counter_max_angle - (clock_max_angle-360)
+        angle_diff_check = counter_max_angle - (clock_max_angle - 360)
 
         """while angle_diff_check/differentials[3] > 0:
             x1 = clock_max_angle/differentials[3] +
@@ -64,7 +65,8 @@ class BikeQAgent(QAgent):
         """Returns a tuple, the first element is a matrix with dimensions: x coordinate,
         y coordinate, speed, angle. The second element is the differences between
         each element of the matrix in SI units. This function should be determined before
-        compile-time based on the occupancy grid resolution and other physical factors."""
+        compile-time based on the occupancy grid resolution and other physical factors.
+        """
         return np.zeros((1000, 1000, 10000, 10000, 360))
 
     def set_up_rewards(self, end_state):
