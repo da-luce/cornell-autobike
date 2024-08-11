@@ -1,4 +1,4 @@
-name: CI
+name: Build
 
 on:
   push:
@@ -14,28 +14,37 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # Checkout  code
+      # Checkout code
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
-        # Build Docker image
+      # Build Docker image
       - name: Build Docker image
         run: docker build -t autobike:workflow .
 
       # Run Black formatting check
       - name: Black formatting check
+        if: success() || failure()
         run: docker run --rm autobike:workflow black --check --config pyproject.toml .
 
       # Run Pylint linting
       - name: Pylint linting
+        if: success() || failure()
         run: docker run --rm autobike:workflow pylint --rcfile=pyproject.toml src/
 
       # Run Pytest with code coverage
       - name: Pytest with code coverage
+        if: success() || failure()
         run: docker run --rm autobike:workflow pytest --cov=./ --cov-report=xml
+
+      # Run mypy type checking
+      - name: Mypy type check
+        if: success() || failure()
+        run: docker run --rm autobike:workflow mypy --config-file=pyproject.toml src/
 
       # Upload to codecov
       - name: Upload coverage to Codecov
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         uses: codecov/codecov-action@v3
         with:
           files: ./coverage.xml

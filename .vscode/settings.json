@@ -7,11 +7,12 @@
         "--rcfile=pyproject.toml"
     ],
     "sort-imports.on-save": true,
+    "mypy.configFile": "pyproject.toml",
 
     // Editor
     "editor.formatOnSave": true,
     "editor.codeActionsOnSave": {
-        "source.organizeImports": true
+        "source.organizeImports": "always"
     },
 
     // Files
