@@ -186,9 +186,9 @@ docker run -it --rm -v "$(pwd):/usr/app" --user root autobike python src/qlearni
     ```text
     xhost + localhost
     ```
-
-    > [!IMPORTANT]
-    > This must be run in the xterm window opened by default by XQuartz _every time_ XQuartz is started
+    
+> [!IMPORTANT]
+> This must be run in the xterm window opened by default by XQuartz _every time_ XQuartz is started
 
 7. Add the following option whenever you run `docker run`:
 
@@ -248,8 +248,8 @@ No clue.
 1. Follow the above guide for running code in Docker containers
 2. Run `pytest` within a container in the top level dir of the repo
 
-   > [!NOTE]
-   > This `/usr/app/` given how our volume is mounted
+> [!NOTE]
+> This `/usr/app/` given how our volume is mounted
 
 ## Best Practices
 
