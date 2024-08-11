@@ -13,6 +13,7 @@ ENV PYTHONPATH="/usr/app/src:${PYTHONPATH}"
 USER root
 RUN pip install --upgrade pip setuptools wheel
 RUN pip install .
+RUN pip install black flake8 pylint pytest
 
 # Install packages
 # RUN flit install --symlink
