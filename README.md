@@ -1,27 +1,82 @@
-# Q-Learning
+# Autobike Software
 
 [![codecov](https://codecov.io/gh/da-luce/Q-Learning/graph/badge.svg?token=DG2EJ0SJPB)](https://codecov.io/gh/da-luce/Q-Learning)
-
 ![Build Status](https://github.com/da-luce/Q-Learning/actions/workflows/ci.yml/badge.svg)
 
-## Usage
+- [Autobike Software](#autobike-software)
+  - [Git Basics](#git-basics)
+    - [Git Resources](#git-resources)
+  - [Running Code with Docker](#running-code-with-docker)
+    - [Installation](#installation)
+      - [MacOS](#macos)
+      - [Linux](#linux)
+      - [Windows](#windows)
+    - [Building an Image](#building-an-image)
+    - [Running in a Container](#running-in-a-container)
+    - [X Window Forwarding](#x-window-forwarding)
+      - [MacOS](#macos-1)
+      - [Linux](#linux-1)
+      - [Windows](#windows-1)
+    - [Testing](#testing)
+  - [Best Practices](#best-practices)
+    - [Formatting and Linting](#formatting-and-linting)
+    - [Directory Structure and Testing](#directory-structure-and-testing)
+  - [Architecture](#architecture)
 
-Run main.py, making sure that qagent.py is importing getPlayableActions and
-getStateMatrix from the file you want.
+## Git Basics
 
-## Development
+- **Clone the Repository:**
+  - To start working on the project, clone the repository to your local machine:
 
-To add something to the repository, first clone the repo with
-`git clone git@github.com:AriMirsky/Q-Learning.git`. Then, navigate to the
-repository with `cd Q-Learning`. Create a new branch with
-`git checkout -b <feature name>` where `<feature name>` is the name of what you
-are adding, without the <>. Then, write the feature. Lastly, go to
-`https://github.com/AriMirsky/Q-Learning/pulls` and create a pull request to
-merge your branch into main.
+    ```bash
+    git clone git@github.com:da-luce/Q-Learning.git
+    ```
 
-## Docker Setup
+- **Navigate to the Repository:**
+  - Change your current directory to the project directory:
 
-### Installing Docker
+    ```bash
+    cd Q-Learning
+    ```
+
+- **Create a New Branch:**
+  - Before making changes, create a new branch off of `dev`:
+
+    ```bash
+    git checkout -b <feature-name> dev
+    ```
+
+    - Replace `<feature-name>` with a descriptive name for your feature (without the `<>`).
+    - Example: `git checkout -b add-user-auth dev`
+
+- **Make Changes and Commit:**
+  - Work on your feature or changes. When ready, stage and commit your changes:
+
+    ```bash
+    git add .
+    git commit -m "Descriptive message about what you changed"
+    ```
+
+- **Push Your Branch to GitHub:**
+  - After committing your changes, push your branch to GitHub:
+
+    ```bash
+    git push origin <feature-name>
+    ```
+
+- **Create a Pull Request:**
+  - Go to the repository on GitHub and navigate to the [Pull Requests page](https://github.com/da-luce/Q-Learning/pulls).
+  - Create a pull request to merge your branch into the `dev` branch.
+
+### Git Resources
+
+- [Git Basics Documentation](https://git-scm.com/doc)
+- [Pro Git Book](https://git-scm.com/book/en/v2)
+- [GitHub Guides](https://guides.github.com/)
+
+## Running Code with Docker
+
+### Installation
 
 #### MacOS
 
@@ -50,61 +105,65 @@ merge your branch into main.
 1. See [Docker install documentation](https://docs.docker.com/engine/install/)
    (untested)
 
-### Running Docker
+### Building an Image
 
-1. Set your working directory to the top level of the Q-learning repository
-2. Running commands:
+If it is your first time running the code with Docker or there have been changes made to the Dockerfile, you need to build the Docker image:
 
-   ```text
-   docker-compose run --rm nav [COMMANDS]
-   ```
+```bash
+docker build -t autobike:latest .
+```
 
-   1. This command will create an image and container (if necessary) and execute
-      the given commands
-   2. The `--rm` option deletes the container that was created to run the
-      commands on exit
-   3. Example: `docker-compose run --rm nav python src/qlearning/main.py` will
-      run main.py 🙂
+Running `docker image ls` should now show this image, alongside any others you have built:
 
-### Tips
+```text
+REPOSITORY       TAG       IMAGE ID       CREATED         SIZE
+autobike         latest    121bfa1d2778   2 minutes ago   3.67GB
+```
 
-1. Create an alias in your `.bashrc` (or whatever shell you are using) to avoid
-   getting carpal tunnel
+> [!NOTE]
+> Images can be deleted with `docker image rm`
 
-   ```bash
-   alias nav='docker-compose run nav --rm'
-   ```
+### Running in a Container
 
-   A quick way to do this if you are using Bash
+To create a container and run code, you can use one of the following techniques:
 
-   ```text
-   echo "alias nav='docker-compose run --rm nav'" >> ~/.bashrc
-   ```
+- Interactive shell: `docker run -it --rm -v "$(pwd):/usr/app" --user root autobike`
+- One off command: `docker run -it --rm -v "$(pwd):/usr/app" --user root autobike <your command>`
 
-   Or Zsh (default on MacOS)
+> [!NOTE]
+> The volume is mounted such that changes to your local code are immediately reflected in the container.**
 
-   ```text
-   echo "alias nav='docker-compose run --rm nav'" >> ~/.zshrc
-   ```
+Example of a one off command:
 
-2. The working directory of the navigation image (defined in
-   `Dockerfile-navigation`) is set to `/usr/app`, which is bound as a volume to
-   the entire Q-learning repository stored locally on the host (this way code
-   changes do not require new image build, see `docker-compose.yml`)
+```bash
+docker run -it --rm -v "$(pwd):/usr/app" --user root autobike python src/qlearning/main.py
+```
 
-   If you are working primarily in a specific module, it can be helpful to set
-   your working directory to something else, e.g.
+> [!NOTE]
+> Spinning up a new container isn't free--it can take a few moments. As such, an interactive shell is often the preferred method of development.
 
-   ```text
-   docker-compose run --rm --workdir /usr/app/src/state_pred/ nav python bike_sim.py
-   ```
+> [!TIP]
+> Create an alias in your `.bashrc` (or whatever shell you are using) to avoid getting carpal tunnel
+>
+> ```bash
+> alias autobike="docker run -it --rm -v '$(pwd):/usr/app' --user root autobike"
+> ```
+>
+> A quick way to do this if you are using Bash:
+>
+> ```bash
+> echo <above_command> >> ~/.bashrc
+> ```
+>
+> Or Zsh (default on MacOS):
+>
+> ```bash
+> echo <above_command> >> ~/.zshrc
+> ```
 
-### X11 Forwarding
+### X Window Forwarding
 
 #### MacOS
-
-> Note: you may need to rebuild your image to include the new X11 forwarding
-> code in the Dockerfile. Talk to Dalton if you need help with this.
 
 1. Install [XQuartz](https://www.xquartz.org/) via Homebrew
 
@@ -128,10 +187,10 @@ merge your branch into main.
    xhost + localhost
    ```
 
-   **Important:** this must be run in the xterm window opened by default by
-   XQuartz _every time_ XQuartz is started
+    > [!IMPORTANT]
+    > This must be run in the xterm window opened by default by XQuartz _every time_ XQuartz is started
 
-7. Add the following option whenever you run `docker-compose run`:
+7. Add the following option whenever you run `docker run`:
 
    ```text
    --env DISPLAY=host.docker.internal:0
@@ -140,32 +199,8 @@ merge your branch into main.
    Example:
 
    ```text
-   docker-compose run --rm --env DISPLAY=host.docker.internal:0 nav python src/state_pred/bike_sim.py
+   docker run -it --rm -v "$(pwd):/usr/app" --user root --env DISPLAY=host.docker.internal:0 autobike python src/state_pred/bike_sim.py
    ```
-
-##### Helpful Alias
-
-First, add the following to `.bashrc` or equivalent:
-
-```bash
-if command -v xhost &> /dev/null then
-    xhost +localhost
-fi
-```
-
-This will add the localhost to xhost when an xterm window is opened.
-Now, for the magic alias:
-
-```bash
-alias qlearn="open -a Xquartz ; docker-compose run --rm --env DISPLAY=host.docker.internal:0"
-```
-
-This alias can now be used as: `qlearn [service] [commands]`. For example:
-`qlearn nav python src/state_pred/bike_sim.py`.
-
-> Note: this command may fail on the first or second try while Xquartz is
-> still opening
-> TODO: can this be improved?
 
 #### Linux
 
@@ -208,13 +243,44 @@ May the odds be ever in your favor...
 
 No clue.
 
-### ROS
+### Testing
 
-To run the ROS container, use
+1. Follow the above guide for running code in Docker containers
+2. Run `pytest` within a container in the top level dir of the repo
+
+   > [!NOTE]
+   > This `/usr/app/` given how our volume is mounted
+
+## Best Practices
+
+### Formatting and Linting
+
+We use [black](https://github.com/psf/black) for formatting along with [flake8](https://flake8.pycqa.org/en/latest/) and [pylint](https://pypi.org/project/pylint/) for linting. If you are using [VS Code](https://code.visualstudio.com/), [vscode settings](.vscode/settings.json) should automatically setup everything you need. Just make sure you have the [recommended extensions](./.vscode/extensions.json) installed.
+
+For other IDEs, there may be extensions provided for these tools, or you could just use the CLI equivalents. Make sure to pass the `pyproject.toml` file as an arg (e.g. `--rcfile=pyproject.toml` or `--config=pyproject.toml`) to use the same formatting and linting settings as the rest of the project.
+
+### Directory Structure and Testing
 
 ```text
-docker-compose run --rm ros
+.
+├── src/
+│   ├── moduleA
+│   ├── moduleB/
+│   │   ├── __init__.py
+│   │   └── README.md
+│   └── main.py
+└── test/
+    ├── test_moduleA.py
+    └── test_moduleB.py
 ```
 
-The container is currently set to run `talker_listener.launch.py` (a demo) by
-default.
+- Each module should contain an `__init__.py` file along with a `README.md` which
+  contains basic documentation on how one should use the file:
+  - Exported constants or functions
+  - Implementation documentation as seen fit
+- Each module should have a corresponding `test_moduleX.py` file containing `pytest` tests
+  - Perhaps, add a small [mermaid](https://mermaid.live) diagram
+
+## Architecture
+
+TODO: add overarching mermaid diagram

@@ -1,19 +1,25 @@
-__pycache__
+# Cache files
+__pycache__/
+*cache*
+
+# IDE-specific files (IntelliJ IDEA, PyCharm)
 Q-Learning.iml
 misc.xml
 modules.xml
 vcs.xml
-src/qlearning.egg-info
-.coverage
-.tox
-.DS_Store
-.pytest_cache
-.mypy_cache
-build
-coverage*
+
+# Egg info (Python package distribution)
+src/qlearning.egg-info/
+
+# Coverage reports and test artifacts
+*coverage*
 codecov*
 
-*cache
-*.osm
+# macOS system files
+.DS_Store
 
-anaconda_setup.md
+# Build directories
+build/
+
+# OpenStreetMap data files
+*.osm
