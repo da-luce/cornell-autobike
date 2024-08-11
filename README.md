@@ -1,7 +1,7 @@
 # Autobike Software
 
 [![codecov](https://codecov.io/gh/da-luce/Q-Learning/graph/badge.svg?token=DG2EJ0SJPB)](https://codecov.io/gh/da-luce/Q-Learning)
-![Build Status](https://github.com/da-luce/Q-Learning/actions/workflows/ci.yml/badge.svg)
+![Build Status](https://github.com/da-luce/Q-Learning/actions/workflows/build.yml/badge.svg)
 
 - [Autobike Software](#autobike-software)
   - [Git Basics](#git-basics)
@@ -257,7 +257,12 @@ No clue.
 
 We use [black](https://github.com/psf/black) for formatting along with [flake8](https://flake8.pycqa.org/en/latest/) and [pylint](https://pypi.org/project/pylint/) for linting. If you are using [VS Code](https://code.visualstudio.com/), [vscode settings](.vscode/settings.json) should automatically setup everything you need. Just make sure you have the [recommended extensions](./.vscode/extensions.json) installed.
 
-For other IDEs, there may be extensions provided for these tools, or you could just use the CLI equivalents. Make sure to pass the `pyproject.toml` file as an arg (e.g. `--rcfile=pyproject.toml` or `--config=pyproject.toml`) to use the same formatting and linting settings as the rest of the project.
+For other IDEs, there may be extensions provided for these tools, or you could just use the CLI equivalents. Make sure to pass the `pyproject.toml` file as an arg (e.g. `--rcfile=pyproject.toml` or `--config=pyproject.toml`) to use the same formatting and linting settings as the rest of the project. Examples (run from the top level of the repo):
+
+- **Linting:** `pylint --rcfile=pyproject.toml src/`
+- **Test:** `pytest`
+- **Formatting:** `black --config pyproject.toml .`
+- **Type checking:** `mypy --config-file=pyproject.toml src/`
 
 ### Directory Structure and Testing
 
