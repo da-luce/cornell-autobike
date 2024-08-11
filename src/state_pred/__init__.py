@@ -19,14 +19,14 @@ Files and important functions:
 States:
 
     States are reprsented as a np.array with 6 elements:
-    np.array([x_position  (m), 
+    np.array([x_position  (m),
               y_position  (m),
               x_velocity  (m/s),
               y_velocity  (m/s),
               yaw_angle   (rad),
               steer_angle (rad)])
 
-    Helpful video for understanding vehicle state: 
+    Helpful video for understanding vehicle state:
     https://www.youtube.com/watch?v=35lZlO6NrO0
 
 Importing:

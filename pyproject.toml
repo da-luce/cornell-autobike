@@ -36,7 +36,7 @@ dependencies = [
 zip-safe = false
 
 [tool.pytest.ini_options]
-testpaths = ["tests"]
+testpaths = ["test"]
 addopts = "--verbose"
 
 [tool.black]

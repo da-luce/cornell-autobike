@@ -40,14 +40,14 @@
     ```
 
 - **Create a New Branch:**
-  - Before making changes, create a new branch off of `dev`:
+  - Before making changes, create a new branch off of `main`:
 
     ```bash
-    git checkout -b <feature-name> dev
+    git checkout -b <feature-name> main
     ```
 
     - Replace `<feature-name>` with a descriptive name for your feature (without the `<>`).
-    - Example: `git checkout -b add-user-auth dev`
+    - Example: `git checkout -b add-user-auth main`
 
 - **Make Changes and Commit:**
   - Work on your feature or changes. When ready, stage and commit your changes:
@@ -167,40 +167,40 @@ docker run -it --rm -v "$(pwd):/usr/app" --user root autobike python src/qlearni
 
 1. Install [XQuartz](https://www.xquartz.org/) via Homebrew
 
-   ```text
-   brew install --cask xquartz
-   ```
+    ```text
+    brew install --cask xquartz
+    ```
 
 2. Logout and login of your Mac to activate XQuartz as default X11 server
 3. Open XQuartz
 
-   ```text
-   open -a XQuartz
-   ```
+    ```text
+    open -a XQuartz
+    ```
 
 4. Go to Security Settings (Menu Bar -> XQuartz -> Settings -> Security Settings)
    and ensure that "Allow connections from network clients" is on
 5. Restart your laptop (FIXME: this step may not be necessary?)
 6. Allow X11 forwarding from localhost via xhost
 
-   ```text
-   xhost + localhost
-   ```
+    ```text
+    xhost + localhost
+    ```
 
     > [!IMPORTANT]
     > This must be run in the xterm window opened by default by XQuartz _every time_ XQuartz is started
 
 7. Add the following option whenever you run `docker run`:
 
-   ```text
-   --env DISPLAY=host.docker.internal:0
-   ```
+    ```text
+    --env DISPLAY=host.docker.internal:0
+    ```
 
-   Example:
+    Example:
 
-   ```text
-   docker run -it --rm -v "$(pwd):/usr/app" --user root --env DISPLAY=host.docker.internal:0 autobike python src/state_pred/bike_sim.py
-   ```
+    ```text
+    docker run -it --rm -v "$(pwd):/usr/app" --user root --env DISPLAY=host.docker.internal:0 autobike python src/state_pred/bike_sim.py
+    ```
 
 #### Linux
 

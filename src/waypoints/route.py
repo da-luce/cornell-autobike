@@ -30,6 +30,7 @@ end_coords = tkintermapview.convert_address_to_coordinates(end_address)
 
 # Functions
 
+
 def initialize_tk():
 
     # Create tkinter window
@@ -43,8 +44,9 @@ def initialize_tk():
 def create_map_widget(root_tk):
 
     # Create map widget
-    map_widget = tkintermapview.TkinterMapView(root_tk, width=800,
-                                               height=600, corner_radius=0)
+    map_widget = tkintermapview.TkinterMapView(
+        root_tk, width=800, height=600, corner_radius=0
+    )
     map_widget.place(relx=0.5, rely=0.5, anchor=tkinter.CENTER)
 
     map_widget.set_zoom(10)
@@ -59,24 +61,21 @@ def bounding_box(lat1, lon1, lat2, lon2, buffer):
     # Buffer: increase each edge of the box defined by lat1, lon1,
     # lat2, lon2 by a buffer
 
-    return (min(lat1, lat2) - buffer,
-            min(lon1, lon2) - buffer,
-            max(lat1, lat2) + buffer,
-            max(lon1, lon2) + buffer)
+    return (
+        min(lat1, lat2) - buffer,
+        min(lon1, lon2) - buffer,
+        max(lat1, lat2) + buffer,
+        max(lon1, lon2) + buffer,
+    )
 
 
 def generate_box(pointA, pointB):
 
-    box = bounding_box(pointA[0],
-                       pointA[1],
-                       pointB[0],
-                       pointB[1],
-                       box_buffer)
-    return map_widget.set_polygon([(box[0], box[1]),
-                                   (box[2], box[1]),
-                                   (box[2], box[3]),
-                                   (box[0], box[3])],
-                                  name="Bounding Box")
+    box = bounding_box(pointA[0], pointA[1], pointB[0], pointB[1], box_buffer)
+    return map_widget.set_polygon(
+        [(box[0], box[1]), (box[2], box[1]), (box[2], box[3]), (box[0], box[3])],
+        name="Bounding Box",
+    )
 
 
 def box_size(box):
@@ -109,13 +108,13 @@ def bind_events(map_widget):
 
     map_widget.add_left_click_map_command(left_click_event)
 
-    map_widget.add_right_click_menu_command(label="Set start",
-                                            command=set_start,
-                                            pass_coords=True)
+    map_widget.add_right_click_menu_command(
+        label="Set start", command=set_start, pass_coords=True
+    )
 
-    map_widget.add_right_click_menu_command(label="Set end",
-                                            command=set_end,
-                                            pass_coords=True)
+    map_widget.add_right_click_menu_command(
+        label="Set end", command=set_end, pass_coords=True
+    )
 
 
 def yes_or_no(question):
@@ -130,13 +129,9 @@ def yes_or_no(question):
 def fetch_data(pointA, pointB):
 
     # Get the final bounding box
-    box = bounding_box(pointA[0],
-                       pointA[1],
-                       pointB[0],
-                       pointB[1],
-                       box_buffer)
+    box = bounding_box(pointA[0], pointA[1], pointB[0], pointB[1], box_buffer)
 
-    if (box_size(box) > 0.25):
+    if box_size(box) > 0.25:
         print("Your bounding box is too large! (over 25 square degrees)")
         exit()
 
@@ -163,7 +158,9 @@ def route(start_pos, end_pos, filepath):
     status, route = router.doRoute(start, end)  # Find the route - a list of OSM nodes
 
     if status == 'success':
-        routeLatLons = list(map(router.nodeLatLon, route))  # Get actual`` route coordinates
+        routeLatLons = list(
+            map(router.nodeLatLon, route)
+        )  # Get actual`` route coordinates
     else:
         routeLatLons = []
 
@@ -172,7 +169,6 @@ def route(start_pos, end_pos, filepath):
 
 # FIXME: this is a really shitty algorithm
 def add_nodes_to_route(route, max_dist):
-
     """
     Added additional nodes to `route` (a of list of tuples (lat, lon)) such that
     the distance between any two nodes in the route is less than or equivalent
@@ -202,7 +198,7 @@ def add_nodes_to_route(route, max_dist):
         added_nodes = 0
 
         # Add new points along the edge formed by node_a , node_b
-        while (dist > max_dist):
+        while dist > max_dist:
 
             # algo as described by
             # https://math.stackexchange.com/questions/175896/finding-a-point-along-a-line-a-certain-distance-away-from-another-point
@@ -226,6 +222,7 @@ def add_nodes_to_route(route, max_dist):
 
     return route
 
+
 if __name__ == '__main__':
 
     # Initialize map
@@ -233,16 +230,16 @@ if __name__ == '__main__':
     map_widget = create_map_widget(root_tk)
     bind_events(map_widget)
 
-    map_widget.set_position(stat.mean([start_coords[0], end_coords[0]]),
-                            stat.mean([start_coords[1], end_coords[1]]))
+    map_widget.set_position(
+        stat.mean([start_coords[0], end_coords[0]]),
+        stat.mean([start_coords[1], end_coords[1]]),
+    )
 
-    start_marker = map_widget.set_marker(start_coords[0],
-                                         start_coords[1],
-                                         text="Default Start")
+    start_marker = map_widget.set_marker(
+        start_coords[0], start_coords[1], text="Default Start"
+    )
 
-    end_marker = map_widget.set_marker(end_coords[0],
-                                       end_coords[1],
-                                       text="Default End")
+    end_marker = map_widget.set_marker(end_coords[0], end_coords[1], text="Default End")
 
     # Generate initial bounding box
     generate_box(start_marker.position, end_marker.position)
@@ -254,7 +251,7 @@ if __name__ == '__main__':
     # FIXME: random errors here...
 
     # Query if user wants to download new data
-    if (yes_or_no("Fetch new data")):
+    if yes_or_no("Fetch new data"):
 
         print("Fetching data...", end="", flush=True)
         response = fetch_data(start_marker.position, end_marker.position)
@@ -275,8 +272,10 @@ if __name__ == '__main__':
 
     # Route the bike!
     print("Routing bike...", end="", flush=True)
-    route, success = route(start_marker.position, end_marker.position, "src/waypoints/map.osm")
-    if (success and len(route) > 1):
+    route, success = route(
+        start_marker.position, end_marker.position, "src/waypoints/map.osm"
+    )
+    if success and len(route) > 1:
         print("✅")
         print(route)
     else:
@@ -290,11 +289,15 @@ if __name__ == '__main__':
     map_widget = create_map_widget(root_tk)
 
     map_widget.set_path(route)
-    map_widget.set_marker(start_marker.position[0], start_marker.position[1], text="Start")
+    map_widget.set_marker(
+        start_marker.position[0], start_marker.position[1], text="Start"
+    )
     map_widget.set_marker(end_marker.position[0], end_marker.position[1], text="End")
 
-    map_widget.set_position(stat.mean([start_marker.position[0], end_marker.position[0]]),
-                            stat.mean([start_marker.position[1], end_marker.position[1]]))
+    map_widget.set_position(
+        stat.mean([start_marker.position[0], end_marker.position[0]]),
+        stat.mean([start_marker.position[1], end_marker.position[1]]),
+    )
 
     generate_box(start_marker.position, end_marker.position)
 
