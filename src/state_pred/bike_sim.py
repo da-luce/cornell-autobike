@@ -230,7 +230,8 @@ def get_possible_states(state, differentials, res):
     cache=False,
 )
 def get_possible_indices(state, differentials, res):
-    """Given an array of states, return the corresponding indices within the state matrix
+    """
+    Given an array of states, return the corresponding indices within the state matrix
 
     Args:
         states:
@@ -276,7 +277,7 @@ def possible_states_performance(iters, differentials):
 
     # Performance appears to be same regardless of test_state
     # Thus, we use this dummy state as the initial state for all computations
-    test_state = np.array([1000, 1000, 3, 2, np.radians(90), np.radians(-20)])
+    example_state = np.array([1000, 1000, 3, 2, np.radians(90), np.radians(-20)])
 
     # Use optimized inputs
     res = optimize_input_res()
@@ -284,7 +285,7 @@ def possible_states_performance(iters, differentials):
     for i in range(0, iters):
 
         start = time.perf_counter()
-        get_possible_states(test_state, differentials, res)
+        get_possible_states(example_state, differentials, res)
         end = time.perf_counter()
 
         runs[i] = end - start

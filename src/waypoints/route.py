@@ -71,7 +71,7 @@ def generate_box(point_a, point_b, map_widget):
 
 def box_size(box):
     """Return the size of a bounding box."""
-    return (box[2] - box[1]) * (box[3] - box[0])
+    return (box[2] - box[0]) * (box[3] - box[1])
 
 
 def set_start(coords, map_widget, start_marker, end_marker):
@@ -139,7 +139,7 @@ def fetch_data(point_a, point_b):
 
 def write_to_disk(response, filepath):
     """File writing helper."""
-    with open(filepath, 'w') as file:
+    with open(filepath, 'w', encoding='utf-8') as file:
         file.write(response)
 
 
@@ -194,11 +194,11 @@ def add_nodes_to_route(route, max_dist):
     return route
 
 
-def address_to_osm(address):
-    """Convert an address to an OSM place. Make sure to onclude a user agent!"""
+def address_to_location(address):
+    """Convert an address to an OSM place. Make sure to include a user agent!"""
     url = f"https://nominatim.openstreetmap.org/search?q={address}&format=jsonv2&addressdetails=1&limit=1"
     headers = {"User-Agent": "Cornell Autobike/1.0 (dcl252@cornell.edu)"}
-    response = requests.get(url, headers=headers)
+    response = requests.get(url, headers=headers, timeout=16)
     response.raise_for_status()
     return response.json()
 
@@ -206,8 +206,8 @@ def address_to_osm(address):
 def main():
     """Main function to encapsulate the script logic."""
     # Initialize map
-    start_location = address_to_osm(START_ADDRESS)[0]
-    end_location = address_to_osm(END_ADDRESS)[0]
+    start_location = address_to_location(START_ADDRESS)[0]
+    end_location = address_to_location(END_ADDRESS)[0]
     start_lat = float(start_location['lat'])
     start_lon = float(start_location['lon'])
     end_lat = float(end_location['lat'])

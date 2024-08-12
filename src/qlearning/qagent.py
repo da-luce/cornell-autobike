@@ -5,41 +5,41 @@ from abc import abstractmethod
 
 class QAgent:
     @abstractmethod
-    def getPlayableActions(self, currentState, differentials, timestep):
+    def getPlayableActions(self, current_state, differentials, timestep):
         print("AAAAA")
         pass
 
     @abstractmethod
-    def getStateMatrix(self):
+    def get_state_matrix(self):
         pass
 
     @abstractmethod
     def set_up_rewards(self, end_state):
         pass
 
-    def getRandomState(self):
+    def get_random_state(self):
         result = []
         for i in range(len(self.q.shape)):
             result.append(np.random.randint(0, high=self.q.shape[i]))
         return tuple(result)
 
     def get_rewards(self, occupancy_grid, distance):
-        constant_A = 1
-        constant_B = 4
-        constant_C = 2
+        constant_a = 1
+        constant_b = 4
+        constant_c = 2
 
         # The reward should increase as we approach the goal and
         # decrease as the probability of encountering an object increases.
 
-        rewards = (constant_A / math.sqrt((distance**2) + constant_B)) * (
-            1 - (constant_C * occupancy_grid)
+        rewards = (constant_a / math.sqrt((distance**2) + constant_b)) * (
+            1 - (constant_c * occupancy_grid)
         )
 
         return rewards
 
     def qlearning(self, rewards_new, iterations, end_state):
         for _ in range(iterations):
-            current_state = self.getRandomState()
+            current_state = self.get_random_state()
             if current_state == end_state:
                 continue
             playable_actions = self.getPlayableActions(
@@ -90,5 +90,5 @@ class QAgent:
         self.gamma = gamma
         self.alpha = alpha
         self.rewards = rewards
-        self.q, self.differentials = self.getStateMatrix()
+        self.q, self.differentials = self.get_state_matrix()
         self.dt = dt

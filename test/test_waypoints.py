@@ -70,5 +70,5 @@ def test_write_to_disk(mock_file):
 
     write_to_disk(data, filepath)
 
-    mock_file.assert_called_once_with(filepath, 'w')
+    mock_file.assert_called_once_with(filepath, 'w', encoding='utf-8')
     mock_file().write.assert_called_once_with(data)

@@ -9,7 +9,6 @@ import matplotlib as mpl
 
 import matplotlib.pyplot as plt
 from matplotlib import patches
-from matplotlib.ticker import AutoMinorLocator as minor
 from scipy.stats import gaussian_kde
 import numpy as np
 from src.state_pred import constants as cst
@@ -107,7 +106,7 @@ def draw_wheel(center_x, center_y, width, length, color, rotation):
         color=color,
         alpha=1,
     )
-    ts = ax.transData.transform([center_x, center_y])
+    ax.transData.transform([center_x, center_y])
     transform = (
         mpl.transforms.Affine2D().rotate_around(center_x, center_y, rotation)
         + ax.transData

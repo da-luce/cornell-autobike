@@ -14,6 +14,7 @@
     "editor.codeActionsOnSave": {
         "source.organizeImports": "always"
     },
+    "editor.rulers": [88],
 
     // Files
     "files.trimTrailingWhitespace": true,

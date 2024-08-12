@@ -38,7 +38,7 @@ target-version = ["py39"]
 skip-string-normalization = true
 
 [tool.pylint]
-disable = ["W0511"]
+disable = ["W0511", "C0301"]
 max-line-length = 88
 
 [tool.mypy]

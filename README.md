@@ -131,7 +131,12 @@ To create a container and run code, you can use one of the following techniques:
 - One off command: `docker run -it --rm -v "$(pwd):/usr/app" --user root autobike <your command>`
 
 > [!NOTE]
-> The volume is mounted such that changes to your local code are immediately reflected in the container.**
+> The volume is mounted such that changes to your local code are immediately reflected in the container.
+
+> [!WARNING]
+> If the volume is not specified in the command line arguments, the container will run
+> with the code that was present when the image was _built_ (this could be quite a while
+> ago).
 
 Example of a one off command:
 
