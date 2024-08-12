@@ -1,26 +1,29 @@
 # Autonomous Bicycle - Python Enviorment
 
-# Base image of container
+# Base image
 FROM python:3.10.6-slim
-FROM gboeing/osmnx:latest
+
+# Update package list and fix missing dependencies
+RUN apt-get update --fix-missing
 
 # Set working directory of container
 WORKDIR /usr/app/
-COPY . .
 ENV PYTHONPATH="/usr/app/src:${PYTHONPATH}"
+COPY . .
 
-# Install pip dependencies defined in pyproject.toml
+# OSMnx dependencies
+RUN apt-get install -y gdal-bin libgdal-dev g++
+
 USER root
-RUN pip install --upgrade pip setuptools wheel
+
+# Install Python dependencies defined in pyproject.toml
 RUN pip install .
-RUN pip install black flake8 pylint pytest
 
-# Install packages
-# RUN flit install --symlink
+# GUI backend for python (required by Matplotlib)
+RUN apt-get install -y tk
 
-# GUI backend for python
-RUN apt-get update --fix-missing  # Not sure why we need --fix-missing now
-RUN apt-get install -y tk         # Required by Matplotlib for GUI
+# Clean up cached package lists to reduce image size
+RUN rm -rf /var/lib/apt/lists/*
 
 USER 1001
 

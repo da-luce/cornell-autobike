@@ -9,7 +9,7 @@ on:
       - main
 
 jobs:
-  build:
+  test:
     # We only need to test on one OS as we are using Docker
     runs-on: ubuntu-latest
     env:

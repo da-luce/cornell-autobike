@@ -7,21 +7,30 @@ name = "autobike_software"
 version = "0.0.1"
 description = "A sample project with specified dependencies"
 authors = [{ name = "Cornell Autobike", email = "cu_autobike@cornell.edu" }]
+requires-python = ">=3.10,<3.11"
 dependencies = [
+	# Essentials
 	"pip==23.2.1",
 	"numpy==1.23.5",
 	"scipy==1.10.0",
 	"numba",
 	"matplotlib==3.6.3",
 	"requests",
+	"pykalman",
+
+	# Mapping and routing
 	"pyroutelib3==1.7.2",
 	"tkintermapview==1.29",
 	"overpass==0.7",
+	# This dependency requires some annoying binaries to be installed. See Dockerfile.
+	"osmnx==1.9.4",
+
+	# Testing and code quality
 	"pytest>=6.0",
 	"pytest-cov>=2.0",
 	"mypy>=0.910",
-	"flake8>=3.9",
-	"pykalman",
+	"black",
+	"pylint",
 ]
 
 [tool.setuptools]
