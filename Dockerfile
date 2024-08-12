@@ -12,7 +12,10 @@ ENV PYTHONPATH="/usr/app/src:${PYTHONPATH}"
 COPY . .
 
 # OSMnx dependencies
-RUN apt-get install -y gdal-bin libgdal-dev g++
+RUN apt-get install -y \
+    gdal-bin=3.2.2+dfsg-2+deb11u2 \
+    libgdal-dev=3.2.2+dfsg-2+deb11u2 \
+    g++=4:10.2.1-1
 
 USER root
 
@@ -20,7 +23,7 @@ USER root
 RUN pip install .
 
 # GUI backend for python (required by Matplotlib)
-RUN apt-get install -y tk
+RUN apt-get install -y tk=8.6.11+1
 
 # Clean up cached package lists to reduce image size
 RUN rm -rf /var/lib/apt/lists/*

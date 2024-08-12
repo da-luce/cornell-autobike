@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools>=61.0", "wheel"]
+requires = ["setuptools==63.2.0", "wheel==0.37.1"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -7,16 +7,16 @@ name = "autobike_software"
 version = "0.0.1"
 description = "A sample project with specified dependencies"
 authors = [{ name = "Cornell Autobike", email = "cu_autobike@cornell.edu" }]
-requires-python = ">=3.10,<3.11"
+requires-python = "==3.10.6"
 dependencies = [
 	# Essentials
 	"pip==23.2.1",
 	"numpy==1.23.5",
 	"scipy==1.10.0",
-	"numba",
+	"numba==0.60.0",
 	"matplotlib==3.6.3",
-	"requests",
-	"pykalman",
+	"requests==2.32.3",
+	"pykalman==0.9.7",
 
 	# Mapping and routing
 	"pyroutelib3==1.7.2",
@@ -26,11 +26,11 @@ dependencies = [
 	"osmnx==1.9.4",
 
 	# Testing and code quality
-	"pytest>=6.0",
-	"pytest-cov>=2.0",
-	"mypy>=0.910",
-	"black",
-	"pylint",
+	"pytest==8.3.2",
+	"pytest-cov==5.0.0",
+	"mypy==1.11.1",
+	"black==24.8.0",
+	"pylint==3.2.6",
 ]
 
 [tool.setuptools]

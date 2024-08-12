@@ -1,7 +1,7 @@
 # Autobike Software
 
-[![codecov](https://codecov.io/gh/da-luce/Q-Learning/graph/badge.svg?token=DG2EJ0SJPB)](https://codecov.io/gh/da-luce/Q-Learning)
-![Build Status](https://github.com/da-luce/Q-Learning/actions/workflows/build.yml/badge.svg)
+[![codecov](https://codecov.io/gh/da-luce/cornell-autobike/graph/badge.svg?token=DG2EJ0SJPB)](https://codecov.io/gh/da-luce/cornell-autobike)
+![Test Status](https://github.com/da-luce/cornell-autobike/actions/workflows/build.yml/badge.svg)
 
 - [Autobike Software](#autobike-software)
   - [Git Basics](#git-basics)
@@ -19,6 +19,7 @@
       - [Windows](#windows-1)
     - [Testing](#testing)
   - [Best Practices](#best-practices)
+    - [Adding Dependencies](#adding-dependencies)
     - [Formatting and Linting](#formatting-and-linting)
     - [Directory Structure and Testing](#directory-structure-and-testing)
   - [Architecture](#architecture)
@@ -29,14 +30,14 @@
   - To start working on the project, clone the repository to your local machine:
 
     ```bash
-    git clone git@github.com:da-luce/Q-Learning.git
+    git clone git@github.com:da-luce/cornell-autobike.git
     ```
 
 - **Navigate to the Repository:**
   - Change your current directory to the project directory:
 
     ```bash
-    cd Q-Learning
+    cd cornell-autobike
     ```
 
 - **Create a New Branch:**
@@ -65,7 +66,7 @@
     ```
 
 - **Create a Pull Request:**
-  - Go to the repository on GitHub and navigate to the [Pull Requests page](https://github.com/da-luce/Q-Learning/pulls).
+  - Go to the repository on GitHub and navigate to the [Pull Requests page](https://github.com/da-luce/cornell-autobike/pulls).
   - Create a pull request to merge your branch into the `dev` branch.
 
 ### Git Resources
@@ -125,13 +126,16 @@ autobike         latest    121bfa1d2778   2 minutes ago   3.67GB
 
 ### Running in a Container
 
-To create a container and run code, you can use one of the following techniques:
+To create a [container](https://docs.docker.com/guides/docker-concepts/the-basics/what-is-a-container/) and run code, you can use one of the following techniques:
 
 - Interactive shell: `docker run -it --rm -v "$(pwd):/usr/app" --user root autobike`
 - One off command: `docker run -it --rm -v "$(pwd):/usr/app" --user root autobike <your command>`
 
 > [!NOTE]
-> The volume is mounted such that changes to your local code are immediately reflected in the container.
+> When no tag is selected, Docker uses the `latest` tag by [defualt](https://docs.docker.com/reference/cli/docker/image/tag/).
+
+> [!NOTE]
+> The [volume](https://docs.docker.com/engine/storage/volumes/) is mounted such that changes to your local code are immediately reflected in the container.
 
 > [!WARNING]
 > If the volume is not specified in the command line arguments, the container will run
@@ -191,7 +195,7 @@ docker run -it --rm -v "$(pwd):/usr/app" --user root autobike python src/qlearni
     ```text
     xhost + localhost
     ```
-    
+
 > [!IMPORTANT]
 > This must be run in the xterm window opened by default by XQuartz _every time_ XQuartz is started
 
@@ -254,13 +258,17 @@ No clue.
 2. Run `pytest` within a container in the top level dir of the repo
 
 > [!NOTE]
-> This `/usr/app/` given how our volume is mounted
+> This is `/usr/app/` given how our volume is mounted
 
 ## Best Practices
 
+### Adding Dependencies
+
+When adding dependencies (pip, apt, etc.) in [pyproject.toml](./pyproject.toml) or [Dockerfile](./Dockerfile), always pin a specific version.
+
 ### Formatting and Linting
 
-We use [black](https://github.com/psf/black) for formatting along with [flake8](https://flake8.pycqa.org/en/latest/) and [pylint](https://pypi.org/project/pylint/) for linting. If you are using [VS Code](https://code.visualstudio.com/), [vscode settings](.vscode/settings.json) should automatically setup everything you need. Just make sure you have the [recommended extensions](./.vscode/extensions.json) installed.
+We use [black](https://github.com/psf/black) for formatting, [pylint](https://pypi.org/project/pylint/) for linting, and [mypy](https://mypy.readthedocs.io/en/stable/) for type checking. If you are using [VS Code](https://code.visualstudio.com/), the provided [VS Code settings](.vscode/settings.json) should automatically setup everything you need. Just make sure you have the [recommended extensions](./.vscode/extensions.json) installed.
 
 For other IDEs, there may be extensions provided for these tools, or you could just use the CLI equivalents. Make sure to pass the `pyproject.toml` file as an arg (e.g. `--rcfile=pyproject.toml` or `--config=pyproject.toml`) to use the same formatting and linting settings as the rest of the project. Examples (run from the top level of the repo):
 
@@ -277,6 +285,7 @@ For other IDEs, there may be extensions provided for these tools, or you could j
 │   ├── moduleA
 │   ├── moduleB/
 │   │   ├── __init__.py
+│   │   ├── foo.py
 │   │   └── README.md
 │   └── main.py
 └── test/
@@ -286,7 +295,7 @@ For other IDEs, there may be extensions provided for these tools, or you could j
 
 - Each module should contain an `__init__.py` file along with a `README.md` which
   contains basic documentation on how one should use the file:
-  - Exported constants or functions
+  - Exported constants and functions
   - Implementation documentation as seen fit
 - Each module should have a corresponding `test_moduleX.py` file containing `pytest` tests
   - Perhaps, add a small [mermaid](https://mermaid.live) diagram
