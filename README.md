@@ -1,7 +1,7 @@
 # Autobike Software
 
 [![codecov](https://codecov.io/gh/da-luce/cornell-autobike/graph/badge.svg?token=DG2EJ0SJPB)](https://codecov.io/gh/da-luce/cornell-autobike)
-![Test Status](https://github.com/da-luce/cornell-autobike/actions/workflows/build.yml/badge.svg)
+![Test Status](https://github.com/da-luce/cornell-autobike/actions/workflows/test.yml/badge.svg)
 
 - [Autobike Software](#autobike-software)
   - [Git Basics](#git-basics)
