@@ -18,8 +18,8 @@ YAW_INERTIA = 22  # kg/(m^2)
 
 # INPUT CONSTRAINTS
 
-SPEED_MIN = 1  # m/s
-SPEED_MAX = 100  # m/s
+SPEED_MIN = 2  # m/s
+SPEED_MAX = 10  # m/s
 
 STEER_ANGLE_MAX = np.radians(90)  # rad
 STEER_ANGLE_DELTA = np.radians(30)  # rad
