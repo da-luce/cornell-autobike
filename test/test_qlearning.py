@@ -1,7 +1,7 @@
 import numpy as np
 import pytest
 
-from qlearning import small_example_qagent
+from src.qlearning import small_example_qagent
 
 
 @pytest.fixture
