@@ -62,6 +62,7 @@ def bounding_box(lat1, lon1, lat2, lon2, buffer):
 
 def generate_box(point_a, point_b, map_widget):
     """Generate a bounding box given two points."""
+    # TODO: check for negatives?
     box = bounding_box(point_a[0], point_a[1], point_b[0], point_b[1], BOX_BUFFER)
     return map_widget.set_polygon(
         [(box[0], box[1]), (box[2], box[1]), (box[2], box[3]), (box[0], box[3])],
@@ -133,6 +134,10 @@ def fetch_data(point_a, point_b):
         sys.exit()
 
     box_string = f"{box[0]},{box[1]},{box[2]},{box[3]}"
+
+    # FIXME: this may generate edges that are split (nodes outside bounding box)
+    # are dropped)
+    # FIXME: what does ;(._;>;) do!?!? But it works now!!!
     api = overpass.API(timeout=600)
     return api.get(f'way({box_string});(._;>;)', responseformat="xml")
 
@@ -162,6 +167,8 @@ def test_route(start_pos, end_pos, filepath):
     return route_lat_lons, (status == 'success')
 
 
+# FIXME: this is a really shitty algorithm
+# FIXME: need to account for curvature in road?
 def add_nodes_to_route(route, max_dist):
     """
     Add additional nodes to `route` so that the distance between
@@ -176,14 +183,24 @@ def add_nodes_to_route(route, max_dist):
         node_a = route[i]
         node_b = route[i + 1]
         dist = node_distance(node_a, node_b)
+
+        # start at node_a and iterate until we are within max_dist of node_b
         current_node = node_a
+        # track how many nodes we have added
         added_nodes = 0
 
+        # Add new points along the edge formed by node_a , node_b
+        # algo as described by
+        # https://math.stackexchange.com/questions/175896/finding-a-point-along-a-line-a-certain-distance-away-from-another-point
         while dist > max_dist:
             dist_ratio = max_dist / dist
+
+            # TODO: perhaps using numpy would be better
             lat = (1 - dist_ratio) * current_node[0] + dist_ratio * node_b[0]
             lon = (1 - dist_ratio) * current_node[1] + dist_ratio * node_b[1]
             current_node = (lat, lon)
+
+            # insert the new node (remember how List.insert works)
             route.insert(i + added_nodes + 1, current_node)
             added_nodes += 1
             dist = node_distance(current_node, node_b)
@@ -261,6 +278,7 @@ def main():
         sys.exit()
 
     # Open a new tkinter window to display the route
+    # FIXME: this is janky
     root_tk = initialize_tk()
     map_widget = create_map_widget(root_tk)
     # root_tk.protocol("WM_DELETE_WINDOW", root_tk.destroy)
