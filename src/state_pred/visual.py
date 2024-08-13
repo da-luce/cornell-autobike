@@ -95,6 +95,7 @@ def plot_bike(state):
     ax.set_ylim(-2, 5)
 
 
+# pylint: disable=too-many-arguments
 def draw_wheel(center_x, center_y, width, length, color, rotation):
     """
     Draw a wheel helper method

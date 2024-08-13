@@ -1,9 +1,13 @@
+"""Module which implements QAgent in a small state space for testing purposes."""
+
 import numpy as np
 
 from src.qlearning import qagent
 
 
 class SmallExampleQAgent(qagent.QAgent):
+    """Class which implements QAgent in a small state space for testing purposes."""
+
     def __init__(self, alpha, gamma, rewards):
         super().__init__(alpha, gamma, rewards, 1)
 

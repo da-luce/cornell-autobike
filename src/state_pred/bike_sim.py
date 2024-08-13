@@ -26,6 +26,7 @@ from src.state_pred import constants as cst
 from src.state_pred import visual as vis
 
 
+# pylint: disable=too-many-locals
 @jit(float64[::1](float64[::1], float64[::1]), nopython=True, cache=False)
 def next_state_dynamic(state, inputs):
     """Nonlinear (dynamic) model of bicycle

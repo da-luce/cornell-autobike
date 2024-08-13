@@ -1,7 +1,7 @@
 import numpy as np
 import pytest
 
-from src.qlearning import smallExampleQAgent
+from qlearning import small_example_qagent
 
 
 @pytest.fixture
@@ -9,7 +9,7 @@ def agent_setup():
     alpha = 0.1
     gamma = 0.9
     rewards = np.zeros((9,))
-    agent = smallExampleQAgent.SmallExampleQAgent(alpha, gamma, rewards)
+    agent = small_example_qagent.SmallExampleQAgent(alpha, gamma, rewards)
     return agent, rewards
 
 
