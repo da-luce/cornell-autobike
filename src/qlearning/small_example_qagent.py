@@ -11,7 +11,8 @@ class SmallExampleQAgent(qagent.QAgent):
     def __init__(self, alpha, gamma, rewards):
         super().__init__(alpha, gamma, rewards, 1)
 
-    def getPlayableActions(self, current_state, differentials, timestep):
+    def get_playable_actions(self, current_state, differentials, timestep):
+        print(current_state, differentials, timestep)
         playable_actions = np.array(
             [
                 [0, 1, 0, 0, 0, 0, 0, 0, 0],
