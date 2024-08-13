@@ -18,10 +18,12 @@ Read more: https://numba.pydata.org/numba-doc/latest/reference/types.html
 """
 
 import time
+
 import numpy as np
-from numba import jit, boolean, float64
-from src.state_pred import visual as vis
+from numba import boolean, float64, jit
+
 from src.state_pred import constants as cst
+from src.state_pred import visual as vis
 
 
 @jit(float64[::1](float64[::1], float64[::1]), nopython=True, cache=False)

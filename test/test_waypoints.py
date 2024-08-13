@@ -1,10 +1,12 @@
-import pytest
 import math
-from unittest.mock import patch, mock_open
+from unittest.mock import mock_open, patch
+
+import pytest
+
 from src.waypoints.route import (
+    add_nodes_to_route,
     bounding_box,
     box_size,
-    add_nodes_to_route,
     fetch_data,
     write_to_disk,
 )

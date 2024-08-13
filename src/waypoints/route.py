@@ -2,16 +2,16 @@
 Waypoint routing
 """
 
-import sys
-import statistics as stat
 import math
-
+import statistics as stat
+import sys
 import tkinter
-import tkintermapview
-import overpass
-from pyroutelib3 import Router
+
 import osmnx
+import overpass
 import requests
+import tkintermapview
+from pyroutelib3 import Router
 
 # Parameters
 BOX_BUFFER = 0.01  # Space to include around start and end positions

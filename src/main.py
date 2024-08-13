@@ -1,5 +1,5 @@
-from pykalman import KalmanFilter
 import numpy as np
+from pykalman import KalmanFilter
 
 
 def main():

@@ -1,13 +1,14 @@
-import pytest
 import numpy as np
-from src.state_pred.bike_sim import (
-    get_possible_states,
-    get_possible_indices,
-    optimize_input_res,
-    round_to_multiple,
-    round_state,
-)
+import pytest
+
 import src.state_pred.constants as cst
+from src.state_pred.bike_sim import (
+    get_possible_indices,
+    get_possible_states,
+    optimize_input_res,
+    round_state,
+    round_to_multiple,
+)
 
 
 @pytest.fixture

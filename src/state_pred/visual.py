@@ -4,14 +4,15 @@ State prediction visualization
 
 # For visualization
 import matplotlib as mpl
+import matplotlib.pyplot as plt
+import numpy as np
+from matplotlib import patches
+from scipy.stats import gaussian_kde
+
+from src.state_pred import constants as cst
 
 # mpl.use('TkAgg')
 
-import matplotlib.pyplot as plt
-from matplotlib import patches
-from scipy.stats import gaussian_kde
-import numpy as np
-from src.state_pred import constants as cst
 
 # Colors
 DARK = '#0B0B0B'

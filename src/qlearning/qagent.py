@@ -1,6 +1,7 @@
-import numpy as np
 import math
 from abc import abstractmethod
+
+import numpy as np
 
 
 class QAgent:
