@@ -31,6 +31,9 @@ dependencies = [
 	"mypy==1.11.1",
 	"black==24.8.0",
 	"pylint==3.2.6",
+
+	# Type stubs
+	"types-requests==2.32.0.20240712",
 ]
 
 [tool.setuptools]

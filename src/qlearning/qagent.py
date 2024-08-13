@@ -73,7 +73,7 @@ class QAgent:
     def reset_matrix(self, rewards_new, iterations, end_state, dimensions):
         """Reset the Q-matrix, and rerun the Q-learning algorithm"""
         shape = tuple([len(self.q)] * dimensions)
-        self.q: np.ndarray = np.zeros(shape)
+        self.q: np.ndarray[np.float_, np.dtype[np.float_]] = np.zeros(shape)
         QAgent.qlearning(self, rewards_new, iterations, end_state)
 
     def alter_matrix(self, rewards_new, iterations, end_state, scale):

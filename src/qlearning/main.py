@@ -2,7 +2,7 @@
 
 import numpy as np
 
-from qlearning import small_example_qagent
+from src.qlearning import small_example_qagent
 
 if __name__ == "__main__":
     qagent = small_example_qagent.SmallExampleQAgent(0.1, 0.9, np.zeros((9,)))
