@@ -21,13 +21,13 @@ YAW_INERTIA = 22  # kg/(m^2)
 SPEED_MIN = 2  # m/s
 SPEED_MAX = 10  # m/s
 
-STEER_ANGLE_MAX = np.radians(90)  # rad
-STEER_ANGLE_DELTA = np.radians(30)  # rad
+STEER_ANGLE_MAX = np.radians(37)  # rad
+STEER_ANGLE_DELTA = np.radians(1)  # rad
 
-ACCELERATION_MIN = 0  # m/(s^2)
+ACCELERATION_MIN = -5  # m/(s^2)
 ACCELERATION_MAX = 10  # m/(s^2)
 
-STEER_ACC_MIN = -50
-STEER_ACC_MAX = 50
+STEER_ACC_MIN = -5
+STEER_ACC_MAX = 5
 
-DT = 0.3  # (s)
+DT = 0.1  # (s)
