@@ -39,13 +39,13 @@ jobs:
       # Run Pytest with code coverage
       - name: Pytest with code coverage
         if: success() || failure()
-        run: ${{ env.DOCKER_BASE_CMD }} autobike pytest --cov=./ --cov-report=xml:./coverage/coverage.xml --cov-report=term
+        # Specify coverage volume
+        run: ${{ env.DOCKER_BASE_CMD }} -v ${{ env.COVERAGE_VOLUME }} autobike pytest --cov=./ --cov-report=xml:./coverage/coverage.xml --cov-report=term
 
       # Run mypy type checking
       - name: Mypy type check
         if: success() || failure()
-        # Specify coverage volume
-        run: ${{ env.DOCKER_BASE_CMD }} -v ${{ env.COVERAGE_VOLUME }} autobike mypy --config-file=pyproject.toml src/
+        run: ${{ env.DOCKER_BASE_CMD }} autobike mypy --config-file=pyproject.toml src/
 
       # Upload to codecov
       - name: Upload coverage to Codecov
