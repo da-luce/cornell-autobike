@@ -298,8 +298,69 @@ For other IDEs, there may be extensions provided for these tools, or you could j
   - Exported constants and functions
   - Implementation documentation as seen fit
 - Each module should have a corresponding `test_moduleX.py` file containing `pytest` tests
-  - Perhaps, add a small [mermaid](https://mermaid.live) diagram
+  - Perhaps, add a small [Mermaid](https://mermaid.live) diagram
 
 ## Architecture
 
-TODO: add overarching mermaid diagram
+```mermaid
+flowchart TD
+
+    input[/Start & End Coordinates\] --> route_planning
+    subgraph route_planning
+
+            map[(Ithaca OSM Data)]
+            gen[\Path Generation/]:::orange
+            waypoints(Waypoints)
+
+            map-->gen
+            gen-->waypoints
+    end
+
+    route_planning --> control_loop
+
+    subgraph control_loop
+
+        subgraph state_processing
+            fetch[Fetch Bike State]:::red
+            kalman[\Kalman Filter/]:::red
+            predict[Predict Bike State]:::orange
+            state[Current Bike State]
+
+            kalman --> state
+            fetch --> kalman
+            predict ---> kalman
+            state  --> predict
+        end
+
+        subgraph vision
+            cam[/ZED 2 - AI Stereo Camera\]
+            sdk[\ZED SDK/]:::red
+            depth[(Raw Depth Data)]:::orange
+            occ_algo[\Occupancy Grid Algorithm/]:::red
+            grid(Occupancy Grid)
+
+            cam --> sdk
+            sdk --> depth
+            depth --> occ_algo
+            occ_algo --> grid
+        end
+
+        subgraph controller
+            %% More work will have to be done here as we explore
+            %% what works and what doesn't
+            q[\Q-Learning Algorithm/]:::red
+            steering(Optimal Steering Angle)
+        end
+
+        steering --> controls:::hidden
+        state --> controller
+        grid --> controller
+        q --> steering
+
+    end
+
+    classDef red fill:#FFCCCC,stroke:#FF6666,stroke-width:2px;
+    classDef orange fill:#FFDAB5,stroke:#FFA07A,stroke-width:2px;
+    classDef green fill:#CCE5CC,stroke:#66CC66,stroke-width:2px;
+    classDef hidden display: none;
+```
