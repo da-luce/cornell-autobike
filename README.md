@@ -359,8 +359,8 @@ flowchart TD
 
     end
 
-    classDef red fill:#ffe6e6,stroke:#FF6666,stroke-width:2px,color:#FF6666;
-    classDef orange fill:#fff3e6,stroke:#FFA07A,stroke-width:2px,color:#FFA07A;
-    classDef green fill:#eef6ee,stroke:#66CC66,stroke-width:2px,color:#66CC66;
-    classDef hidden display: none;
+    classDef red fill:#FFE6E6,stroke:#FF6666,stroke-width:2px,color:#FF6666;
+    classDef orange fill:#FFF3E6,stroke:#FFA07A,stroke-width:2px,color:#FFA07A;
+    classDef green fill:#EEF6EE,stroke:#66CC66,stroke-width:2px,color:#66CC66;
+    classDef hidden display:none;
 ```
