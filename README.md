@@ -23,6 +23,7 @@
     - [Formatting and Linting](#formatting-and-linting)
     - [Directory Structure and Testing](#directory-structure-and-testing)
   - [Architecture](#architecture)
+  - [Citations](#citations)
 
 ## Git Basics
 
@@ -294,9 +295,10 @@ For other IDEs, there may be extensions provided for these tools, or you could j
 ```
 
 - Each module should contain an `__init__.py` file along with a `README.md` which
-  contains basic documentation on how one should use the file:
+  contains basic documentation on how one should use the file along wih other relevant info:
   - Exported constants and functions
   - Implementation documentation as seen fit
+  - **Citations** and **sources**
 - Each module should have a corresponding `test_moduleX.py` file containing `pytest` tests
   - Perhaps, add a small [Mermaid](https://mermaid.live) diagram
 
@@ -305,62 +307,131 @@ For other IDEs, there may be extensions provided for these tools, or you could j
 ```mermaid
 flowchart TD
 
-    input[/Start & End Coordinates\] --> route_planning
-    subgraph route_planning
-
-            map[(Ithaca OSM Data)]
-            gen[\Path Generation/]:::orange
-            waypoints(Waypoints)
-
-            map-->gen
-            gen-->waypoints
+    %% Sensors Input Layer
+    sensors:::graySubgraph
+    subgraph sensors[Sensors]
+        lidar{{ZED 2 Lidar}}
+        camera{{Visual Camera}}
+        gps{{GPS}}
+        rtk{{RTK}}
     end
 
-    route_planning --> control_loop
+    %% Perception Layer
+    lidar --> grid
+    camera --> road_sign_detection
+    camera --> boundary_detection
+    camera --> object_detection
+    perception:::graySubgraph
+    subgraph perception[Perception]
 
-    subgraph control_loop
-
-        subgraph state_processing
-            fetch[Fetch Bike State]:::red
-            kalman[\Kalman Filter/]:::red
-            predict[Predict Bike State]:::orange
-            state[Current Bike State]
-
-            kalman --> state
-            fetch --> kalman
-            predict ---> kalman
-            state  --> predict
+        %% YOLO Subsystem
+        YOLO:::graySubgraph
+        subgraph YOLO[YOLO Model]
+            road_sign_detection[Road Marking & Signage Recognition]:::orange
+            object_detection[Object Detection & Classification]:::orange
         end
 
-        subgraph vision
-            cam[/ZED 2 - AI Stereo Camera\]
-            sdk[\ZED SDK/]:::red
-            depth[(Raw Depth Data)]:::orange
-            occ_algo[\Occupancy Grid Algorithm/]:::red
-            grid(Occupancy Grid)
+        boundary_detection[Boundary & Lane Detection]:::orange
+        grid[Occupancy Grid]:::orange
 
-            cam --> sdk
-            sdk --> depth
-            depth --> occ_algo
-            occ_algo --> grid
+        c_space[(Configuration Space)]
+
+        object_detection --> grid_discretization
+        boundary_detection --> grid_discretization
+        grid --> grid_discretization
+        localization -->|Current State| grid_discretization
+
+        grid_discretization[\Grid Discretization/]:::green
+        grid_discretization --> c_space
+
+        %% Localization Subsystem
+        localization:::graySubgraph
+        subgraph localization[Localization]
+            kalman_filter[\Kalman Filter/]:::red
+            kinematic_model[\Kinematic Model Prediction/]:::purple
+            current_state[Current Bicycle State]
+
+            kalman_filter --> current_state
+            current_state --> kinematic_model
+            kinematic_model --> kalman_filter
         end
-
-        subgraph controller
-            %% More work will have to be done here as we explore
-            %% what works and what doesn't
-            q[\Q-Learning Algorithm/]:::red
-            steering(Optimal Steering Angle)
-        end
-
-        steering --> controls:::hidden
-        state --> controller
-        grid --> controller
-        q --> steering
-
     end
 
+    gps --> localization
+    rtk --> localization
+
+    %% Planning and Decision Making Layer
+    road_sign_detection --> behavior_planning
+    planning:::graySubgraph
+    subgraph planning[Planning]
+
+        c_space --> path_planning
+        behavior_planning[\Behavioral Planning & Decision Making/]:::green
+
+        ui((UI & Feedback System)):::gray
+    end
+    behavior_planning -->|Stop for red lights, etc.| control
+    path_planning -->|Navigate Surroundings| control
+    route -->|Waypoints| path_planning
+
+    %% Path Planning Subsystem
+    path_planning:::graySubgraph
+    subgraph path_planning[Path Planning]
+        a_star[Hybrid A* Algorithm]
+        grid_path(Optimal Path)
+        next_cell(Next Cell)
+        trajectory(Next Velocity Vector)
+
+        a_star --> grid_path
+        grid_path --> next_cell
+        next_cell --> trajectory
+    end
+
+    %% Route Mapping Layer
+    route:::graySubgraph
+    subgraph route[Static Route Mapping]
+        map[(Offline OSM Data)]
+        gen[\Path Generation/]:::orange
+        waypoints(Waypoints)
+
+        map --> gen
+        gen --> waypoints
+    end
+
+    %% Control Layer
+    control:::graySubgraph
+    subgraph control[Control]
+        steering_control[\Steering Control/]:::blue
+        braking_control[\Braking System Control/]:::blue
+        acceleration_control[\Acceleration Control/]:::blue
+    end
+
+    classDef blue fill:#E6F7FF,stroke:#66B2FF,stroke-width:2px,color:#66B2FF;
+    classDef orange fill:#FFE6CC,stroke:#FF8C00,stroke-width:2px,color:#FF8C00;
     classDef red fill:#FFE6E6,stroke:#FF6666,stroke-width:2px,color:#FF6666;
-    classDef orange fill:#FFF3E6,stroke:#FFA07A,stroke-width:2px,color:#FFA07A;
-    classDef green fill:#EEF6EE,stroke:#66CC66,stroke-width:2px,color:#66CC66;
-    classDef hidden display:none;
+    classDef green fill:#E6FFE6,stroke:#66CC66,stroke-width:2px,color:#66CC66;
+    classDef purple fill:#F3E6FF,stroke:#9933FF,stroke-width:2px,color:#9933FF;
+    classDef gray fill:#F0F0F0,stroke:#A0A0A0,stroke-width:1px,color:#A0A0A0;
+    classDef graySubgraph fill:transparent,stroke:#A0A0A0,stroke-width:2px,color:#A0A0A0;
+    linkStyle default stroke: white;
 ```
+
+- **Sensors Layer**: Responsible for collecting raw data from various sensors, including LiDAR, cameras, GPS, and RTK. These sensors provide crucial information about the environment, such as obstacles, road markings, and the bicycle’s location. This data is the foundation for perception, localization, and decision-making processes.
+
+- **Static Route Mapping Layer**: Uses offline OpenStreetMap (OSM) data to generate a static route with predefined waypoints. This static route is used as the baseline path that the dynamic path planning will refine based on real-time conditions.
+
+- **Perception Layer**: The perception layer processes raw sensor data to create a detailed understanding of the surrounding environment. It includes subsystems for detecting objects, recognizing road signs, identifying lane boundaries, and generating an occupancy grid. This data is combined into a 2D, discretized configuration space (C-space), which represents "the actual free space zone for the movement of robot and guarantees that the vehicle or robot must not collide with the obstacle" [^1]. The C-space first accounts for boundaries, such as lane lines or the edge of the road. The goal is to "hug" the right-most boundary relatively closely, by closing off anything past the right-most boundary and penalizing movement away from it. Hence, the C-space effectively represents our "bike lane." The occupancy grid accounts for unexpected objects in our "bike lane," expanding obstacles in the environment to include a safety margin that accounts for the bounding box of the bike. Not sure how we incorporate YOLO.
+
+- **Localization Layer**: Estimates the current state of the bicycle, including its position and orientation, using data from GPS and real time kinematics (RTK). The Kalman filter refines these estimates, while the kinematic model predicts future states.
+
+- **Planning and Decision-Making Layer**: Plans the optimal path to the next waypoint [^2]. The path planning subsystem refines the route through the configuration space--we aim to use a Hybrid A* algorithm [^3]. The behavioral planning module handles high-level decisions, such as stopping at red lights or and obeying road rules (this is not as important as path planning). Given the path, we can easily deduce how we need to adjust our steering/speed to achieve the next point.
+
+- **Control Layer**: This is not our responsibility
+
+## Citations
+
+[^1]: [Debnath, Sanjoy & Omar, Rosli & Abdul Latip, Nor Badariyah. (2019). A Review on Energy Efficient Path Planning Algorithms for Unmanned Air Vehicles: 5th ICCST 2018, Kota Kinabalu, Malaysia, 29-30 August 2018. 10.1007/978-981-13-2622-6_51.](https://www.researchgate.net/publication/327271383_A_Review_on_Energy_Efficient_Path_Planning_Algorithms_for_Unmanned_Air_Vehicles_5th_ICCST_2018_Kota_Kinabalu_Malaysia_29-30_August_2018)
+
+[^2]: [Mohamed Reda, Ahmed Onsy, Amira Y. Haikal, Ali Ghanbari, Path planning algorithms in the autonomous driving system: A comprehensive review, Robotics and Autonomous Systems, Volume 174, 2024, 104630, ISSN 0921-8890, https://doi.org/10.1016/j.robot.2024.104630.](https://www.sciencedirect.com/science/article/pii/S0921889024000137)
+
+[^3]: [https://medium.com/@junbs95/gentle-introduction-to-hybrid-a-star-9ce93c0d7869](https://medium.com/@junbs95/gentle-introduction-to-hybrid-a-star-9ce93c0d7869)
