@@ -310,93 +310,71 @@ flowchart TD
     %% Sensors Input Layer
     sensors:::graySubgraph
     subgraph sensors[Sensors]
-        lidar{{ZED 2 Lidar}}
-        camera{{Visual Camera}}
-        gps{{GPS}}
-        rtk{{RTK}}
+        depth(ZED 2 Depth)
+        camera(Visual Camera)
+        gps(GPS)
+        rtk(RTK)
+    end
+
+    %% Legend
+    legend:::graySubgraph
+    subgraph legend[Legend]
+        ross_node(ROS Node)
+        start[ ] -->|ROS Topic| finish[ ]
+        subsystem:::graySubgraph
+        subgraph subsystem[Bike Subsystem]
+        end
     end
 
     %% Perception Layer
-    lidar --> grid
-    camera --> road_sign_detection
-    camera --> boundary_detection
-    camera --> object_detection
+    depth -->|/sensor/depth| grid
+    camera -->|/sensor/image| road_sign_detection
+    camera -->|/sensor/image| boundary_detection
+    camera -->|/sensor/image| object_detection
+    gps -->|/sensor/gps| localization
+    rtk -->|/sensor/rtk| localization
+
     perception:::graySubgraph
     subgraph perception[Perception]
 
         %% YOLO Subsystem
         YOLO:::graySubgraph
         subgraph YOLO[YOLO Model]
-            road_sign_detection[Road Marking & Signage Recognition]:::orange
-            object_detection[Object Detection & Classification]:::orange
+            road_sign_detection(Road Signage Recognition)
+            object_detection(Object Detection & Classification)
         end
 
-        boundary_detection[Boundary & Lane Detection]:::orange
-        grid[Occupancy Grid]:::orange
+        boundary_detection(Boundary & Lane Detection)
+        grid(Occupancy Grid)
+        localization(Localization)
+        c_space(Configuration Space)
 
-        c_space[(Configuration Space)]
-
-        object_detection --> grid_discretization
-        boundary_detection --> grid_discretization
-        grid --> grid_discretization
-        localization -->|Current State| grid_discretization
-
-        grid_discretization[\Grid Discretization/]:::green
-        grid_discretization --> c_space
-
-        %% Localization Subsystem
-        localization:::graySubgraph
-        subgraph localization[Localization]
-            kalman_filter[\Kalman Filter/]:::red
-            kinematic_model[\Kinematic Model Prediction/]:::purple
-            current_state[Current Bicycle State]
-
-            kalman_filter --> current_state
-            current_state --> kinematic_model
-            kinematic_model --> kalman_filter
-        end
+        object_detection -->|/perception/objects| c_space
+        boundary_detection -->|/perception/boundaries| c_space
+        grid -->|/perception/occupancy_grid| c_space
+        localization -->|/perception/current_state| c_space
     end
 
-    gps --> localization
-    rtk --> localization
+    %% Planning and Decision-Making Layer
+    road_sign_detection -->|/perception/roadsigns| decision_making
+    c_space -->|/perception/c_space| path_planning
 
-    %% Planning and Decision Making Layer
-    road_sign_detection --> behavior_planning
     planning:::graySubgraph
     subgraph planning[Planning]
 
-        c_space --> path_planning
-        behavior_planning[\Behavioral Planning & Decision Making/]:::green
+        decision_making(Decision Making)
+        ui(<a href='https://github.com/dheera/rosboard'>rosboard</a>)
+        path_planning(Hybrid A* Planning)
 
-        ui((UI & Feedback System)):::gray
-    end
-    behavior_planning -->|Stop for red lights, etc.| control
-    path_planning -->|Navigate Surroundings| control
-    route -->|Waypoints| path_planning
 
-    %% Path Planning Subsystem
-    path_planning:::graySubgraph
-    subgraph path_planning[Path Planning]
-        a_star[Hybrid A* Algorithm]
-        grid_path(Optimal Path)
-        next_cell(Next Cell)
-        trajectory(Next Velocity Vector)
-
-        a_star --> grid_path
-        grid_path --> next_cell
-        next_cell --> trajectory
     end
 
-    %% Route Mapping Layer
-    route:::graySubgraph
-    subgraph route[Static Route Mapping]
-        map[(Offline OSM Data)]
-        gen[\Path Generation/]:::orange
-        waypoints(Waypoints)
+    waypoints(Static Waypoint Routing)
+    waypoints -->|/planning/waypoints| path_planning
 
-        map --> gen
-        gen --> waypoints
-    end
+    decision_making -->|/planning/throttle| control
+    decision_making -->|/planning/braking| control
+    path_planning -->|/planning/steering_angle| control
 
     %% Control Layer
     control:::graySubgraph
@@ -413,7 +391,7 @@ flowchart TD
     classDef purple fill:#F3E6FF,stroke:#9933FF,stroke-width:2px,color:#9933FF;
     classDef gray fill:#F0F0F0,stroke:#A0A0A0,stroke-width:1px,color:#A0A0A0;
     classDef graySubgraph fill:transparent,stroke:#A0A0A0,stroke-width:2px,color:#A0A0A0;
-    linkStyle default stroke: white;
+    linkStyle default stroke:black;
 ```
 
 - **Sensors Layer**: Responsible for collecting raw data from various sensors, including LiDAR, cameras, GPS, and RTK. These sensors provide crucial information about the environment, such as obstacles, road markings, and the bicycle’s location. This data is the foundation for perception, localization, and decision-making processes.
