@@ -1,24 +1,30 @@
-version: '3.8'
+version: '3'
 services:
   autobike:
-    image: autobike:test3
+    container_name: autobike_dev
+    build:
+      context: .
+    command: bash -c "ros2 run demo_nodes_cpp talker"
+    networks:
+      - rosnet
     user: root
     environment:
-      - DISPLAY=novnc:0.0
-    networks:
-      - x11
-    stdin_open: true
-    tty: true
-    command: bash
-  novnc:
-    image: theasp/novnc:latest
-    environment:
-      - DISPLAY_WIDTH=2560
-      - DISPLAY_HEIGHT=1440
+      - HOME=/root
+
+  rosboard:
+    container_name: rosboard
+    build:
+      context: .
+    command: bash -c "cd /usr/app/rosboard && ./run"
     ports:
-      - "8080:8080"
+      - "8888:8888"
     networks:
-      - x11
-    restart: on-failure
+      - rosnet
+    depends_on:
+      - autobike
+    user: root
+    environment:
+      - HOME=/root
+
 networks:
-  x11:
+  rosnet:

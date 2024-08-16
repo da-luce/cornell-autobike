@@ -1,7 +1,9 @@
-# Autonomous Bicycle - Python Enviorment
+# Build-time arguments
+ARG ROS_DISTRO=humble
+ARG ROSBOARD_PORT=8888
 
 # Base image (Humble is the LTS version for Ubuntu 22.04)
-FROM ros:humble
+FROM ros:${ROS_DISTRO}
 
 # Update package list and fix missing dependencies
 RUN apt-get update --fix-missing
@@ -27,25 +29,19 @@ RUN pip install .
 # GUI backend for python (required by Matplotlib)
 RUN apt-get install -y tk
 
-# ROS visualization
-# RUN apt install -y \
-#    ros-humble-rviz2 \
-#    ros-humble-gazebo-ros
+# Setup ROSboard
+RUN apt-get install -y \
+    ros-${ROS_DISTRO}-demo-nodes-cpp && \
+    pip3 install tornado simplejpeg && \
+    git clone https://github.com/dheera/rosboard.git
+EXPOSE ${ROSBOARD_PORT}
 
-# RUN apt-get update && apt-get install -y \
-#     mesa-utils \
-#     libgl1-mesa-glx \
-#     libgl1-mesa-dri
-
-RUN bash -c "source /opt/ros/humble/setup.bash && apt-get install -y ros-humble-rviz2"
-
-
-# Automatically source the ROS 2 environment for every shell session
-RUN echo "source /opt/ros/humble/setup.bash" >> /root/.bashrc
+# Source the ROS 2 environment for every shell session
+RUN bash -c "source /opt/ros/${ROS_DISTRO}/setup.bash && apt-get install -y ros-humble-rviz2"
+RUN echo "source /opt/ros/${ROS_DISTRO}/setup.bash" >> /root/.bashrc
 
 # Clean up cached package lists to reduce image size
 RUN rm -rf /var/lib/apt/lists/*
-
 
 USER 1001
 
