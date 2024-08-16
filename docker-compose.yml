@@ -1,16 +1,23 @@
 version: '3'
 services:
+
+  # Autobike development
   autobike:
     container_name: autobike_dev
     build:
       context: .
-    command: bash -c "ros2 run demo_nodes_cpp talker"
+    command: bash -c
     networks:
       - rosnet
     user: root
     environment:
       - HOME=/root
+    working_dir: /usr/app
+    volumes:
+      - ./:/usr/app
 
+
+  # ROSboard
   rosboard:
     container_name: rosboard
     build:

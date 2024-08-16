@@ -5,14 +5,13 @@ ARG ROSBOARD_PORT=8888
 # Base image (Humble is the LTS version for Ubuntu 22.04)
 FROM ros:${ROS_DISTRO}
 
+WORKDIR /usr/app/
+
 # Update package list and fix missing dependencies
 RUN apt-get update --fix-missing
-RUN apt update --fix-missing
 
-# Set working directory of container
-WORKDIR /usr/app/
 ENV PYTHONPATH="/usr/app/src:${PYTHONPATH}"
-COPY . .
+COPY pyproject.toml .
 
 # OSMnx dependencies
 RUN apt-get install -y \
@@ -20,11 +19,13 @@ RUN apt-get install -y \
     libgdal-dev \
     g++
 
-USER root
+RUN sudo apt-get install -y python3-pip
+RUN pip install --upgrade pip
+RUN python3 -m pip install  .
 
-# Install Python dependencies defined in pyproject.toml
-RUN apt-get install -y python3-pip
-RUN pip install .
+COPY . .
+
+USER root
 
 # GUI backend for python (required by Matplotlib)
 RUN apt-get install -y tk
