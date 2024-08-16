@@ -1,12 +1,11 @@
 # Build-time arguments
 ARG ROS_DISTRO=humble
-ARG ROSBOARD_PORT=8888
 
 # Base image (Humble is the LTS version for Ubuntu 22.04)
 FROM ros:${ROS_DISTRO}
 
 # Set working directory
-WORKDIR /usr/app/
+WORKDIR /usr/local/autobike
 
 # Update package list and fix missing dependencies
 RUN apt-get update --fix-missing
@@ -18,8 +17,7 @@ RUN apt-get install -y python3-pip && pip3 install --upgrade pip
 RUN apt-get install -y \
     ros-${ROS_DISTRO}-demo-nodes-cpp && \
     pip3 install tornado simplejpeg && \
-    git clone https://github.com/dheera/rosboard.git
-EXPOSE ${ROSBOARD_PORT}
+    git clone https://github.com/dheera/rosboard.git /usr/local/rosboard
 
 # OSMnx dependencies
 RUN apt-get install -y \

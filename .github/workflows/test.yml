@@ -13,7 +13,7 @@ jobs:
     # We only need to test on one OS as we are using Docker
     runs-on: ubuntu-latest
     env:
-      DOCKER_BASE_CMD: docker run --user root --rm
+      DOCKER_BASE_CMD: docker compose run --rm
       COVERAGE_VOLUME: ${{ github.workspace }}/coverage:/usr/app/coverage
 
     steps:
@@ -29,23 +29,23 @@ jobs:
       - name: Black formatting check
         # always() runs even if the job is canceled, while success() || failure() does not
         if: success() || failure()
-        run: ${{ env.DOCKER_BASE_CMD }} autobike black --check --config pyproject.toml .
+        run: ${{ env.DOCKER_BASE_CMD }} autobike bash -ic "format --check"
 
       # Run Pylint linting
       - name: Pylint linting
         if: success() || failure()
-        run: ${{ env.DOCKER_BASE_CMD }} autobike pylint --rcfile=pyproject.toml src/
+        run: ${{ env.DOCKER_BASE_CMD }} autobike bash -ic "lint"
 
       # Run Pytest with code coverage
       - name: Pytest with code coverage
         if: success() || failure()
         # Specify coverage volume
-        run: ${{ env.DOCKER_BASE_CMD }} -v ${{ env.COVERAGE_VOLUME }} autobike pytest --cov=./ --cov-report=xml:./coverage/coverage.xml --cov-report=term
+        run: ${{ env.DOCKER_BASE_CMD }} -v ${{ env.COVERAGE_VOLUME }} autobike bash -ic "pytest --cov=./ --cov-report=xml:./coverage/coverage.xml --cov-report=term"
 
       # Run mypy type checking
       - name: Mypy type check
         if: success() || failure()
-        run: ${{ env.DOCKER_BASE_CMD }} autobike mypy --config-file=pyproject.toml src/
+        run: ${{ env.DOCKER_BASE_CMD }} autobike bash -ic "type"
 
       # Upload to codecov
       - name: Upload coverage to Codecov

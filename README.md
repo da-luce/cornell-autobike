@@ -18,11 +18,16 @@
       - [Linux](#linux-1)
       - [Windows](#windows-1)
     - [Testing](#testing)
+    - [ROSBoard](#rosboard)
   - [Best Practices](#best-practices)
     - [Adding Dependencies](#adding-dependencies)
     - [Formatting and Linting](#formatting-and-linting)
     - [Directory Structure and Testing](#directory-structure-and-testing)
   - [Architecture](#architecture)
+    - [Infrastructure](#infrastructure)
+      - [Why Docker?](#why-docker)
+      - [Why ROS?](#why-ros)
+    - [A Note on ROS GUIs](#a-note-on-ros-guis)
   - [Citations](#citations)
 
 ## Git Basics
@@ -129,8 +134,10 @@ autobike         latest    121bfa1d2778   2 minutes ago   3.67GB
 
 To create a [container](https://docs.docker.com/guides/docker-concepts/the-basics/what-is-a-container/) and run code, you can use one of the following techniques:
 
-- Interactive shell: `docker run -it --rm -v "$(pwd):/usr/app" --user root autobike`
-- One off command: `docker run -it --rm -v "$(pwd):/usr/app" --user root autobike <your command>`
+- Interactive shell: `docker compose run --rm autobike`
+- One off command: `docker compose run --rm autobike <your command>`
+
+[`docker compose`](./docker-compose.yml) specifies all the command line args you would normally run using plain `docker run`. The following notes are present if for some reason you are only using `docker run` and for explanation of the information in [`./docker-compose.yml`](./docker-compose.yml).
 
 > [!NOTE]
 > When no tag is selected, Docker uses the `latest` tag by [defualt](https://docs.docker.com/reference/cli/docker/image/tag/).
@@ -146,7 +153,7 @@ To create a [container](https://docs.docker.com/guides/docker-concepts/the-basic
 Example of a one off command:
 
 ```bash
-docker run -it --rm -v "$(pwd):/usr/app" --user root autobike python src/qlearning/main.py
+docker compose run --rm autobike python3 src/qlearning/main.py
 ```
 
 > [!NOTE]
@@ -156,7 +163,7 @@ docker run -it --rm -v "$(pwd):/usr/app" --user root autobike python src/qlearni
 > Create an alias in your `.bashrc` (or whatever shell you are using) to avoid getting carpal tunnel
 >
 > ```bash
-> alias autobike="docker run -it --rm -v '$(pwd):/usr/app' --user root autobike"
+> alias autobike="docker compose run --rm autobike"
 > ```
 >
 > A quick way to do this if you are using Bash:
@@ -206,10 +213,10 @@ docker run -it --rm -v "$(pwd):/usr/app" --user root autobike python src/qlearni
     --env DISPLAY=host.docker.internal:0
     ```
 
-    Example:
+    This is already provided in [`docker-compose.yml`](./docker-compose.yml), so there is no need to pass any flags when using `docker compose`. Try it out with:
 
     ```text
-    docker run -it --rm -v "$(pwd):/usr/app" --user root --env DISPLAY=host.docker.internal:0 autobike python src/state_pred/bike_sim.py
+    docker compose run autobike python3 src/state_pred/bike_sim.py
     ```
 
 #### Linux
@@ -259,7 +266,31 @@ No clue.
 2. Run `pytest` within a container in the top level dir of the repo
 
 > [!NOTE]
-> This is `/usr/app/` given how our volume is mounted
+> This is `/usr/local/autobike` given how our volume is mounted
+
+### ROSBoard
+
+1. Start both services in the background on the same network: `docker compose up -d`. The dev container will exit, this is alright. You should see something like:
+
+    ```text
+    [+] Running 3/3
+    ✔ Network cornell-autobike_rosnet  Created         0.0s
+    ✔ Container autobike_dev           Started         0.2s
+    ✔ Container rosboard               Started         0.4s
+    ```
+
+2. Attach to the dev container: `docker compose exec autobike bash`
+3. Run a demo: `ros2 run demo_nodes_cpp talker`. You should see something like this being logged in your terminal:
+
+    ```text
+    [INFO] [1723831327.616574043] [talker]: Publishing: 'Hello World: 1'
+    [INFO] [1723831328.618190002] [talker]: Publishing: 'Hello World: 2'
+    [INFO] [1723831329.618042586] [talker]: Publishing: 'Hello World: 3'
+    ```
+
+4. Go to [`localhost:8888`](http://localhost:8888/), and you should see the `/chatter` topic being logged in the dashboard!
+
+![rosboard demo](./assets/rosboard.png)
 
 ## Best Practices
 
@@ -271,12 +302,20 @@ When adding dependencies (pip, apt, etc.) in [pyproject.toml](./pyproject.toml) 
 
 We use [black](https://github.com/psf/black) for formatting, [pylint](https://pypi.org/project/pylint/) for linting, and [mypy](https://mypy.readthedocs.io/en/stable/) for type checking. If you are using [VS Code](https://code.visualstudio.com/), the provided [VS Code settings](.vscode/settings.json) should automatically setup everything you need. Just make sure you have the [recommended extensions](./.vscode/extensions.json) installed.
 
-For other IDEs, there may be extensions provided for these tools, or you could just use the CLI equivalents. Make sure to pass the `pyproject.toml` file as an arg (e.g. `--rcfile=pyproject.toml` or `--config=pyproject.toml`) to use the same formatting and linting settings as the rest of the project. Examples (run from the top level of the repo):
+For other IDEs, there may be extensions provided for these tools, or you could just use the CLI equivalents. Make sure to pass the `pyproject.toml` file as an arg (e.g. `--rcfile=pyproject.toml` or `--config=pyproject.toml`) to use the same formatting and linting settings as the rest of the project. For your convenience, there are aliases defined in `.bashrc` within the container.
 
-- **Linting:** `pylint --rcfile=pyproject.toml src/`
-- **Test:** `pytest`
-- **Formatting:** `black --config pyproject.toml .`
-- **Type checking:** `mypy --config-file=pyproject.toml src/`
+| Procedure         | Command                                  | Alias    |
+| ----------------- | ---------------------------------------- | -------- |
+| **Linting**       | `pylint --rcfile=pyproject.toml src/`    | `lint`   |
+| **Testing**       | `pytest`                                 | `pytest` |
+| **Formatting**    | `black --config pyproject.toml .`        | `format` |
+| **Type checking** | `mypy --config-file=pyproject.toml src/` | `type`   |
+
+> [!NOTE]
+> Docker runs the container in a non-interactive shell, which by default does not load
+> `.bashrc` unless explicitly told to when running a "one off command." So if you are
+> within the container, running `lint` will lint just fine. However, to run it as a one off,
+> you need to use the `-i` flag with bash: `docker compose run --rm autobike bash -ic "lint"`
 
 ### Directory Structure and Testing
 
@@ -405,6 +444,30 @@ flowchart TD
 - **Planning and Decision-Making Layer**: Plans the optimal path to the next waypoint [^2]. The path planning subsystem refines the route through the configuration space--we aim to use a Hybrid A* algorithm [^3]. The behavioral planning module handles high-level decisions, such as stopping at red lights or and obeying road rules (this is not as important as path planning). Given the path, we can easily deduce how we need to adjust our steering/speed to achieve the next point.
 
 - **Control Layer**: This is not our responsibility
+
+### Infrastructure
+
+#### Why Docker?
+
+- Code is always reproducible and consistent across all environments
+- Docker encapsulates everything needed, including system-level dependencies, apt packages, and other tools, not just Python libraries like virtual environments do
+-
+
+#### Why ROS?
+
+- ROS (Robot Operating System) is widely used across the robotics industry, providing a reliable and well-supported framework
+- ROS provides built-in tools and frameworks for asynchronous communication (e.g., publishers, subscribers, services, and actions), so we don't need to implement these from scratch
+- ROS includes powerful tools for visualizing data (e.g., RViz) and monitoring system performance, aiding in development and debugging
+
+### A Note on ROS GUIs
+
+Certain ROS tools like `rqt` and `rqt_graph` can work quite well using X11 forwarding, even on macOS with Apple Silicon. However, more complex 3D visualization tools like `RViz2` and simulation environments like `Gazebo` seem to struggle with X forwarding on macOS, especially on Apple Silicon (issues from XQuartz to Docker to everything inbetween), or dont't work outright.
+
+On the NVIDIA Jetson, tools like RViz and Gazebo should work smoothly without these limitations using X11 forwarding.
+
+For Apple Silicon, using a VNC server inside the container is an alternative solution, but performance has been lackluster in practice due to latency and rendering issues.
+
+A potential solution for visualizing built-in ROS message types in these environments is to use ROSboard. ROSboard renders ROS data types using WebGL directly in a web browser, bypassing the need for complex GUI forwarding or VNC setups. This approach works cross-platform, offering a lightweight and responsive alternative for visualizing ROS topics. More work is needed if we are rending custom data types though.
 
 ## Citations
 
