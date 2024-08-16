@@ -4,22 +4,25 @@ services:
   # Autobike development
   autobike:
     container_name: autobike_dev
+    image: autobike:tk
+    hostname: bike_dev
     build:
       context: .
-    command: bash -c
+    command: bash
+    stdin_open: true # docker run -i
+    tty: true        # docker run -t
     networks:
       - rosnet
-    user: root
     environment:
-      - HOME=/root
-    working_dir: /usr/app
+      - DISPLAY=host.docker.internal:0
     volumes:
       - ./:/usr/app
-
 
   # ROSboard
   rosboard:
     container_name: rosboard
+    image: autobike:tk
+    hostname: bike_dev
     build:
       context: .
     command: bash -c "cd /usr/app/rosboard && ./run"
@@ -29,9 +32,6 @@ services:
       - rosnet
     depends_on:
       - autobike
-    user: root
-    environment:
-      - HOME=/root
 
 networks:
   rosnet:
