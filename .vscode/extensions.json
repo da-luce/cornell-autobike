@@ -1,0 +1,10 @@
+{
+    "recommendations": [
+        "ms-python.python",             // Python support
+        "ms-python.black-formatter",    // Black formatter
+        "ms-python.isort",              // Import sorting
+        "ms-python.pylint",             // Pylint linter
+        "matangover.mypy",              // Mypy type checker
+        "editorconfig.editorconfig"     // Consistent styles between IDEs
+    ]
+}

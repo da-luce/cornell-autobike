@@ -1,19 +1,27 @@
-from pykalman import KalmanFilter
-import numpy as np
+"""Module which runs the navigation algorithm as a whole."""
+
+# import numpy as np
+# from pykalman import KalmanFilter
+
 
 def main():
+    """
+    Main loop
+    """
+
     # Initialize state
     current_state = [0, 0, 0, 0, 0, 0, 0]
 
-    while(True):
+    while True:
         # Receiving data from GPS
         gps = get_gps()
 
         # Receiving data from vision
         vision = get_vision()
+        print(vision)
 
         # Update state given GPS data
-        current_state = update_state(gps)
+        current_state = update_state(current_state, gps)
 
         # Find optimal steering angle
         steering_angle = get_steering_angle(current_state)
@@ -26,32 +34,54 @@ def main():
         # if end_state is reached:
         #     break
 
+
 def calculate_moving_average(state, data):
-    # take average of current state and gps data
+    """
+    take average of current state and gps data
+    """
+    print(state, data)
+    return 0
 
-    return
 
-# Receives data from GPS
 def get_gps():
-    return
+    """
+    Receives data from GPS
+    """
+    return 0
 
-# Receives data from vision
+
 def get_vision():
-    return
+    """
+    Receives data from vision
+    """
+    return 0
 
-# Updates state given GPS data
+
 def update_state(state, gps):
+    """
+    Updates state given GPS data
+    """
+    print(state, gps)
     return state
 
-# Returns optimal steering angle
+
 def get_steering_angle(state):
+    """
+    Returns optimal steering angle
+    """
+    print(state)
     steering_angle = 0.0
 
     return steering_angle
 
-# Sends steering angle data to controls
+
 def output_data(steering_angle):
-    return
+    """
+    Sends steering angle data to controls
+    """
+    print(steering_angle)
+    return 0
+
 
 if __name__ == "__main__":
     main()

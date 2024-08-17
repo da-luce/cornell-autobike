@@ -86,7 +86,7 @@ The model relies on a variety physical constants of the bike, detailed below:
 
 A kinematic model is less accurate a dynamic model, as it ignores the
 actual forces acting upon the bike. However, it would also be computationally
-less expensive. More investigation required.  
+less expensive. More investigation required.
 
 ## Terminology
 
@@ -100,7 +100,7 @@ acceleration (altered via the motor on the rear rear).
 
 At each timestep, we change the values of each input: this is the *input
 delta*. For example, how much we turn the front wheel at this timestep or how
-much we accelerate.  
+much we accelerate.
 
 ### Input Resolution
 
