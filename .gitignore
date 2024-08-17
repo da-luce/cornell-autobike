@@ -1,11 +1,14 @@
 # Cache files
 __pycache__/
 *cache*
+<<<<<<< HEAD
 *.egg-info
 
 # Coverage reports and test artifacts
 *coverage*
 codecov*
+=======
+>>>>>>> main
 
 # IDE-specific files (IntelliJ IDEA, PyCharm)
 Q-Learning.iml
@@ -13,6 +16,7 @@ misc.xml
 modules.xml
 vcs.xml
 
+<<<<<<< HEAD
 # macOS system files
 .DS_Store
 
@@ -22,3 +26,20 @@ install/
 log/
 
 
+=======
+# Egg info (Python package distribution)
+src/qlearning.egg-info/
+
+# Coverage reports and test artifacts
+*coverage*
+codecov*
+
+# macOS system files
+.DS_Store
+
+# Build directories
+build/
+
+# OpenStreetMap data files
+*.osm
+>>>>>>> main
