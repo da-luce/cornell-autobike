@@ -47,8 +47,6 @@ RUN groupadd --gid $USER_GID $USERNAME && \
 
 ENV HOME=/home/$USERNAME
 RUN chown -R $USERNAME:$USERNAME $HOME
-# Attempt to fix the github workflow permission errors
-RUN chown -R $USERNAME:$USERNAME /usr/local/autobike
 
 # Add shell env to .bashrc
 COPY shell_env.sh /tmp/shell_env.sh

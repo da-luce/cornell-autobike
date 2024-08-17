@@ -13,7 +13,8 @@ jobs:
     # We only need to test on one OS as we are using Docker
     runs-on: ubuntu-latest
     env:
-      DOCKER_BASE_CMD: docker compose run --rm
+      # Running as root removes permission errors when running github workflow
+      DOCKER_BASE_CMD: docker compose run --rm --user root
       COVERAGE_VOLUME: ${{ github.workspace }}/coverage:/usr/app/coverage
 
     steps:
