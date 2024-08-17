@@ -1,0 +1,26 @@
+{
+    // Python formatting and linting
+    "black-formatter.args": [
+        "--config", "pyproject.toml"
+    ],
+    "pylint.args": [
+        "--rcfile=pyproject.toml"
+    ],
+    "sort-imports.on-save": true,
+    "mypy.configFile": "pyproject.toml",
+
+    // Editor
+    "editor.formatOnSave": true,
+    "editor.codeActionsOnSave": {
+        "source.organizeImports": "always"
+    },
+    "editor.rulers": [88],
+
+    // Files
+    "files.trimTrailingWhitespace": true,
+    "files.insertFinalNewline": true,
+    "files.associations": {
+        // Associate PEP 484 stub files with Python
+        "*.pyi": "python"
+    }
+}
