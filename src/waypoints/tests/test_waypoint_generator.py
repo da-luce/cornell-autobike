@@ -1,5 +1,6 @@
 """Unit tests for the WaypointGenerator class."""
 
+import os
 import pytest
 import rclpy
 from waypoints.waypoint_generator import WaypointGenerator
@@ -10,8 +11,12 @@ from nav_msgs.msg import Path
 def node():
     """Create a WaypointGenerator node"""
     rclpy.init()
-    waypoint_node = WaypointGenerator(None, None)
+
+    # IMPORTANT: this forces both colcon test and pytest to find the correct map.osm file (in the root of the ROS waypoints package)
+    map_path = os.path.join(os.path.dirname(__file__), "..", "map.osm")
+    waypoint_node = WaypointGenerator(map_path)
     yield waypoint_node
+
     rclpy.shutdown()
 
 

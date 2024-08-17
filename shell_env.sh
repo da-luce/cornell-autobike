@@ -14,7 +14,7 @@ source $WORKDIR/install/setup.bash
 alias lint='(cd $WORKDIR && pylint --rcfile=pyproject.toml src/)'
 alias format='(cd $WORKDIR && black --config pyproject.toml .)'
 alias type='(cd $WORKDIR && mypy --config-file=pyproject.toml src/)'
-alias pytest='(cd $WORKDIR && pytest)'
+# Don't need pytest, as it grabs correct information running anywhere in the project
 
 # Colcon
 alias build='(cd $WORKDIR && colcon build)'

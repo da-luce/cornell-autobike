@@ -43,6 +43,7 @@ zip-safe = false
 [tool.pytest.ini_options]
 testpaths = ["src/*/test*"]
 addopts = "--verbose"
+pythonpath = ["src"]
 
 [tool.black]
 line-length = 88

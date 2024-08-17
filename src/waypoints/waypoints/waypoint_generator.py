@@ -25,14 +25,16 @@ class WaypointGenerator(Node):
     """
 
     # FIXME: how do these slots work?
-    __slots__ = ("stamp", "frame_id")
+    # FIXME: we pass the map_path to acount for running pytest and colcon tests--they expect it in different dirs (see the test file...)
+    __slots__ = ("stamp", "frame_id", "map_path")
 
-    def __init__(self, stamp=None, frame_id=None):
+    def __init__(self, map_path, stamp=None, frame_id=None):
         super().__init__('waypoints_node')
         self.publisher_ = self.create_publisher(Path, '/waypoints', 10)
         self.get_logger().info("Waypoint routing node started")
         self.stamp = stamp
         self.frame_id = frame_id
+        self.map_path = map_path
 
         # Run the main logic
         self.main()
@@ -121,8 +123,7 @@ class WaypointGenerator(Node):
 
         # Setup the router
         # TODO: don't make this hardcoded?
-        # FIXME: colcon looks for his in the ROS package root, pytest looks in the project root.
-        router = Router("cycle", "./map.osm", localfileType="xml")
+        router = Router("cycle", self.map_path, localfileType="xml")
 
         # Find the closest nodes to the start and end positions
         start_node = router.findNode(start[0], start[1])
@@ -196,7 +197,8 @@ class WaypointGenerator(Node):
 def main(args=None):
     """Run on `ros2 run waypoints waypoints`"""
     rclpy.init(args=args)
-    node = WaypointGenerator()
+
+    node = WaypointGenerator(map_path="./map.osm")  # Default path for ROS context
     rclpy.spin(node)
     rclpy.shutdown()
 
