@@ -168,7 +168,7 @@ autobike         latest    121bfa1d2778   2 minutes ago   3.67GB
 ```
 
 > [!NOTE]
-> Images can be deleted with `docker image rm`
+> Images can be deleted with `docker image rm`. Try adding the `--no-cache` flag if a rebuild isn't working as expected.
 
 ### 2. Run in a Container
 
@@ -284,6 +284,11 @@ Packages may define an entry point to be run independently. For example: `ros2 r
 4. Go to [`localhost:8888`](http://localhost:8888/), and you should see the `/chatter` topic being logged in the dashboard!
 
 ![rosboard demo](./assets/rosboard.png)
+
+5. Run `docker compose down` when you are done.
+
+> [!NOTE]
+> If you are struggling to get this working, try deleting all your containers and restarting at [step 1](#visualizing-with-rosboard).
 
 #### Other ROS GUIs
 
