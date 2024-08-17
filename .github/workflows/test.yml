@@ -28,7 +28,13 @@ jobs:
 
       # Build ROS project
       - name: Build ROS project
+        if: success()
         run: ${{ env.DOCKER_BASE_CMD }} autobike bash -ic "build"
+
+      # Run test ROS package
+      - name: Run ROS package
+        if: success()
+        run: ${{ env.DOCKER_BASE_CMD }} autobike bash -ic "build && ros2 run waypoints once"
 
       # Run Black formatting check
       - name: Black formatting check

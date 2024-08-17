@@ -243,11 +243,12 @@ Summary: 1 package finished [0.88s]
 ```
 
 > [!NOTE]
-> `build` is a predefined alias for `colcon build`. Before building for the first time, one must run `source install/setup.bash`*.
+> `build` is essentially an alias for `colcon build && source install/setup.bash`.
 >
-> *_This only needs to be sourced once at the start of the containers life, and is already done for you in the image_
->
-> WARNING: This should all be done in the **top level directory**, or else you will have build artifacts all over the place.
+> WARNING: If not using the alias, this should all be done in the **top level directory**, or else you will have build artifacts all over the place. The alias forces the correct directory.
+
+> [!TIP]
+> If you encounter strange behavior, it’s often a good idea to clean your workspace before rebuilding: `rm -rf build/ install/ log/`. There is an alias `clean` to make this easier.
 
 #### Running a Package
 
@@ -306,16 +307,20 @@ We use [black](https://github.com/psf/black) for formatting, [pylint](https://py
 
 For other IDEs, there may be extensions provided for these tools, or you could just use the CLI equivalents. Make sure to pass the `pyproject.toml` file as an arg (e.g. `--rcfile=pyproject.toml` or `--config=pyproject.toml`) to use the same formatting and linting settings as the rest of the project. For your convenience, there are aliases defined in `.bashrc` within the container (these are sourced from [`shell_env.sh`](./shell_env.sh)).
 
-| Procedure               | Tool                                                           | Command                                        | Alias    |
-| ----------------------- | -------------------------------------------------------------- | ---------------------------------------------- | -------- |
-| **Linting**             | [pylint](https://pypi.org/project/pylint/)                     | `pylint --rcfile=pyproject.toml src/`          | `lint`   |
-| **Testing** (Method 1)  | [pytest](https://docs.pytest.org/en/stable/)                   | `pytest`                                       | `pytest` |
-| **Testing** (Method 2)* | [colcon](https://colcon.readthedocs.io/en/released/) + pytest  | `colcon test --event-handlers console_direct+` | `ctest`  |
-| **Formatting**          | [black](https://pypi.org/project/black/)                       | `black --config pyproject.toml .`              | `format` |
-| **Type checking**       | [pylint](https://pypi.org/project/pylint/)                     | `mypy --config-file=pyproject.toml src/`       | `type`   |
-| Building                | [colcon]([colcon](https://colcon.readthedocs.io/en/released/)) | `colcon buils`                                 | `build`  |
+| Procedure               | Tool                                                           | Command                                        | Alias          |
+| ----------------------- | -------------------------------------------------------------- | ---------------------------------------------- | -------------- |
+| **Linting**             | [pylint](https://pypi.org/project/pylint/)                     | `pylint --rcfile=pyproject.toml src/`          | `lint`         |
+| **Testing** (Method 1)  | [pytest](https://docs.pytest.org/en/stable/)                   | `pytest`                                       | `pytest`       |
+| **Testing** (Method 2)* | [colcon](https://colcon.readthedocs.io/en/released/) + pytest  | `colcon test --event-handlers console_direct+` | `coltest`      |
+| **Formatting**          | [black](https://pypi.org/project/black/)                       | `black --config pyproject.toml .`              | `format`       |
+| **Formatting**          | [black](https://pypi.org/project/black/)                       | `black --config pyproject.toml --check .`      | `format_check` |
+| **Type checking**       | [pylint](https://pypi.org/project/pylint/)                     | `mypy --config-file=pyproject.toml src/`       | `type_check`   |
+| Building                | [colcon]([colcon](https://colcon.readthedocs.io/en/released/)) | `colcon buils`                                 | `build`        |
 
 *_colcon will automatically collect package pytest tests and run them. I tried to make it so both approaches would work, as colcon does not support code coverage with the same ease that pytest does._
+
+> [!IMPORTANT]
+> You need `build` before running pytest!
 
 > [!NOTE]
 > Docker runs the container in a non-interactive shell, which by default does not load

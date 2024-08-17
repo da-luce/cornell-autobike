@@ -2,7 +2,6 @@
 Waypoint generator for route planning.
 """
 
-import os
 from typing import Tuple, Optional, List, cast
 import xml.etree.ElementTree as ET
 
@@ -27,11 +26,13 @@ class WaypointGenerator(Node):
 
     # FIXME: how do these slots work?
     # FIXME: we pass the map_path to acount for running pytest and colcon tests--they expect it in different dirs (see the test file...)
-    __slots__ = ("stamp", "frame_id", "map_path")
+    __slots__ = ("publisher_", "stamp", "frame_id", "map_path")
 
     def __init__(self, map_path, stamp=None, frame_id=None):
         super().__init__('waypoints_node')
-        self.publisher_ = self.create_publisher(Path, '/waypoints', 10)
+
+        # Publish a Path to the /planning/waypoints topic, queue depth of 1
+        self.publisher_ = self.create_publisher(Path, '/planning/waypoints', 1)
         self.get_logger().info("Waypoint routing node started")
         self.stamp = stamp
         self.frame_id = frame_id
@@ -184,10 +185,19 @@ def main(args=None):
     """Run on `ros2 run waypoints waypoints`"""
     rclpy.init(args=args)
 
-    node = WaypointGenerator(
-        map_path="./src/waypoints/map.osm"
-    )  # Default path for ROS context
+    node = WaypointGenerator(map_path="./src/waypoints/map.osm")
     rclpy.spin(node)
+    node.destroy_node()
+    rclpy.shutdown()
+
+
+def run_once(args=None):
+    """Run the waypoint generation node once and then exit (useful for testing)."""
+    rclpy.init(args=args)
+
+    # FIXME: It seems the node runs once on initialization?
+    node = WaypointGenerator(map_path="./src/waypoints/map.osm")
+    node.destroy_node()
     rclpy.shutdown()
 
 

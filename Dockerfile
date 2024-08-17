@@ -48,9 +48,9 @@ RUN groupadd --gid $USER_GID $USERNAME && \
 ENV HOME=/home/$USERNAME
 RUN chown -R $USERNAME:$USERNAME $HOME
 
-# Add shell env to .bashrc
-COPY shell_env.sh /tmp/shell_env.sh
-RUN cat /tmp/shell_env.sh >> $HOME/.bashrc
+# Add shell env to .bashrc (overwritten by volume)
+COPY shell_env.sh $HOME/shell_env.sh
+RUN echo "source \$HOME/shell_env.sh" >> $HOME/.bashrc
 
 # Clean up cached package lists to reduce image size
 RUN rm -rf /var/lib/apt/lists/*

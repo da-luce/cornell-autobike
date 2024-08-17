@@ -29,6 +29,7 @@ setup(
     entry_points={
         'console_scripts': [
             'waypoints = waypoints.waypoint_generator:main',
+            'once = waypoints.waypoint_generator:run_once',
         ],
     },
     data_files=[
