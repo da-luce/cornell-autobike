@@ -1,6 +1,6 @@
+"""Setup script for the waypoints package."""
+
 from setuptools import setup
-import os
-from glob import glob
 
 PACKAGE_NAME = 'waypoints'
 

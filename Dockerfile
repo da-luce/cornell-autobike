@@ -2,36 +2,41 @@
 ARG ROS_DISTRO=humble
 
 # Base image (Humble is the LTS version for Ubuntu 22.04)
-FROM ros:${ROS_DISTRO}
+# IMPORTANT: pin to a specific hash!
+FROM ros:${ROS_DISTRO}@sha256:80a4f6329aad64f14b600133cb3fd279d0bf666feeca5abef3f10bb41b0916ea
 
 # Set working directory
-WORKDIR /usr/local/autobike
+ENV WORKDIR /usr/local/autobike
+WORKDIR $WORKDIR
 
 # Update package list and fix missing dependencies
 RUN apt-get update --fix-missing
 
+# Basic tools
+RUN apt-get install -y vim
+
 # Install pip (updating is important!)
-RUN apt-get install -y python3-pip && pip3 install --upgrade pip
+RUN apt-get install -y python3-pip=22.0.2+dfsg-1ubuntu0.4 && pip3 install --upgrade pip
 
 # Setup ROSboard
 RUN apt-get install -y \
-    ros-${ROS_DISTRO}-demo-nodes-cpp && \
-    pip3 install tornado simplejpeg && \
+    ros-${ROS_DISTRO}-demo-nodes-cpp=0.20.5-1jammy.20240730.220928 && \
+    pip3 install tornado==6.4.1 simplejpeg==1.7.4 && \
     git clone https://github.com/dheera/rosboard.git /usr/local/rosboard
 
 # OSMnx dependencies
 RUN apt-get install -y \
-    gdal-bin \
-    libgdal-dev \
-    g++
+    gdal-bin=3.4.1+dfsg-1build4 \
+    libgdal-dev=3.4.1+dfsg-1build4 \
+    g++=4:11.2.0-1ubuntu1
 
 # GUI backend for python (required by Matplotlib)
 RUN apt-get install -y python3.10-tk
 
 # Copy Python project files and install dependencies
-ENV PYTHONPATH="/usr/app/src:${PYTHONPATH}"
+ENV PYTHONPATH="$WORKDIR:${PYTHONPATH}"
 COPY pyproject.toml .
-RUN pip3 install .
+RUN pip install .
 
 # Run the container as a non-root user for better security
 ARG USERNAME=bichael
@@ -41,20 +46,11 @@ RUN groupadd --gid $USER_GID $USERNAME && \
     useradd --uid $USER_UID --gid $USER_GID -m $USERNAME
 
 ENV HOME=/home/$USERNAME
-ARG RC=$HOME/.bashrc
-
 RUN chown -R $USERNAME:$USERNAME $HOME
 
-# Source the ROS 2 environment for every shell session
-RUN echo "source /opt/ros/${ROS_DISTRO}/setup.bash" >> $RC
-
-# Aliases
-RUN echo "alias ros_test='ros2 run demo_nodes_cpp talker'" >> $RC
-RUN echo "alias lint='pylint --rcfile=pyproject.toml src/'" >> $RC
-RUN echo "alias pytest='pytest'" >> $RC
-RUN echo "alias format='black --config pyproject.toml .'" >> $RC
-RUN echo "alias type='mypy --config-file=pyproject.toml src/'" >> $RC
-RUN echo "alias python=python3" >> $RC
+# Add shell env to .bashrc
+COPY shell_env.sh /tmp/shell_env.sh
+RUN cat /tmp/shell_env.sh >> $HOME/.bashrc
 
 # Clean up cached package lists to reduce image size
 RUN rm -rf /var/lib/apt/lists/*

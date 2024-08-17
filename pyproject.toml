@@ -41,7 +41,7 @@ dependencies = [
 zip-safe = false
 
 [tool.pytest.ini_options]
-testpaths = ["test"]
+testpaths = ["src/*/test*"]
 addopts = "--verbose"
 
 [tool.black]
@@ -52,6 +52,7 @@ skip-string-normalization = true
 [tool.pylint]
 disable = ["W0511", "C0301"]
 max-line-length = 88
+ignored-classes = ["nav_msgs.msg.Path", "geometry_msgs.msg.PoseStamped"]
 
 [tool.mypy]
 mypy_path = "src"

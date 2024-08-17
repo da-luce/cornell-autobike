@@ -1,4 +1,9 @@
-from typing import Tuple, Optional, List
+"""
+Waypoint generator for route planning.
+"""
+
+from typing import Tuple, Optional, List, cast
+import xml.etree.ElementTree as ET
 
 import overpass
 import requests
@@ -15,11 +20,19 @@ END_ADDRESS = "Morrison Hall, Sisson Place, Ithaca, NY"
 
 
 class WaypointGenerator(Node):
+    """
+    ROS2 node for generating and publishing waypoint paths.
+    """
 
-    def __init__(self):
+    # FIXME: how do these slots work?
+    __slots__ = ("stamp", "frame_id")
+
+    def __init__(self, stamp=None, frame_id=None):
         super().__init__('waypoints_node')
         self.publisher_ = self.create_publisher(Path, '/waypoints', 10)
         self.get_logger().info("Waypoint routing node started")
+        self.stamp = stamp
+        self.frame_id = frame_id
 
         # Run the main logic
         self.main()
@@ -64,20 +77,26 @@ class WaypointGenerator(Node):
             api = overpass.API(timeout=600)
             # FIXME: what the heck does (._;>;) do?!?
             query = f'way({box_string});(._;>;)'
-            response = api.get(query, responseformat="xml")
+            response = cast(str, api.get(query, responseformat="xml"))
+
+            # Treat trivial responses as None
+            # Parse the XML response to check for meaningful map data
+            root = ET.fromstring(response)
+            if (
+                not any(root.iter("node"))
+                and not any(root.iter("way"))
+                and not any(root.iter("relation"))
+            ):
+                return None
+
             return response
+
+        except requests.exceptions.RequestException as e:
+            self.get_logger().error(f"Network error: {e}")
         except overpass.errors.OverpassSyntaxError as e:
             self.get_logger().error(f"Overpass syntax error: {e}")
-        except overpass.errors.OverpassTooManyRequests as e:
-            self.get_logger().error(f"Too many requests sent to Overpass API: {e}")
-        except overpass.errors.OverpassGatewayTimeout as e:
-            self.get_logger().error(f"Gateway timeout from Overpass API: {e}")
-        except overpass.errors.OverpassRuntimeError as e:
-            self.get_logger().error(f"Runtime error from Overpass API: {e}")
-        except Exception as e:
-            self.get_logger().error(
-                f"An unexpected error occurred fetching map data: {e}"
-            )
+        except overpass.errors.OverpassError as e:
+            self.get_logger().error(f"Overpass API error: {e}")
 
         return None
 
@@ -102,6 +121,7 @@ class WaypointGenerator(Node):
 
         # Setup the router
         # TODO: don't make this hardcoded?
+        # FIXME: colcon looks for his in the ROS package root, pytest looks in the project root.
         router = Router("cycle", "./map.osm", localfileType="xml")
 
         # Find the closest nodes to the start and end positions
@@ -174,6 +194,7 @@ class WaypointGenerator(Node):
 
 
 def main(args=None):
+    """Run on `ros2 run waypoints waypoints`"""
     rclpy.init(args=args)
     node = WaypointGenerator()
     rclpy.spin(node)
