@@ -2,6 +2,7 @@
 Waypoint generator for route planning.
 """
 
+import os
 from typing import Tuple, Optional, List, cast
 import xml.etree.ElementTree as ET
 
@@ -102,27 +103,12 @@ class WaypointGenerator(Node):
 
         return None
 
-    def test_route(self, start_pos, end_pos, filepath):
-        """Get the route between two positions."""
-        router = Router("cycle", filepath, localfileType="xml")
-        start = router.findNode(start_pos[0], start_pos[1])
-        end = router.findNode(end_pos[0], end_pos[1])
-        status, route = router.doRoute(start, end)
-
-        if status == 'success':
-            route_lat_lons = list(map(router.nodeLatLon, route))
-        else:
-            route_lat_lons = []
-
-        return route_lat_lons, (status == 'success')
-
     def route(
         self, start: Tuple[float, float], end: Tuple[float, float]
     ) -> Optional[List[Tuple[float, float]]]:
         """Get the route between two positions."""
 
-        # Setup the router
-        # TODO: don't make this hardcoded?
+        # Setup the route
         router = Router("cycle", self.map_path, localfileType="xml")
 
         # Find the closest nodes to the start and end positions
@@ -198,7 +184,9 @@ def main(args=None):
     """Run on `ros2 run waypoints waypoints`"""
     rclpy.init(args=args)
 
-    node = WaypointGenerator(map_path="./map.osm")  # Default path for ROS context
+    node = WaypointGenerator(
+        map_path="./src/waypoints/map.osm"
+    )  # Default path for ROS context
     rclpy.spin(node)
     rclpy.shutdown()
 

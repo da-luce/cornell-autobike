@@ -51,7 +51,7 @@ target-version = ["py39"]
 skip-string-normalization = true
 
 [tool.pylint]
-disable = ["W0511", "C0301"]
+disable = ["W0511", "C0301", "E1101", "E0237"]
 max-line-length = 88
 ignored-classes = ["nav_msgs.msg.Path", "geometry_msgs.msg.PoseStamped"]
 

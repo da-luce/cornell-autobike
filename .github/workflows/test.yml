@@ -31,7 +31,7 @@ jobs:
 
       # Run Black formatting check
       - name: Black formatting check
-        run: ${{ env.DOCKER_BASE_CMD }} autobike bash -ic "format --check"
+        run: ${{ env.DOCKER_BASE_CMD }} autobike bash -ic "format_check"
 
       # Run Pylint linting
       - name: Pylint linting

@@ -13,6 +13,7 @@ source $WORKDIR/install/setup.bash
 # Common tools
 alias lint='(cd $WORKDIR && pylint --rcfile=pyproject.toml src/)'
 alias format='(cd $WORKDIR && black --config pyproject.toml .)'
+alias format_check='(cd $WORKDIR && black --check --config pyproject.toml .)'
 alias type='(cd $WORKDIR && mypy --config-file=pyproject.toml src/)'
 # Don't need pytest, as it grabs correct information running anywhere in the project
 
