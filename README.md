@@ -317,7 +317,7 @@ For other IDEs, there may be extensions provided for these tools, or you could j
 | **Type checking**       | [pylint](https://pypi.org/project/pylint/)                     | `mypy --config-file=pyproject.toml src/`       | `type_check`   |
 | Building                | [colcon]([colcon](https://colcon.readthedocs.io/en/released/)) | `colcon buils`                                 | `build`        |
 
-*_colcon will automatically collect package pytest tests and run them. I tried to make it so both approaches would work, as colcon does not support code coverage with the same ease that pytest does._
+*_colcon will automatically collect package pytest tests and run them. It is difficult to get both of these to work at the same time. You should ensure that `pytest` always works as this is what we use to validate PRs. Colcon does not support code coverage with the same ease that pytest does._
 
 > [!IMPORTANT]
 > You need `build` before running pytest!

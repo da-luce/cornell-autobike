@@ -1,10 +1,16 @@
 """Unit tests for the WaypointGenerator class."""
 
+# pylint: disable=redefined-outer-name
+
 import os
 import pytest
 import rclpy
-from waypoints.waypoint_generator import WaypointGenerator
+
 from nav_msgs.msg import Path
+
+# FIXME: this import works for pytest and colcon test but not pylint :(
+# pylint: disable=import-error, no-name-in-module
+from waypoints.waypoint_generator import WaypointGenerator
 
 
 @pytest.fixture(scope='module')

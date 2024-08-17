@@ -51,7 +51,7 @@ jobs:
       - name: Pytest with code coverage
         if: success() || failure()
         # Specify coverage volume
-        run: ${{ env.DOCKER_BASE_CMD }} -v ${{ env.COVERAGE_VOLUME }} autobike bash -ic "pytest --cov=./ --cov-report=xml:./coverage/coverage.xml --cov-report=term"
+        run: ${{ env.DOCKER_BASE_CMD }} -v ${{ env.COVERAGE_VOLUME }} autobike bash -ic "build && pytest --cov=./ --cov-report=xml:./coverage/coverage.xml --cov-report=term"
 
       # Run mypy type checking
       - name: Mypy type check
