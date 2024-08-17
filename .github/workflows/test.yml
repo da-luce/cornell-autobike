@@ -23,7 +23,7 @@ jobs:
 
       # Build Docker image
       - name: Build Docker image
-        run: docker build -t autobike .
+        run: docker build -t autobike --no-cache .
 
       # Build ROS project
       - name: Build ROS project
