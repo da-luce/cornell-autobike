@@ -20,7 +20,7 @@ RUN apt-get install -y python3-pip=22.0.2+dfsg-1ubuntu0.4 && pip3 install --upgr
 
 # Setup ROSboard
 RUN apt-get install -y \
-    ros-${ROS_DISTRO}-demo-nodes-cpp=0.20.5-1jammy.20240730.220928 && \
+    ros-${ROS_DISTRO}-demo-nodes-cpp && \
     pip3 install tornado==6.4.1 simplejpeg==1.7.4 && \
     git clone https://github.com/dheera/rosboard.git /usr/local/rosboard
 
