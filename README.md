@@ -17,6 +17,7 @@
       - [MacOS](#macos-1)
       - [Linux](#linux-1)
       - [Windows](#windows-1)
+    - [ROS Madness](#ros-madness)
     - [Testing](#testing)
     - [ROSBoard](#rosboard)
   - [Best Practices](#best-practices)
@@ -260,10 +261,26 @@ May the odds be ever in your favor...
 
 No clue.
 
+### ROS Madness
+
+ROS uses [colcon](https://colcon.readthedocs.io/en/released/) to build and manage workspaces.
+It can automatically detect package types (e.g., CMake, Python, etc.) and build them accordingly. We define ROS packages in `./src`, see this [tutorial](https://docs.ros.org/en/humble/Tutorials/Beginner-Client-Libraries/Writing-A-Simple-Py-Publisher-And-Subscriber.html).
+
+To build, run, test code in a container:
+
+> [!WARNING]
+> This should all be done in the **top level directory**, or else you will have build artifacts all over the place.
+
+1. `source install/setup.bash`
+2. `colcon build`
+3. `ros2 run waypoints waypoints`
+
 ### Testing
 
 1. Follow the above guide for running code in Docker containers
 2. Run `pytest` within a container in the top level dir of the repo
+
+Colcon will automatically collect package pytest tests: `colcon test --event-handlers console_direct+`
 
 > [!NOTE]
 > This is `/usr/local/autobike` given how our volume is mounted
@@ -450,8 +467,7 @@ flowchart TD
 #### Why Docker?
 
 - Code is always reproducible and consistent across all environments
-- Docker encapsulates everything needed, including system-level dependencies, apt packages, and other tools, not just Python libraries like virtual environments do
--
+- Docker encapsulates everything we need, including system-level dependencies, apt packages, and other tools, not just Python libraries like virtual environments do
 
 #### Why ROS?
 

@@ -23,3 +23,12 @@ build/
 
 # OpenStreetMap data files
 *.osm
+
+# Ignore build artifacts
+build/
+install/
+log/
+
+# Poetry-related files
+poetry.lock
+
