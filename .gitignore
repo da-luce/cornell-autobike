@@ -16,9 +16,6 @@ vcs.xml
 # macOS system files
 .DS_Store
 
-# OpenStreetMap data files
-*.osm
-
 # ROS2 build artifacts
 build/
 install/
