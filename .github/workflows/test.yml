@@ -27,7 +27,7 @@ jobs:
 
       # Build ROS project
       - name: Build ROS project
-        run: ${{ env.DOCKER_BASE_CMD }} autobike build
+        run: ${{ env.DOCKER_BASE_CMD }} autobike bash -ic "build"
 
       # Run Black formatting check
       - name: Black formatting check
