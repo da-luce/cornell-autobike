@@ -4,6 +4,7 @@
 ![Test Status](https://github.com/da-luce/cornell-autobike/actions/workflows/test.yml/badge.svg)
 
 - [Autobike Software](#autobike-software)
+  - [Important Links](#important-links)
   - [Installation](#installation)
     - [MacOS](#macos)
     - [Linux](#linux)
@@ -27,11 +28,21 @@
     - [Directory Structure and Testing](#directory-structure-and-testing)
   - [Architecture](#architecture)
   - [Infrastructure](#infrastructure)
-      - [Why Docker?](#why-docker)
-      - [Why ROS?](#why-ros)
+    - [Why Docker?](#why-docker)
+    - [Why ROS?](#why-ros)
   - [Git Basics](#git-basics)
     - [Git Resources](#git-resources)
   - [Citations](#citations)
+
+---
+
+## Important Links
+
+- [Software Planning Repo](https://github.com/da-luce/Autobike-Software-Planning/)
+- [Vision Repo](https://github.com/da-luce/Autobike-Vision)
+- [Navigation Repo](https://github.com/da-luce/cornell-autobike)
+- [Autobike Google Drive](https://drive.google.com/drive/folders/0B9FAXBSQ_mBLU25zc3h3VmR3MXc?resourcekey=0-_FN2UezNOB-4-eSO1g_xPw&usp=sharing)
+- [Slack Channel](https://cuautonomousbike.slack.com/archives/C05PP2TQFCG)
 
 ---
 
@@ -354,13 +365,16 @@ src/
 │  ├─ package.xml
 ```
 
+- Nodes should prioritize using standardized [ROS 2 common data types](https://github.com/ros2/common_interfaces). These types are widely supported across the ROS ecosystem, ensuring better compatibility and integration with other ROS packages and sensors.
 - The [waypoints](./src/waypoints/) package should serve as a good example of how to build a simple package.
 - Each package should contain a `README.md` which contains basic documentation on how one should use the file along wih other relevant info:
   - Exported constants and functions
   - Implementation documentation as seen fit
   - **Citations** and **sources**
   - Perhaps, add a small [Mermaid](https://mermaid.live) diagram
-- Each module should have a corresponding `test/test_package_X.py` file containing `pytest` tests
+- Each package should have a corresponding `test/test_package_X.py` file containing `pytest` tests
+
+---
 
 ## Architecture
 
@@ -451,7 +465,6 @@ flowchart TD
     classDef purple fill:#F3E6FF,stroke:#9933FF,stroke-width:2px,color:#9933FF;
     classDef gray fill:#F0F0F0,stroke:#A0A0A0,stroke-width:1px,color:#A0A0A0;
     classDef graySubgraph fill:transparent,stroke:#A0A0A0,stroke-width:2px,color:#A0A0A0;
-    linkStyle default stroke:black;
 ```
 
 - **Sensors Layer**: Responsible for collecting raw data from various sensors, including LiDAR, cameras, GPS, and RTK. These sensors provide crucial information about the environment, such as obstacles, road markings, and the bicycle’s location. This data is the foundation for perception, localization, and decision-making processes.
@@ -466,15 +479,17 @@ flowchart TD
 
 - **Control Layer**: This is not our responsibility
 
+---
+
 ## Infrastructure
 
-#### Why Docker?
+### Why Docker?
 
 - Code is always reproducible and consistent across all environments
 - Docker encapsulates everything we need, including system-level dependencies, apt packages, and other tools, not just Python libraries like virtual environments do
 - Installing ROS any other way is beyond painful
 
-#### Why ROS?
+### Why ROS?
 
 - ROS (Robot Operating System) is widely used across the robotics industry, providing a reliable and well-supported framework
 - ROS provides built-in tools and frameworks for asynchronous communication (e.g., publishers, subscribers, services, and actions), so we don't need to implement these from scratch
@@ -531,6 +546,8 @@ flowchart TD
 - [Git Basics Documentation](https://git-scm.com/doc)
 - [Pro Git Book](https://git-scm.com/book/en/v2)
 - [GitHub Guides](https://guides.github.com/)
+
+---
 
 ## Citations
 
