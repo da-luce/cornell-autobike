@@ -56,7 +56,7 @@ jobs:
       # Run mypy type checking
       - name: Mypy type check
         if: success() || failure()
-        run: ${{ env.DOCKER_BASE_CMD }} autobike bash -ic "type"
+        run: ${{ env.DOCKER_BASE_CMD }} autobike bash -ic "type_check"
 
       # Upload to codecov
       - name: Upload coverage to Codecov
