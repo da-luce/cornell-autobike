@@ -14,7 +14,6 @@ jobs:
     runs-on: ubuntu-latest
     env:
       # Running as root removes permission errors when running github workflow
-      DOCKER_BASE_CMD: docker compose run --rm --user root
       COVERAGE_VOLUME: ${{ github.workspace }}/coverage:/usr/app/coverage
 
     steps:
@@ -26,37 +25,41 @@ jobs:
       - name: Build Docker image
         run: docker build -t autobike --no-cache .
 
+      # Start the container in detached mode
+      - name: Start Docker container
+        run: docker compose run --volume ${{ env.COVERAGE_VOLUME }} --detach --user root autobike
+
       # Build ROS project
       - name: Build ROS project
         if: success()
-        run: ${{ env.DOCKER_BASE_CMD }} autobike bash -ic "build"
+        run: docker compose exec autobike bash -ic "build"
 
       # Run test ROS package
       - name: Run ROS package
         if: success()
-        run: ${{ env.DOCKER_BASE_CMD }} autobike bash -ic "build && ros2 run waypoints once"
+        run: docker compose exec autobike bash -ic "build && ros2 run waypoints once"
 
       # Run Black formatting check
       - name: Black formatting check
         if: success() || failure()
-        run: ${{ env.DOCKER_BASE_CMD }} autobike bash -ic "format_check"
+        run: docker compose exec autobike bash -ic "format_check"
 
       # Run Pylint linting
       - name: Pylint linting
         # always() runs even if the job is canceled, while success() || failure() does not
         if: success() || failure()
-        run: ${{ env.DOCKER_BASE_CMD }} autobike bash -ic "lint"
+        run: docker compose exec autobike bash -ic "lint"
 
       # Run Pytest with code coverage
       - name: Pytest with code coverage
         if: success() || failure()
         # Specify coverage volume
-        run: ${{ env.DOCKER_BASE_CMD }} -v ${{ env.COVERAGE_VOLUME }} autobike bash -ic "build && pytest --cov=./ --cov-report=xml:./coverage/coverage.xml --cov-report=term"
+        run: docker compose exec autobike bash -ic "build && pytest --cov=./ --cov-report=xml:./coverage/coverage.xml --cov-report=term"
 
       # Run mypy type checking
       - name: Mypy type check
         if: success() || failure()
-        run: ${{ env.DOCKER_BASE_CMD }} autobike bash -ic "type_check"
+        run: docker compose exec autobike bash -ic "type_check"
 
       # Upload to codecov
       - name: Upload coverage to Codecov
