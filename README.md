@@ -394,7 +394,7 @@ flowchart TD
     legend:::graySubgraph
     subgraph legend[Legend]
         ross_node(ROS Node)
-        start[ ] -->|ROS Topic| finish[ ]
+        pub(Publisher) -->|ROS Topic| sub(Subscriber)
         subsystem:::graySubgraph
         subgraph subsystem[Bike Subsystem]
         end
