@@ -325,13 +325,13 @@ For other IDEs, there may be extensions provided for these tools, or you could j
 | **Testing** (Method 2)* | [colcon](https://colcon.readthedocs.io/en/released/) + pytest  | `colcon test --event-handlers console_direct+` | `coltest`      |
 | **Formatting**          | [black](https://pypi.org/project/black/)                       | `black --config pyproject.toml .`              | `format`       |
 | **Formatting**          | [black](https://pypi.org/project/black/)                       | `black --config pyproject.toml --check .`      | `format_check` |
-| **Type checking**       | [pylint](https://pypi.org/project/pylint/)                     | `mypy --config-file=pyproject.toml src/`       | `type_check`   |
-| Building                | [colcon]([colcon](https://colcon.readthedocs.io/en/released/)) | `colcon buils`                                 | `build`        |
+| **Type checking**       | [mypy](https://mypy-lang.org/)                                 | `mypy --config-file=pyproject.toml src/`       | `type_check`   |
+| Building                | [colcon]([colcon](https://colcon.readthedocs.io/en/released/)) | `colcon build`                                 | `build`        |
 
 *_colcon will automatically collect package pytest tests and run them. It is difficult to get both of these to work at the same time. You should ensure that `pytest` always works as this is what we use to validate PRs. Colcon does not support code coverage with the same ease that pytest does._
 
 > [!IMPORTANT]
-> You need `build` before running pytest!
+> You need to `build` before running pytest!
 
 > [!NOTE]
 > Docker runs the container in a non-interactive shell, which by default does not load
