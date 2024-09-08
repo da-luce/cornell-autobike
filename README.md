@@ -40,6 +40,7 @@
 
 - [Software Planning Repo](https://github.com/da-luce/Autobike-Software-Planning/)
 - [Vision Repo](https://github.com/da-luce/Autobike-Vision)
+- [Old Navigation Repo](https://github.com/CornellAutonomousBikeTeam/Bike-Simulation-python)
 - [Navigation Repo](https://github.com/da-luce/cornell-autobike)
 - [Autobike Google Drive](https://drive.google.com/drive/folders/0B9FAXBSQ_mBLU25zc3h3VmR3MXc?resourcekey=0-_FN2UezNOB-4-eSO1g_xPw&usp=sharing)
 - [Slack Channel](https://cuautonomousbike.slack.com/archives/C05PP2TQFCG)
