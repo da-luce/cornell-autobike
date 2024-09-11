@@ -104,20 +104,26 @@ This is primarily for reference, and if you are running MacOS then you should be
     xhost + localhost
     ```
 
-> [!IMPORTANT]
-> This must be run in the xterm window opened by default by XQuartz _every time_ XQuartz is started
+  > [!IMPORTANT]
+  > This must be run in the xterm window opened by default by XQuartz _every time_ XQuartz is started
 
-7. Add the following option whenever you run `docker run`:
-
-    ```text
-    --env DISPLAY=host.docker.internal:0
-    ```
-
-    This is already provided in [`docker-compose.yml`](./docker-compose.yml), so there is no need to pass any flags when using `docker compose`. Try it out with:
+7. Run a command that invokes a GUI via `docker compose`, e.g.
 
     ```text
-    docker compose run autobike python3 src/state_pred/bike_sim.py
+    docker compose run autobike python3 src/unrosified/state_pred/bike_sim.py
     ```
+
+    FIXME: while we are switching over to ROS, this command probably won't work :(
+
+    > [!NOTE]
+    > If you are using `docker run` (not recommended), you need to add the follow option:
+    >
+    > ```text
+    > --env DISPLAY=host.docker.internal:0
+    > ```
+    >
+    > This is already provided in [`docker-compose.yml`](./docker-compose.yml), so
+    > there is no need to pass any flags when using `docker compose`.
 
 #### Linux
 
@@ -163,6 +169,14 @@ No clue.
 ---
 
 ## Running the Software
+
+> [!NOTE]
+> These steps assume you are in the top level of your copy of the repository. If you
+> haven't already, clone the repository onto your machine:
+>
+> ```bash
+> git clone git@github.com:da-luce/cornell-autobike.git
+> ```
 
 ### 1. Build the Image
 
@@ -385,7 +399,7 @@ flowchart TD
     %% Sensors Input Layer
     sensors:::graySubgraph
     subgraph sensors[Sensors]
-        depth(ZED 2 Depth)
+        depth(ZED 2 Depth):::orange
         camera(Visual Camera)
         gps(GPS)
         rtk(RTK)
@@ -399,6 +413,7 @@ flowchart TD
         subsystem:::graySubgraph
         subgraph subsystem[Bike Subsystem]
         end
+        current(Currently Working On):::orange
     end
 
     %% Perception Layer
@@ -420,9 +435,9 @@ flowchart TD
         end
 
         boundary_detection(Boundary & Lane Detection)
-        grid(Occupancy Grid)
+        grid(Occupancy Grid):::orange
         localization(Localization)
-        c_space(Configuration Space)
+        c_space(Configuration Space):::orange
 
         object_detection -->|/perception/objects| c_space
         boundary_detection -->|/perception/boundaries| c_space
@@ -439,9 +454,8 @@ flowchart TD
 
         decision_making(Decision Making)
         ui(<a href='https://github.com/dheera/rosboard'>rosboard</a>)
-        path_planning(Hybrid A* Planning)
-
-
+        path_planning(Hybrid A* Planning):::orange
+        pure_pursuit(Pure Pursuit):::orange
     end
 
     waypoints(Static Waypoint Routing)
@@ -449,7 +463,8 @@ flowchart TD
 
     decision_making -->|/planning/throttle| control
     decision_making -->|/planning/braking| control
-    path_planning -->|/planning/steering_angle| control
+    path_planning -->|/planning/path| pure_pursuit
+    pure_pursuit -->|/planning/steering_velocity| control
 
     %% Control Layer
     control:::graySubgraph
