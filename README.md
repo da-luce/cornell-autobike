@@ -115,15 +115,15 @@ This is primarily for reference, and if you are running MacOS then you should be
 
     FIXME: while we are switching over to ROS, this command probably won't work :(
 
-    > [!NOTE]
-    > If you are using `docker run` (not recommended), you need to add the follow option:
-    >
-    > ```text
-    > --env DISPLAY=host.docker.internal:0
-    > ```
-    >
-    > This is already provided in [`docker-compose.yml`](./docker-compose.yml), so
-    > there is no need to pass any flags when using `docker compose`.
+  > [!NOTE]
+  > If you are using `docker run` (not recommended), you need to add the follow option:
+  >
+  > ```text
+  > --env DISPLAY=host.docker.internal:0
+  > ```
+  >
+  > This is already provided in [`docker-compose.yml`](./docker-compose.yml), so
+  > there is no need to pass any flags when using `docker compose`.
 
 #### Linux
 
