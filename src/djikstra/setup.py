@@ -29,7 +29,7 @@ setup(
     entry_points={
         'console_scripts': [
             'djikstra = djikstra.alg:main',
-            'once = djikstra.alg:run_once',
+            'once = djikstra.alg: r',
         ],
     },
     data_files=[
