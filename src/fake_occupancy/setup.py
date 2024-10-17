@@ -3,7 +3,7 @@ from glob import glob
 
 from setuptools import setup
 
-package_name = 'fake-occupancy'
+package_name = 'fake_occupancy'
 
 setup(
     name=package_name,
@@ -41,7 +41,8 @@ setup(
     # scripts here.
     entry_points={
         'console_scripts': [
-            'my_script = my_package.my_script:main'
+            'fake_occupancy = fake_occupancy.occupancy_generator:main',
+            'test = fake_occupancy.grid_gen:main'
         ],
     },
 )
