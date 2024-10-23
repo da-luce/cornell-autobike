@@ -1,91 +1,76 @@
-"""
-Generates fake occupancy grids for testing.
-"""
-
-import matplotlib.pyplot as plt
 import numpy as np
-from matplotlib.animation import FuncAnimation
+import rclpy
+from nav_msgs.msg import OccupancyGrid
+from rclpy.node import Node
 
 from fake_occupancy.noise import biased_easing, perlin
 
 
-def gen_grid(
-    size_y: int = 100,
-    size_x: int = 100,
-    scale: float = 2,
-    time: float = 0,
-    seed: float = 0,
-) -> np.ndarray:
+class OccupancyGridPublisher(Node):
     """
-    Generate a fake occupancy grid.
-
-    :param size_y: Height of the grid.
-    :param size_x: Width of the grid.
-    :param scale: Scale factor for the Perlin noise.
-    :param time: Time parameter for the Perlin noise, to simulate changes over time.
-    :param seed: Seed for the Perlin noise generation.
-    :return: An array representing the occupancy grid, as uint8.
+    ROS2 node for generating and publishing occupancy grids.
     """
 
-    # Create a grid of coordinates
-    lin_x = np.linspace(0, 5, size_x, endpoint=False)
-    lin_y = np.linspace(0, 5, size_y, endpoint=False)
-    x, y = np.meshgrid(lin_y, lin_x)
+    def __init__(self):
+        super().__init__('occupancy_grid_publisher')
 
-    # Apply Perlin noise function (move upwards in time)
-    noise = perlin(x / scale, y / scale + time, seed)
+        self.publisher_ = self.create_publisher(
+            OccupancyGrid, '/planning/occupancy_grid', 1)
+        self.get_logger().info("Occupancy grid publisher node started")
+        self.frame_number = 0
+        self.timer = self.create_timer(
+            0.1, self.publish_occupancy_grid)  # 10 Hz
 
-    # Normalize to 0-1, add epsilon to avoid division by zero issues
-    noise = (noise - noise.min()) / (noise.max() - noise.min() + 1e-6)
+    def generate_grid(self, size_y=100, size_x=100, scale=2, time=0, seed=0) -> np.ndarray:
+        """
+        Generate an occupancy grid using Perlin noise.
+        """
+        lin_x = np.linspace(0, 5, size_x, endpoint=False)
+        lin_y = np.linspace(0, 5, size_y, endpoint=False)
+        x, y = np.meshgrid(lin_y, lin_x)
+        noise = perlin(x / scale, y / scale + time, seed)
+        noise = (noise - noise.min()) / (noise.max() - noise.min() + 1e-6)
+        noise = biased_easing(noise, 5)
+        return (noise * 100).astype(np.int8)
 
-    # Apply biased easing function
-    noise = biased_easing(noise, 5)
+    def publish_occupancy_grid(self):
+        """
+        Publish the generated occupancy grid as a ROS2 OccupancyGrid message.
+        """
+        grid = self.generate_grid(time=self.frame_number * 0.05)
+        occupancy_msg = OccupancyGrid()
 
-    return noise
+        # Populate the OccupancyGrid message
+        occupancy_msg.header.stamp = self.get_clock().now().to_msg()
+        occupancy_msg.header.frame_id = 'map'
+        occupancy_msg.info.resolution = 0.1  # 10cm per cell
+        occupancy_msg.info.width = grid.shape[1]
+        occupancy_msg.info.height = grid.shape[0]
+        occupancy_msg.info.origin.position.x = 0.0
+        occupancy_msg.info.origin.position.y = 0.0
+        occupancy_msg.info.origin.position.z = 0.0
+        occupancy_msg.info.origin.orientation.w = 1.0
+
+        # Flatten the 2D grid and assign to data
+        occupancy_msg.data = grid.flatten().tolist()
+
+        # Publish the message
+        self.publisher_.publish(occupancy_msg)
+        self.get_logger().info(
+            f"Published occupancy grid frame {self.frame_number}")
+        self.frame_number += 1
 
 
-# Animation function
-def update(frame_number, img):
-    img.set_data(
-        gen_grid(
-            size_y=100,
-            size_x=100,
-            scale=2,
-            time=frame_number * 0.05,
-            seed=0,
-        )
-    )
-    return (img,)
-
-
-def main():
+def main(args=None):
     """
-    Main function to run the animation of the fake occupancy grid generation.
+    Entry point for the ROS2 node.
     """
-
-    # Set up the figure and axis for animation
-    fig, ax = plt.subplots()
-
-    # Initialize the grid with the first frame
-    initial_grid = gen_grid(time=0)
-
-    # Display the initial grid
-    img = ax.imshow(initial_grid, cmap="gray", interpolation="nearest")
-
-    # Create animation
-    ani = FuncAnimation(
-        fig,
-        update,
-        fargs=(img,),
-        frames=np.arange(0, 256),
-        interval=16,
-        repeat_delay=256,
-    )
-
-    # Show the animation
-    plt.show()
+    rclpy.init(args=args)
+    node = OccupancyGridPublisher()
+    rclpy.spin(node)
+    node.destroy_node()
+    rclpy.shutdown()
 
 
-# Run the main function if this script is executed directly
-if __name__ == "__main__":
+if __name__ == '__main__':
     main()

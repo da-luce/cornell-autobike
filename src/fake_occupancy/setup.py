@@ -41,7 +41,7 @@ setup(
     # scripts here.
     entry_points={
         'console_scripts': [
-            'fake_occupancy = fake_occupancy.occupancy_generator:main',
+            'fake_occupancy = fake_occupancy.grid_gen:main',
             'test = fake_occupancy.grid_gen:main'
         ],
     },
