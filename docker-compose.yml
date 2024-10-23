@@ -32,5 +32,29 @@ services:
     depends_on:
       - autobike
 
+   # Guacamole Server
+  guacamole:
+    image: guacamole/guacamole
+    depends_on:
+      - guacd
+    environment:
+      GUACD_HOSTNAME: guacd
+      GUACAMOLE_HOME: /etc/guacamole
+    ports:
+      - "8080:8080"
+    networks:
+      - rosnet
+    volumes:
+      - ./user-mapping.xml:/etc/guacamole/user-mapping.xml
+    platform: linux/amd64
+
+  # Guacamole Proxy Daemon
+  guacd:
+    image: guacamole/guacd
+    networks:
+      - rosnet
+    platform: linux/amd64
+
+
 networks:
   rosnet:
