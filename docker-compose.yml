@@ -7,6 +7,8 @@ services:
     hostname: bike_dev
     build:
       context: .
+    ports:
+      - 3389:3389
     stdin_open: true
     tty: true
     command: bash
@@ -22,8 +24,6 @@ services:
     container_name: rosboard
     image: autobike
     hostname: bike_dev
-    build:
-      context: .
     command: bash -c "cd /usr/local/rosboard/ && ./run"
     ports:
       - 8888:8888

@@ -30,6 +30,13 @@ RUN apt-get install -y \
     libgdal-dev=3.4.1+dfsg-1build4 \
     g++=4:11.2.0-1ubuntu1
 
+# RDP stuff
+RUN apt-get update && \
+    apt-get install -y xfce4 xfce4-terminal xrdp && \
+    echo "xfce4-session" > /etc/skel/.xsession && \
+    mkdir -p /var/run/dbus && \
+    apt-get clean
+
 # GUI backend for python (required by Matplotlib)
 RUN apt-get install -y python3.10-tk
 
@@ -43,7 +50,9 @@ ARG USERNAME=bichael
 ARG USER_UID=1000
 ARG USER_GID=1000
 RUN groupadd --gid $USER_GID $USERNAME && \
-    useradd --uid $USER_UID --gid $USER_GID -m $USERNAME
+    useradd --uid $USER_UID --gid $USER_GID -m $USERNAME && \
+    echo "$USERNAME:autobike" | chpasswd && \
+    adduser $USERNAME sudo
 
 ENV HOME=/home/$USERNAME
 RUN chown -R $USERNAME:$USERNAME $HOME

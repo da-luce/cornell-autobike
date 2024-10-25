@@ -22,6 +22,7 @@
       - [Running a Package](#running-a-package)
       - [Visualizing with ROSBoard](#visualizing-with-rosboard)
       - [Other ROS GUIs](#other-ros-guis)
+      - [Guacamole](#guacamole)
     - [4. Testing and Code Quality](#4-testing-and-code-quality)
   - [Best Practices](#best-practices)
     - [Adding Dependencies](#adding-dependencies)
@@ -326,6 +327,17 @@ On the NVIDIA Jetson, tools like RViz and Gazebo should work smoothly without th
 For Apple Silicon, using a VNC server inside the container is an alternative solution, but performance has been lackluster in practice due to latency and rendering issues.
 
 A potential solution for visualizing built-in ROS message types in these environments is to use ROSboard. ROSboard renders ROS data types using WebGL directly in a web browser, bypassing the need for complex GUI forwarding or VNC setups. This approach works cross-platform, offering a lightweight and responsive alternative for visualizing ROS topics. More work is needed if we are rending custom data types though.
+
+#### Guacamole
+
+1. `docker compose up -d`
+2. Open a root shell to dev container and run: `service rdpx start`
+3. Go to `http://localhost:8080/guacamole`
+  i. Username: `user`
+  ii. Password: `password`
+4. Login to the desktop GUI
+  i. Username: `bichael`
+  ii. Password: `autobike`
 
 ### 4. Testing and Code Quality
 

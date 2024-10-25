@@ -1,9 +1,9 @@
 <user-mapping>
   <authorize username="user" password="password">
-    <connection name="Autobike">
-      <protocol>ssh</protocol>
+    <connection name="Autobike RDP">
+      <protocol>rdp</protocol>
       <param name="hostname">autobike_dev</param>
-      <param name="port">22</param>
+      <param name="port">3389</param>
     </connection>
   </authorize>
 </user-mapping>
