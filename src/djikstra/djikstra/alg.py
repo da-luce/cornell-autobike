@@ -1,9 +1,12 @@
 import heapq
-from typing import List, Tuple, Optional
+from typing import List, Optional, Tuple
+
+import numpy as np
 import rclpy
-from rclpy.node import Node
-from nav_msgs.msg import Path
 from geometry_msgs.msg import PoseStamped
+from nav_msgs.msg import OccupancyGrid, Path
+from rclpy.node import Node
+
 
 class DijkstraPathPlanner(Node):
     """
@@ -17,11 +20,33 @@ class DijkstraPathPlanner(Node):
         self.end = end
         self.rows = len(grid)
         self.cols = len(grid[0])
-        self.directions = [(-1, 0), (1, 0), (0, -1), (0, 1)]  # Up, Down, Left, Right
-        
+        self.directions = [(-1, 0), (1, 0), (0, -1), (0, 1)
+                           ]  # Up, Down, Left, Right
+
         # Publisher setup for ROS2
-        self.publisher_ = self.create_publisher(Path, '/perception/occupancy_grid', 10)
+        self.publisher_ = self.create_publisher(
+            Path, '/perception/occupancy_grid', 10)
         self.get_logger().info("Dijkstra path planner node started")
+
+        self.create_subscription(
+            OccupancyGrid, '/occupancy_grid', self.grid_callback, 10)
+
+    def grid_callback(self, msg: OccupancyGrid):
+        grid = [[0]*100]*100
+        """Callback function to process the occupancy grid."""
+        for i in range(len(msg.data)):
+            for j in range(len(msg.data[0])):
+                if msg.data[i][j] >= 0.5:
+                    grid[i][j] = 1
+
+        self.grid = grid
+
+        if self.grid is not None:
+            path = self.dijkstra(self.start, self.end)
+            if path:
+                self.publish_path(path)
+            else:
+                self.get_logger().error("No path found from start to end")
 
         # Run Dijkstra's algorithm and publish the path
         path = self.dijkstra(self.start, self.end)
@@ -78,7 +103,8 @@ class DijkstraPathPlanner(Node):
         """Publish the path as a ROS2 Path message."""
         path_msg = self.path_from_waypoints(waypoints)
         self.publisher_.publish(path_msg)
-        self.get_logger().info(f"Published path with {len(path_msg.poses)} waypoints")
+        self.get_logger().info(
+            f"Published path with {len(path_msg.poses)} waypoints")
 
     def path_from_waypoints(self, waypoints: List[Tuple[int, int]]) -> Path:
         """Convert a list of waypoints into a ROS2 Path message."""
@@ -120,6 +146,7 @@ def main(args=None):
     # Clean up
     node.destroy_node()
     rclpy.shutdown()
+
 
 if __name__ == "__main__":
     main()
