@@ -330,12 +330,14 @@ A potential solution for visualizing built-in ROS message types in these environ
 
 #### Guacamole
 
-1. `docker compose up -d`
-2. Open a root shell to dev container and run: `service rdpx start`
-3. Go to `http://localhost:8080/guacamole`
+1. Start docker demon
+2. `docker compose up -d`
+3. Open a root shell to dev container and run: `service xrdp start`
+  Can use: `docker exec -it --user root  autobike_dev bash`
+4. Go to `http://localhost:8080/guacamole`
   i. Username: `user`
   ii. Password: `password`
-4. Login to the desktop GUI
+5. Login to the desktop GUI
   i. Username: `bichael`
   ii. Password: `autobike`
 
