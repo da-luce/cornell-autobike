@@ -51,7 +51,7 @@ class OccupancyGridPublisher(Node):
         occupancy_msg.info.origin.position.z = 0.0
         occupancy_msg.info.origin.orientation.w = 1.0
 
-        # Flatten the 2D grid and assign to data
+
         occupancy_msg.data = grid.flatten().tolist()
 
         # Publish the message

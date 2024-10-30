@@ -31,29 +31,35 @@ class DijkstraPathPlanner(Node):
         self.create_subscription(
             OccupancyGrid, '/occupancy_grid', self.grid_callback, 10)
 
-    def grid_callback(self, msg: OccupancyGrid):
-        grid = [[0]*100]*100
-        """Callback function to process the occupancy grid."""
-        for i in range(len(msg.data)):
-            for j in range(len(msg.data[0])):
-                if msg.data[i][j] >= 0.5:
-                    grid[i][j] = 1
+def grid_callback(self, msg: OccupancyGrid):
+    """Callback function to process the occupancy grid."""
+    # Reshape msg.data to match grid dimensions
+    grid = np.array(msg.data, dtype=np.int8).reshape((msg.info.height, msg.info.width))
 
-        self.grid = grid
+    # Set up threshold-based binary conversion
+    threshold = 50  # threshold of 50% probability for obstacles
+    binary_grid = []
+    for row in grid:
+        binary_row = []
+        for cell in row:
+            binary_row.append(1 if cell >= threshold else 0)
+        binary_grid.append(binary_row)
 
-        if self.grid is not None:
-            path = self.dijkstra(self.start, self.end)
-            if path:
-                self.publish_path(path)
-            else:
-                self.get_logger().error("No path found from start to end")
+    self.grid = binary_grid
 
-        # Run Dijkstra's algorithm and publish the path
-        path = self.dijkstra(self.start, self.end)
-        if path:
-            self.publish_path(path)
-        else:
-            self.get_logger().error("No path found from start to end")
+    # Log the binary grid for verification
+    self.get_logger().info(f"Binary grid after thresholding:\n{np.array(binary_grid)}")
+
+    # Run Dijkstra’s algorithm if grid is set
+    path = self.dijkstra(self.start, self.end)
+    if path:
+        self.publish_path(path)
+        self.get_logger().info(f"Print Path after Binary:\n {path}")
+    else:
+        self.get_logger().error("No path found from start to end")
+
+
+
 
     def is_valid(self, row: int, col: int) -> bool:
         """Check if the cell is within bounds and not an obstacle."""
