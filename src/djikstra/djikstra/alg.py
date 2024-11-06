@@ -31,32 +31,32 @@ class DijkstraPathPlanner(Node):
         self.create_subscription(
             OccupancyGrid, '/occupancy_grid', self.grid_callback, 10)
 
-def grid_callback(self, msg: OccupancyGrid):
-    """Callback function to process the occupancy grid."""
-    # Reshape msg.data to match grid dimensions
-    grid = np.array(msg.data, dtype=np.int8).reshape((msg.info.height, msg.info.width))
+    def grid_callback(self, msg: OccupancyGrid):
+        """Callback function to process the occupancy grid."""
+        # Reshape msg.data to match grid dimensions
+        grid = np.array(msg.data, dtype=np.int8).reshape((msg.info.height, msg.info.width))
 
-    # Set up threshold-based binary conversion
-    threshold = 50  # threshold of 50% probability for obstacles
-    binary_grid = []
-    for row in grid:
-        binary_row = []
-        for cell in row:
-            binary_row.append(1 if cell >= threshold else 0)
-        binary_grid.append(binary_row)
+        # Set up threshold-based binary conversion
+        threshold = 50  # threshold of 50% probability for obstacles
+        binary_grid = []
+        for row in grid:
+            binary_row = []
+            for cell in row:
+                binary_row.append(1 if cell >= threshold else 0)
+            binary_grid.append(binary_row)
 
-    self.grid = binary_grid
+        self.grid = binary_grid
 
-    # Log the binary grid for verification
-    self.get_logger().info(f"Binary grid after thresholding:\n{np.array(binary_grid)}")
+        # Log the binary grid for verification
+        self.get_logger().info(f"Binary grid after thresholding:\n{np.array(binary_grid)}")
 
-    # Run Dijkstra’s algorithm if grid is set
-    path = self.dijkstra(self.start, self.end)
-    if path:
-        self.publish_path(path)
-        self.get_logger().info(f"Print Path after Binary:\n {path}")
-    else:
-        self.get_logger().error("No path found from start to end")
+        # Run Dijkstra’s algorithm if grid is set
+        path = self.dijkstra(self.start, self.end)
+        if path:
+            self.publish_path(path)
+            self.get_logger().info(f"Print Path after Binary:\n {path}")
+        else:
+            self.get_logger().error("No path found from start to end")
 
 
 
