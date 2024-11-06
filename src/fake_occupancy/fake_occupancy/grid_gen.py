@@ -15,11 +15,13 @@ class OccupancyGridPublisher(Node):
         super().__init__('occupancy_grid_publisher')
 
         self.publisher_ = self.create_publisher(
-            OccupancyGrid, '/planning/occupancy_grid', 1)
+            OccupancyGrid, 'occupancy_grid', 1)
         self.get_logger().info("Occupancy grid publisher node started")
         self.frame_number = 0
+        timer_period = 0.5  # seconds
         self.timer = self.create_timer(
-            0.1, self.publish_occupancy_grid)  # 10 Hz
+            timer_period, self.publish_occupancy_grid)
+        self.i = 0
 
     def generate_grid(self, size_y=100, size_x=100, scale=2, time=0, seed=0) -> np.ndarray:
         """

@@ -25,35 +25,38 @@ class DijkstraPathPlanner(Node):
 
         # Publisher setup for ROS2
         self.publisher_ = self.create_publisher(
-            Path, '/perception/occupancy_grid', 10)
+            Path, 'Path', 10)
+
         self.get_logger().info("Dijkstra path planner node started")
 
-        self.create_subscription(
-            OccupancyGrid, '/occupancy_grid', self.grid_callback, 10)
+        self.subscription = self.create_subscription(
+            OccupancyGrid, 'occupancy_grid', self.grid_callback, 10)
 
     def grid_callback(self, msg: OccupancyGrid):
-        grid = [[0]*100]*100
-        """Callback function to process the occupancy grid."""
-        for i in range(len(msg.data)):
-            for j in range(len(msg.data[0])):
-                if msg.data[i][j] >= 0.5:
+        """
+        Callback function to process the occupancy grid.
+        """
+        width = msg.info.width
+        height = msg.info.height
+        grid = [[0 for _ in range(width)] for _ in range(height)]
+
+        for i in range(height):
+            for j in range(width):
+                index = i * width + j
+                if msg.data[index] >= 25:
                     grid[i][j] = 1
+                else:
+                    grid[i][j] = 0
 
         self.grid = grid
 
         if self.grid is not None:
+            self.get_logger().info(f"received grid of {self.grid}")
             path = self.dijkstra(self.start, self.end)
             if path:
-                self.publish_path(path)
+                self.path_callback(path)
             else:
                 self.get_logger().error("No path found from start to end")
-
-        # Run Dijkstra's algorithm and publish the path
-        path = self.dijkstra(self.start, self.end)
-        if path:
-            self.publish_path(path)
-        else:
-            self.get_logger().error("No path found from start to end")
 
     def is_valid(self, row: int, col: int) -> bool:
         """Check if the cell is within bounds and not an obstacle."""
@@ -99,7 +102,7 @@ class DijkstraPathPlanner(Node):
         path.reverse()
         return path
 
-    def publish_path(self, waypoints: List[Tuple[int, int]]):
+    def path_callback(self, waypoints: List[Tuple[int, int]]):
         """Publish the path as a ROS2 Path message."""
         path_msg = self.path_from_waypoints(waypoints)
         self.publisher_.publish(path_msg)
@@ -127,20 +130,15 @@ class DijkstraPathPlanner(Node):
 def main(args=None):
     rclpy.init(args=args)
 
-    # Example occupancy grid: 0 = free space, 1 = obstacle
-    grid = [
-        [0, 0, 0, 0, 0],
-        [0, 1, 1, 0, 0],
-        [0, 0, 0, 1, 0],
-        [0, 1, 0, 0, 0],
-        [0, 0, 0, 0, 0]
-    ]
+    # Define start and end coordinates for the path
+    start = (0, 0)
+    end = (7, 4)
 
-    # Start and end coordinates
-    start = (0, 0)  # Top-left corner
-    end = (4, 4)    # Bottom-right corner
+    # Create the DijkstraPathPlanner node without an initial grid
+    node = DijkstraPathPlanner([[0 for _ in range(10)]
+                               for _ in range(10)], start, end)
 
-    node = DijkstraPathPlanner(grid, start, end)
+    # Spin to allow processing of incoming occupancy grid messages and path generation
     rclpy.spin(node)
 
     # Clean up
