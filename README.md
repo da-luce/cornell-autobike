@@ -332,14 +332,31 @@ A potential solution for visualizing built-in ROS message types in these environ
 
 1. Start docker demon
 2. `docker compose up -d`
-3. Open a root shell to dev container and run: `service xrdp start`
-  Can use: `docker exec -it --user root  autobike_dev bash`
-4. Go to `http://localhost:8080/guacamole`
+3. Go to `http://localhost:8080/guacamole`
+4. Open a root shell to dev container and run: `service xrdp start`
+  Can use: `docker exec -it --user root autobike_dev bash`
+
   i. Username: `user`
   ii. Password: `password`
 5. Login to the desktop GUI
   i. Username: `bichael`
   ii. Password: `autobike`
+6. In a terminal, start `bash` (the default shell is wacky)
+7. Install this stuff in the container:
+
+  ```bash
+  apt install ros-humble-rviz2
+  apt install libogre-1.12-dev
+  ldconfig -p | grep libOgreMain
+  ```
+
+8. Source ROS again: `source /opt/ros/humble/setup.bash`
+9. `rviz2` should work
+10. Very helpful: `https://gazebosim.org/docs/latest/ros_installation/`:
+
+  ```bash
+  apt-get install ros-${ROS_DISTRO}-ros-gz
+  ```
 
 ### 4. Testing and Code Quality
 
