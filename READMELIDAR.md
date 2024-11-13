@@ -95,3 +95,4 @@ Make sure to have a ROS workspace set up and the necessary packages installed:
     roslaunch pointcloud_to_grid rviz.launch
     ```
 
+
