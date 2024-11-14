@@ -16,7 +16,7 @@ RUN apt-get update --fix-missing
 RUN apt-get install -y vim
 
 # Install pip (updating is important!)
-RUN apt-get install -y python3-pip=22.0.2+dfsg-1ubuntu0.4 && pip3 install --upgrade pip
+RUN apt-get install -y python3-pip && pip3 install --upgrade pip
 
 # Setup ROSboard
 RUN apt-get install -y \
