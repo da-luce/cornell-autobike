@@ -33,20 +33,25 @@ class DijkstraPathPlanner(Node):
             OccupancyGrid, 'occupancy_grid', self.grid_callback, 10)
 
     def grid_callback(self, msg: OccupancyGrid):
-        """
-        Callback function to process the occupancy grid.
-        """
+        """Callback function to process the occupancy grid."""
         width = msg.info.width
         height = msg.info.height
-        grid = [[0 for _ in range(width)] for _ in range(height)]
+        self.rows = height
+        self.cols = width
 
-        for i in range(height):
-            for j in range(width):
-                index = i * width + j
-                if msg.data[index] >= 25:
-                    grid[i][j] = 1
-                else:
-                    grid[i][j] = 0
+        # Process occupancy grid into a 2D list
+        self.grid = [
+            [1 if msg.data[i * width + j] >= 50 else 0 for j in range(width)]
+            for i in range(height)
+        ]
+
+        self.get_logger().info("Occupancy grid processed and updated.")
+        path = self.dijkstra(self.start, self.end)
+        if path:
+            self.path_callback(path)
+        else:
+            self.get_logger().error("No path found from start to end.")
+
 
         # Set up threshold-based binary conversion
         threshold = 50  # threshold of 50% probability for obstacles
@@ -116,22 +121,26 @@ class DijkstraPathPlanner(Node):
         self.get_logger().info(
             f"Published path with {len(path_msg.poses)} waypoints")
 
-    def path_from_waypoints(self, waypoints: List[Tuple[int, int]]) -> Path:
-        """Convert a list of waypoints into a ROS2 Path message."""
-        path_msg = Path()
-        path_msg.header.stamp = self.get_clock().now().to_msg()
-        path_msg.header.frame_id = "map"
+def path_from_waypoints(self, waypoints: List[Tuple[int, int]]) -> Path:
+    """Convert a list of waypoints into a ROS2 Path message."""
+    path_msg = Path()
+    path_msg.header.stamp = self.get_clock().now().to_msg()
+    path_msg.header.frame_id = "map"
 
-        for row, col in waypoints:
-            pose_stamped = PoseStamped()
-            pose_stamped.header.stamp = path_msg.header.stamp
-            pose_stamped.header.frame_id = "map"
-            pose_stamped.pose.position.x = float(row)
-            pose_stamped.pose.position.y = float(col)
-            pose_stamped.pose.position.z = 0.0
-            path_msg.poses.append(pose_stamped)
+    for row, col in waypoints:
+        pose_stamped = PoseStamped()
+        pose_stamped.header.stamp = path_msg.header.stamp
+        pose_stamped.header.frame_id = "map"
+        pose_stamped.pose.position.x = float(row)
+        pose_stamped.pose.position.y = float(col)
+        pose_stamped.pose.position.z = 0.0
+        path_msg.poses.append(pose_stamped)
 
-        return path_msg
+    self.get_logger().info(f"Generated path message with {len(path_msg.poses)} waypoints.")
+    return path_msg
+
+
+
 
 
 def main(args=None):
@@ -141,16 +150,16 @@ def main(args=None):
     start = (0, 0)
     end = (7, 4)
 
-    # Create the DijkstraPathPlanner node without an initial grid
-    node = DijkstraPathPlanner([[0 for _ in range(10)]
-                               for _ in range(10)], start, end)
+    # Create the DijkstraPathPlanner node
+    node = DijkstraPathPlanner(None, start, end)  # Start with no initial grid
 
-    # Spin to allow processing of incoming occupancy grid messages and path generation
+    # Spin to process incoming messages
     rclpy.spin(node)
 
     # Clean up
     node.destroy_node()
     rclpy.shutdown()
+
 
 
 if __name__ == "__main__":
