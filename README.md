@@ -345,6 +345,7 @@ A potential solution for visualizing built-in ROS message types in these environ
 7. Install this stuff in the container:
 
   ```bash
+  apt update
   apt install ros-humble-rviz2
   apt install libogre-1.12-dev
   ldconfig -p | grep libOgreMain

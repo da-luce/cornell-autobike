@@ -37,6 +37,15 @@ RUN apt-get update && \
     mkdir -p /var/run/dbus && \
     apt-get clean
 
+# NoVNC
+RUN apt-get update && apt-get install -y \
+    x11vnc \
+    xterm \
+    fluxbox
+
+ENV DISPLAY=:0
+CMD x11vnc -display :0 -forever -nopw -listen 0.0.0.0 -rfbport 3389
+
 # GUI backend for python (required by Matplotlib)
 RUN apt-get install -y python3.10-tk
 

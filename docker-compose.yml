@@ -8,14 +8,14 @@ services:
     build:
       context: .
     ports:
-      - 3389:3389
+      - 3389:3389 # VNC port
     stdin_open: true
     tty: true
     command: bash
     networks:
       - rosnet
     environment:
-      - DISPLAY=host.docker.internal:0
+      - DISPLAY=:0
     volumes:
       - ./:/usr/local/autobike
 
@@ -55,6 +55,22 @@ services:
       - rosnet
     platform: linux/amd64
 
+  # NoVNC Service (for web-based access to VNC)
+  novnc:
+    image: theasp/novnc:latest
+    container_name: novnc_container
+    platform: linux/amd64
+    environment:
+      - DISPLAY_WIDTH=3000
+      - DISPLAY_HEIGHT=1800
+      - RUN_XTERM=no
+    ports:
+      - "8081:8080"  # NoVNC runs on port 8080 inside the container, exposed as 8081 on the host
+    networks:
+      - rosnet
+    depends_on:
+      - autobike  # Ensure NoVNC waits for autobike container
+    restart: unless-stopped
 
 networks:
   rosnet:
