@@ -1,7 +1,6 @@
-import rclpy
 import numpy as np
+import rclpy
 from geometry_msgs.msg import Twist
-from sensor_msgs.msg import LaserScan
 from sensor_msgs.msg import LaserScan, PointCloud2, PointField
 from std_msgs.msg import Float32
 
@@ -20,6 +19,10 @@ class MyRobotDriver:
 
         self.__right_motor.setPosition(float('inf'))
         self.__right_motor.setVelocity(0)
+
+        # gps initialization here
+        gps = self.__robot.getGPS("gps")
+        gps.enable(32)
 
         self.__target_twist = Twist()
 
@@ -52,7 +55,8 @@ class MyRobotDriver:
         """ Process LIDAR data and publish PointCloud2 """
         ranges = np.array(scan.ranges)
         angles = np.linspace(scan.angle_min, scan.angle_max, len(ranges))
-
+        gps_value = self.gps.getValues()
+        print(gps_value)
         # Convert to Cartesian coordinates
         x = ranges * np.cos(angles)
         y = ranges * np.sin(angles)

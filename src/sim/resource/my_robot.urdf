@@ -19,6 +19,12 @@
                 <alwaysOn>true</alwaysOn>
             </ros>
         </device>
+        <device reference="gps" type="GPS">
+            <ros>
+                <topicName>/gps</topicName>
+                <alwaysOn>true</alwaysOn>
+            </ros>
+        </device>
         <plugin type="sim.my_robot_driver.MyRobotDriver" />
     </webots>
 </robot>
