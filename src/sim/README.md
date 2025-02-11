@@ -8,6 +8,7 @@ Start containers and run the sim:
 2. `docker exec -it --user root autobike_dev bash`
 3. `build`
 4. `ros2 launch sim robot_launch.py`
+5. Install Webots with `y` if necessary
 
 Open the GUI
 
@@ -19,6 +20,11 @@ Send commands to the driver
 1. `docker exec -it --user root autobike_dev bash` for another terminal
 v TODO: update robot driver to listen to output of pure pursuit container :D
 1. `ros2 topic pub /cmd_vel geometry_msgs/Twist  "linear: { x: 0.1 }"`
+
+View in Rviz2
+
+* Update frame to name of LiDAR (`our_lidar`)
+* View the pointcloud being published
 
 ## Tips
 
