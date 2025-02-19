@@ -51,6 +51,9 @@ class MyRobotDriver:
         self.__left_motor.setVelocity(command_motor_left)
         self.__right_motor.setVelocity(command_motor_right)
 
+        # Log the steering action
+        self.__node.get_logger().info(f"Steering: Angle={angle:.2f}, Left Motor={command_motor_left:.2f}, Right Motor={command_motor_right:.2f}")
+
     def __lidar_callback(self, scan):
         """ Process LIDAR data and publish PointCloud2 """
         ranges = np.array(scan.ranges)

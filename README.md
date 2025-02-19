@@ -421,6 +421,21 @@ src/
 ```mermaid
 flowchart TD
 
+    gps(GPS) --> |/gps - sensor_msgs/NavSatFix| localization
+    kinetics(Kinetics) --> |/kinetics - nav_msgs/Odometry - and maybe more| pure_pursuit
+    waypoints(Waypoints) --> |/GPS_path - nav_msgs/Path| localization
+
+    %% Processing Layers
+    lidar(LiDAR) -->|/pointcloud - sensor_msgs/PointCloud2| filtering
+    filtering(pointcloud_to_grid) -->|/occupancy - nav_msgs/OccupancyGrid| localization
+    localization(Localization) -->|/path - nav_msgs/Path| pure_pursuit
+    pure_pursuit(Pure Pursuit) --> |/steering - geometry_msgs/Twist| output
+    output(Output Driver)
+```
+
+```mermaid
+flowchart TD
+
     %% Sensors Input Layer
     sensors:::graySubgraph
     subgraph sensors[Sensors]
