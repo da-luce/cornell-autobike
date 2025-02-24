@@ -150,12 +150,12 @@ Robot {
       type "rotating"  # Enables full 360° rotation
     }
     GPS {
-      SFString type             "satellite"   # {"satellite", "laser"}
-      SFFloat  accuracy         0             # [0, inf)
-      SFFloat  noiseCorrelation 0             # [0, 1]
-      SFFloat  resolution       -1            # {-1, [0, inf)}
-      SFFloat  speedNoise       0             # [0, inf)
-      SFFloat  speedResolution  -1            # {-1, [0, inf)}
+      type             "satellite"   # {"satellite", "laser"}
+      accuracy         0             # [0, inf)
+      noiseCorrelation 0             # [0, 1]
+      resolution       -1            # {-1, [0, inf)}
+      speedNoise       0             # [0, inf)
+      speedResolution  -1            # {-1, [0, inf)}
     }
   ]
   boundingObject Transform {
