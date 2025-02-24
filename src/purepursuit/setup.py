@@ -1,4 +1,4 @@
-"""Setup script for the waypoints package."""
+"""Setup script for the pure pursuit package."""
 
 from setuptools import setup
 

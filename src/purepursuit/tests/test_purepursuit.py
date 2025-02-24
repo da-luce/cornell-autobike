@@ -5,12 +5,13 @@ import pytest
 import rclpy
 from geometry_msgs.msg import Twist
 from nav_msgs.msg import Path
-from purepursuit.purepursuit import PurePursuitController  # Import the controller
+from purepursuit.purepursuit_alg import PurePursuitController  # Import the controller
 from rclpy.duration import Duration
 from rclpy.node import Node
+from geometry_msgs.msg import PoseStamped, Pose, Point
 
 
-@pytest.fixture
+@pytest.fixture(scope='module')
 def node_and_controller():
     # Create a ROS 2 node for testing and the PurePursuitController instance
     rclpy.init()
@@ -26,10 +27,9 @@ def test_path_subscription(node_and_controller):
     # Create a mock Path message
     path_msg = Path()
     path_msg.poses = [
-        # Example path (PoseStamped objects with x, y coordinates)
-        {"pose": {"position": {"x": 0, "y": 0, "z": 0}}},
-        {"pose": {"position": {"x": 1, "y": 1, "z": 0}}},
-        {"pose": {"position": {"x": 2, "y": 2, "z": 0}}},
+        PoseStamped(pose=Pose(position=Point(x=0.0, y=0.0, z=0.0))),
+        PoseStamped(pose=Pose(position=Point(x=1.0, y=1.0, z=0.0))),
+        PoseStamped(pose=Pose(position=Point(x=2.0, y=2.0, z=0.0)))
     ]
 
     # Simulate receiving the path message by calling the path_callback
@@ -47,10 +47,10 @@ def test_find_lookahead_point(node_and_controller):
 
     # Test path with 4 points (simplified for testing purposes)
     controller.current_path = [
-        {"pose": {"position": {"x": 0, "y": 0}}},
-        {"pose": {"position": {"x": 1, "y": 1}}},
-        {"pose": {"position": {"x": 2, "y": 2}}},
-        {"pose": {"position": {"x": 3, "y": 3}}},
+        PoseStamped(pose=Pose(position=Point(x=0.0, y=0.0, z=0.0))),
+        PoseStamped(pose=Pose(position=Point(x=1.0, y=1.0, z=0.0))),
+        PoseStamped(pose=Pose(position=Point(x=2.0, y=2.0, z=0.0))),
+        PoseStamped(pose=Pose(position=Point(x=3.0, y=3.0, z=0.0)))
     ]
 
     # Robot position is at (0, 0)
@@ -70,16 +70,19 @@ def test_steering_angle_calculation(node_and_controller):
 
     # Set up a test case with a simple path
     controller.current_path = [
-        {"pose": {"position": {"x": 0, "y": 0}}},
-        {"pose": {"position": {"x": 2, "y": 2}}},
+        PoseStamped(pose=Pose(position=Point(x=0.0, y=0.0, z=0.0))),
+        PoseStamped(pose=Pose(position=Point(x=2.0, y=2.0, z=0.0)))
     ]
 
     # Robot at position (0, 0) with heading of 0 radians (facing east)
     steering_angle = controller.calculate_steering_angle((0, 0), 0)
 
-    # The robot should steer toward the point (2, 2)
-    # This is a simple test and we expect the angle to be non-zero
-    expected_angle = math.atan2(2, 2)  # Should be 45 degrees (π/4 radians)
+    # Calculate the expected steering angle based on the formula
+    lookahead_distance = 2.0
+    wheelbase = 2.5
+    expected_angle = math.atan2(2 * wheelbase * math.sin(math.atan2(2, 2)), lookahead_distance)
+
+    # Assert that the calculated angle is close to the expected angle
     assert math.isclose(steering_angle, expected_angle, abs_tol=0.1)
 
 
