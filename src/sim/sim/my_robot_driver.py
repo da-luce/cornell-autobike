@@ -1,7 +1,7 @@
 import numpy as np
 import rclpy
 from geometry_msgs.msg import Twist
-from sensor_msgs.msg import LaserScan, PointCloud2, PointField
+from sensor_msgs.msg import LaserScan, NavSatFix, PointCloud2, PointField
 from std_msgs.msg import Float32
 
 HALF_DISTANCE_BETWEEN_WHEELS = 0.045
@@ -20,9 +20,6 @@ class MyRobotDriver:
         self.__right_motor.setPosition(float('inf'))
         self.__right_motor.setVelocity(0)
 
-        # gps initialization here
-        gps = self.__robot.getGPS("gps")
-        gps.enable(32)
 
         self.__target_twist = Twist()
 
@@ -35,6 +32,11 @@ class MyRobotDriver:
 
         # PointCloud2 Publisher
         self.__pointcloud_publisher = self.__node.create_publisher(PointCloud2, '/pointcloud', 10)
+        self.__gps_publisher = self.__node.create_publisher(NavSatFix, '/gps', 10)
+
+        # Initialize GPS
+        self.__gps = self.__robot.getDevice("gps")
+        self.__gps.enable(32)
 
     def __angle_callback(self, msg):
         """ Callback function to handle received angle data """
@@ -54,12 +56,26 @@ class MyRobotDriver:
         # Log the steering action
         self.__node.get_logger().info(f"Steering: Angle={angle:.2f}, Left Motor={command_motor_left:.2f}, Right Motor={command_motor_right:.2f}")
 
+    def __gps_callback(self):
+        """ Callback function to publish GPS data """
+        gps_value = self.__gps.getValues()  # Corrected to self.__gps
+
+        # Create a NavSatFix message and populate it with GPS data
+        gps_msg = NavSatFix()
+        gps_msg.latitude = gps_value[0]  # Latitude
+        gps_msg.longitude = gps_value[1]  # Longitude
+        gps_msg.altitude = gps_value[2]  # Altitude
+
+        # Publish the GPS data
+        self.__gps_publisher.publish(gps_msg)
+
+        # Log GPS data
+        self.__node.get_logger().info(f"GPS: Latitude={gps_value[0]:.6f}, Longitude={gps_value[1]:.6f}, Altitude={gps_value[2]:.2f}")
+
     def __lidar_callback(self, scan):
         """ Process LIDAR data and publish PointCloud2 """
         ranges = np.array(scan.ranges)
         angles = np.linspace(scan.angle_min, scan.angle_max, len(ranges))
-        gps_value = self.gps.getValues()
-        print(gps_value)
         # Convert to Cartesian coordinates
         x = ranges * np.cos(angles)
         y = ranges * np.sin(angles)
@@ -102,6 +118,8 @@ class MyRobotDriver:
         rclpy.spin_once(self.__node, timeout_sec=0)
 
         self.__node.get_logger().info(f"Stepping!")
+        self.__node.get_logger().info("Publishing GPS data...")
+        self.__gps_callback()
 
         forward_speed = self.__target_twist.linear.x
         angular_speed = self.__target_twist.angular.z
