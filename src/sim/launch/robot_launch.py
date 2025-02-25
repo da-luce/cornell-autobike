@@ -27,10 +27,17 @@ def generate_launch_description():
         executable='obstacle_avoider',
     )
 
+    # NOTE: executable is the same as "entry_point" as listed in setup.py for package
+    waypoints_generator = Node(
+        package='waypoints',
+        executable='waypoints',
+    )
+
     return LaunchDescription([
         webots,
         my_robot_driver,
         obstacle_avoider,
+        waypoints_generator,
         launch.actions.RegisterEventHandler(
             event_handler=launch.event_handlers.OnProcessExit(
                 target_action=webots,
