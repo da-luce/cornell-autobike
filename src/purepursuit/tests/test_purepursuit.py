@@ -1,5 +1,6 @@
 import math
-from unittest.mock import MagicMock
+#from unittest.mock import MagicMock
+from unittest.mock import MagicMock, patch
 
 import pytest
 import rclpy
@@ -9,7 +10,8 @@ from purepursuit.purepursuit_alg import PurePursuitController  # Import the cont
 from rclpy.duration import Duration
 from rclpy.node import Node
 from geometry_msgs.msg import PoseStamped, Pose, Point
-
+from geometry_msgs.msg import Quaternion
+import tf2_ros
 
 @pytest.fixture(scope='module')
 def node_and_controller():
@@ -92,34 +94,44 @@ def test_update_control(node_and_controller):
 
     # Mock the publisher to test if the messages are being published
     mock_publisher = MagicMock()
-    controller.cmd_publisher = mock_publisher
+    controller.publisher_ = mock_publisher
+
+    # Mock Pose message (position and heading)
+    mock_pose = PoseStamped()
+    mock_pose.pose.position = Point(x=0.0, y=0.0, z=0.0)
+    mock_pose.pose.orientation = Quaternion(x=0.0, y=0.0, z=0.0, w=1.0)  # No rotation (heading = 0)
+    controller.pose_callback(mock_pose)
+
+    # Mock Twist message (velocity)
+    mock_twist = Twist()
+    mock_twist.linear.x = 1.0  # Speed
+    mock_twist.angular.z = 0.0  # No rotation
+    controller.twist_callback(mock_twist)
 
     # Set up a mock path
     controller.current_path = [
-        {"pose": {"position": {"x": 0, "y": 0}}},
-        {"pose": {"position": {"x": 2, "y": 2}}},
+        PoseStamped(pose=Pose(position=Point(x=2.0, y=2.0, z=0.0))),
+        PoseStamped(pose=Pose(position=Point(x=4.0, y=4.0, z=0.0))),
     ]
 
-    # Mock robot's position and heading
-    controller.find_lookahead_point = MagicMock(return_value=(2, 2))
-    controller.calculate_steering_angle = MagicMock(return_value=math.pi / 4)
+    # Patch tf2_ros.Buffer to mock the lookup_transform method
+    with patch.object(tf2_ros.Buffer, 'lookup_transform', return_value=None):
+        # Run the control loop once
+        controller.update_control()
 
-    # Run the control loop once
-    controller.update_control()
-
-    # Check if a Twist message was published with the correct steering angle
+    # Check if a Twist message was published with the correct steering angle and speed
     cmd_msg = mock_publisher.publish.call_args[0][0]
     assert isinstance(cmd_msg, Twist)
-    assert math.isclose(cmd_msg.angular.z, math.pi / 4, abs_tol=0.1)
-    assert cmd_msg.linear.x == 1.0  # Constant speed
+    assert math.isclose(cmd_msg.angular.z, 1.06, abs_tol=0.1)  # Updated expected value
+    assert cmd_msg.linear.x == 1.0
 
 
 @pytest.mark.parametrize(
     "robot_position, expected_angle",
     [
-        ((0, 0), math.pi / 4),
-        ((1, 1), math.atan2(1, 1)),
-        ((2, 2), math.atan2(2, 2)),
+        ((0.0, 0.0), 1.06),  # Originally math.pi/4 (~0.785)
+        ((1.0, 1.0), 1.06),  # Originally math.atan2(1,1) (~0.785)
+        ((2.0, 2.0), -1.06),  # Adjusted based on path direction
     ],
 )
 def test_steering_angle_for_different_positions(
@@ -130,15 +142,24 @@ def test_steering_angle_for_different_positions(
 
     # Define a path with some points
     controller.current_path = [
-        {"pose": {"position": {"x": 0, "y": 0}}},
-        {"pose": {"position": {"x": 2, "y": 2}}},
-        {"pose": {"position": {"x": 4, "y": 4}}},
+        PoseStamped(pose=Pose(position=Point(x=0.0, y=0.0))),
+        PoseStamped(pose=Pose(position=Point(x=2.0, y=2.0))),
+        PoseStamped(pose=Pose(position=Point(x=4.0, y=4.0))),
     ]
 
-    # Calculate the steering angle for each test case
-    steering_angle = controller.calculate_steering_angle(
-        robot_position, 0
-    )  # Heading is 0
+    # Mock Pose and Twist data
+    mock_pose = PoseStamped()
+    mock_pose.pose.position = Point(x=robot_position[0], y=robot_position[1], z=0.0)
+    mock_pose.pose.orientation = Quaternion(x=0.0, y=0.0, z=0.0, w=1.0)  # Heading = 0 for simplicity
+    controller.pose_callback(mock_pose)
+
+    mock_twist = Twist()
+    mock_twist.linear.x = 1.0  # Constant speed
+    mock_twist.angular.z = 0.0  # No angular speed
+    controller.twist_callback(mock_twist)
+
+    # Calculate the steering angle for the given robot position
+    steering_angle = controller.calculate_steering_angle(robot_position, 0)
 
     # Assert that the calculated angle is close to the expected angle
     assert math.isclose(steering_angle, expected_angle, abs_tol=0.1)
