@@ -157,6 +157,13 @@ Robot {
       speedNoise       0             # [0, inf)
       speedResolution  -1            # {-1, [0, inf)}
     }
+    Gyro {
+     lookupTable [ ]    # lookup table
+     xAxis       TRUE   # {TRUE, FALSE}
+     yAxis       TRUE   # {TRUE, FALSE}
+     zAxis       TRUE   # {TRUE, FALSE}
+     resolution  -1     # {-1, [0, inf)}
+}
   ]
   boundingObject Transform {
     translation 0 0 0.0415

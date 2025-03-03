@@ -25,6 +25,12 @@
                 <alwaysOn>true</alwaysOn>
             </ros>
         </device>
+                <device reference="gyro" type="Gyro">
+            <ros>
+                <topicName>/gyro</topicName>
+                <alwaysOn>true</alwaysOn>
+            </ros>
+        </device>
         <plugin type="sim.my_robot_driver.MyRobotDriver" />
     </webots>
 </robot>
