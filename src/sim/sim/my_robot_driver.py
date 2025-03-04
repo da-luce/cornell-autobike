@@ -26,11 +26,12 @@ class MyRobotDriver:
         rclpy.init(args=None)
         self.__node = rclpy.create_node('my_robot_driver')
 
+        # Subscriptions (manual commands)
         self.__node.create_subscription(Twist, '/cmd_vel', self.__cmd_vel_callback, 1)
         self.__node.create_subscription(LaserScan, '/lidar', self.__lidar_callback, 1)
         self.__node.create_subscription(Float32, '/angle', self.__angle_callback, 1)
 
-        # PointCloud2 Publisher
+        # Publishers (LiDAR and GPS data)
         self.__pointcloud_publisher = self.__node.create_publisher(PointCloud2, '/pointcloud', 10)
         # GPS publisher
         self.__gps_publisher = self.__node.create_publisher(NavSatFix, '/gps', 10)

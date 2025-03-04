@@ -33,11 +33,17 @@ def generate_launch_description():
         executable='waypoints',
     )
 
+    localization = Node(
+        package='djikstra',
+        executable='djikstra',
+    )
+
     return LaunchDescription([
         webots,
         my_robot_driver,
         obstacle_avoider,
         waypoints_generator,
+        localization,
         launch.actions.RegisterEventHandler(
             event_handler=launch.event_handlers.OnProcessExit(
                 target_action=webots,
