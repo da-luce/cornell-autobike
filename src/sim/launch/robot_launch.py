@@ -42,12 +42,31 @@ def generate_launch_description():
         executable='djikstra',
     )
 
+    pointcloud_to_grid_node = Node(
+        package='pointcloud_to_grid',
+        executable='pointcloud_to_grid_node',
+        output='screen',
+        parameters=[
+            {'cloud_in_topic': '/pointcloud'},  # Set your topic here
+            {'position_x': -5.0},
+            {'position_y': 0.0},
+            {'verbose1': False},
+            {'verbose2': False},
+            {'cell_size': 0.5},
+            {'length_x': 50.0},
+            {'length_y': 100.0},
+            {'mapi_topic_name': 'intensity_grid'},
+            {'maph_topic_name': 'height_grid'},
+        ]
+    )
+
     return LaunchDescription([
         webots,
         my_robot_driver,
         obstacle_avoider,
         waypoints_generator,
         localization,
+        pointcloud_to_grid_node,
         launch.actions.RegisterEventHandler(
             event_handler=launch.event_handlers.OnProcessExit(
                 target_action=webots,
