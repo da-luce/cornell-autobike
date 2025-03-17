@@ -163,7 +163,25 @@ Robot {
      yAxis       TRUE   # {TRUE, FALSE}
      zAxis       TRUE   # {TRUE, FALSE}
      resolution  -1     # {-1, [0, inf)}
-}
+    }
+Camera {
+      translation 0 0.03 0.05     # Position the camera slightly above and in front of robot
+      rotation 0 1 0 0            # Camera pointing forward
+      fieldOfView 0.8727          # ~50 degrees - good balance between wide view and detail
+      width 640                   # Standard resolution width
+      height 480                  # Standard resolution height
+      near 0.05                   # Close clipping plane
+      far 100.0                   # Far clipping plane
+      exposure 1.0                # Normal exposure
+      antiAliasing TRUE           # Reduce jagged edges
+      ambientOcclusionRadius 0    # No ambient occlusion
+      bloomThreshold -1.0         # No bloom effect
+      motionBlur 0.0              # No motion blur
+      noise 0.01                  # Very slight noise for realism
+      projection "planar"         # Standard camera projection
+      name "camera"               # Name used in your code
+      recognition NULL            # No object recognition needed
+    }
   ]
   boundingObject Transform {
     translation 0 0 0.0415

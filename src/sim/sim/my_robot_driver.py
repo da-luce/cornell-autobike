@@ -1,7 +1,7 @@
 import numpy as np
 import rclpy
 from geometry_msgs.msg import Twist
-from sensor_msgs.msg import Imu, LaserScan, NavSatFix, PointCloud2, PointField
+from sensor_msgs.msg import Image, Imu, LaserScan, NavSatFix, PointCloud2, PointField
 from std_msgs.msg import Float32
 
 HALF_DISTANCE_BETWEEN_WHEELS = 0.045
@@ -37,6 +37,9 @@ class MyRobotDriver:
         self.__gps_publisher = self.__node.create_publisher(NavSatFix, '/gps', 10)
         # Gyroscope publisher
         self.__gyro_publisher = self.__node.create_publisher(Imu, '/gyro', 10)
+        #Camera Publisher
+        self.__camera_publisher = self.__node.create_publisher(Image, '/camera', 10)
+
 
         # Initialize GPS
         self.__gps = self.__robot.getDevice("gps")
@@ -45,6 +48,37 @@ class MyRobotDriver:
         #Initialize the Gyroscope
         self.__gyro = self.__robot.getDevice("gyro")
         self.__gyro.enable(32)
+
+        #Initialize the Camera
+        self.__camera = self.__robot.getDevice("camera")
+        self.__camera.enable(32)
+
+    def __camera_callback(self):
+        """Process camera data and publish it as ROS Image message"""
+        # Get the camera image
+        image_data = self.__camera.getImage()
+
+        if image_data is not None:
+            width = self.__camera.getWidth()
+            height = self.__camera.getHeight()
+
+            ros_image = Image()
+
+            ros_image.header.stamp = self.__node.get_clock().now().to_msg()
+            ros_image.header.frame_id = "camera_link"
+
+            # Set image properties
+            ros_image.height = height
+            ros_image.width = width
+            ros_image.encoding = "bgra8"
+            ros_image.is_bigendian = 0
+            ros_image.step = width * 4
+
+            # Note: getImage() returns a buffer of bytes which we can directly use
+            ros_image.data = image_data
+
+            # Publish the image
+            self.__camera_publisher.publish(ros_image)
 
     def __gyro_callback(self):
         gyro_vals = self.__gyro.getValues()
@@ -145,6 +179,10 @@ class MyRobotDriver:
 
         self.__node.get_logger().info("Publishing Gyroscope data...")
         self.__gyro_callback()
+
+        self.__node.get_logger().info('Publishing camera image')
+        self.__camera_callback()
+
 
         forward_speed = self.__target_twist.linear.x
         angular_speed = self.__target_twist.angular.z
