@@ -31,6 +31,10 @@ def generate_launch_description():
     waypoints_generator = Node(
         package='waypoints',
         executable='waypoints',
+        name='waypoints_generator',
+        parameters=[{
+            'simulation_mode': True
+        }]
     )
 
     localization = Node(

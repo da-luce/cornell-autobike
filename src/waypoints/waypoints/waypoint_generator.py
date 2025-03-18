@@ -31,6 +31,9 @@ class WaypointGenerator(Node):
     def __init__(self, map_path, stamp=None, frame_id=None):
         super().__init__('waypoints_node')
 
+        # Running a sim if True
+        self.declare_parameter('simulation_mode', False)
+
         # Publish a Path to the /planning/waypoints topic, queue depth of 1
         self.publisher_ = self.create_publisher(Path, '/planning/waypoints', 1)
         self.get_logger().info("Waypoint routing node started")
@@ -159,6 +162,11 @@ class WaypointGenerator(Node):
 
     def main(self):
         """Main node logic"""
+
+        simulation_mode = self.get_parameter('simulation_mode').get_parameter_value().bool_value
+        if simulation_mode:
+            self.get_logger().info(f"Running node in simulation mode.")
+
         # Get start and end positions from addresses
         start_coords = self.coords_from_address(START_ADDRESS)
         end_coords = self.coords_from_address(END_ADDRESS)
