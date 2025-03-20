@@ -41,6 +41,10 @@ RUN apt install -y \
 # Webots
 RUN apt install -y ros-humble-webots-ros2
 
+# pointcloud_to_grid package
+RUN apt-get update
+RUN apt install -y ros-humble-pcl-ros
+
 # GUI backend for python (required by Matplotlib)
 RUN apt-get install -y python3.10-tk
 

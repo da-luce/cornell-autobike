@@ -141,13 +141,13 @@ Robot {
       translation 0 0 0.08  # Position the LiDAR on top of the robot
       rotation 0 0 1 0  # Adjust orientation if needed
       name "our_lidar"
-      fieldOfView 1.57  # 90 degrees
+      fieldOfView 6.2832  # 360 degrees
       horizontalResolution 512  # Number of rays per scan
       numberOfLayers 1  # Single-layer LiDAR
       minRange 0.02  # Minimum detection range
       maxRange 5.0  # Maximum detection range
       noise 0.01  # Small noise factor
-      type "rotating"  # Enables full 360° rotation
+      type "fixed"   # Enables full 360° rotation
     }
     GPS {
       type             "satellite"   # {"satellite", "laser"}
