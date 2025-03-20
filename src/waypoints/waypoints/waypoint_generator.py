@@ -166,6 +166,19 @@ class WaypointGenerator(Node):
         simulation_mode = self.get_parameter('simulation_mode').get_parameter_value().bool_value
         if simulation_mode:
             self.get_logger().info(f"Running node in simulation mode.")
+            simulation_route = [
+                (-0.5, -0.5),
+                (-0.4, -0.3),
+                (-0.3, -0.1),
+                (-0.1, 0.1),
+                (0.1, 0.3),
+                (0.3, 0.4),
+                (0.5, 0.5)
+            ]
+            path = self.path_from_waypoints(simulation_route)
+            self.publisher_.publish(path)
+            self.get_logger().info(f"Published simulation path with {len(path.poses)} waypoints")
+            return
 
         # Get start and end positions from addresses
         start_coords = self.coords_from_address(START_ADDRESS)
