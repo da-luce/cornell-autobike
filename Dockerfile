@@ -3,7 +3,7 @@ ARG ROS_DISTRO=humble
 
 # Base image (Humble is the LTS version for Ubuntu 22.04)
 # IMPORTANT: pin to a specific hash!
-FROM ros:${ROS_DISTRO}@sha256:80a4f6329aad64f14b600133cb3fd279d0bf666feeca5abef3f10bb41b0916ea
+FROM --platform=linux/amd64 ros:${ROS_DISTRO}
 
 # Set working directory
 ENV WORKDIR /usr/local/autobike
@@ -30,6 +30,21 @@ RUN apt-get install -y \
     libgdal-dev=3.4.1+dfsg-1build4 \
     g++=4:11.2.0-1ubuntu1
 
+# Install xeyes to test NoVNC
+RUN apt-get update && apt-get install -y x11-apps
+
+# Install rviz2
+RUN apt install -y \
+    ros-humble-rviz2 \
+    libogre-1.12-dev
+
+# Webots
+RUN apt install -y ros-humble-webots-ros2
+
+# pointcloud_to_grid package
+RUN apt-get update
+RUN apt install -y ros-humble-pcl-ros
+
 # GUI backend for python (required by Matplotlib)
 RUN apt-get install -y python3.10-tk
 
@@ -43,7 +58,9 @@ ARG USERNAME=bichael
 ARG USER_UID=1000
 ARG USER_GID=1000
 RUN groupadd --gid $USER_GID $USERNAME && \
-    useradd --uid $USER_UID --gid $USER_GID -m $USERNAME
+    useradd --uid $USER_UID --gid $USER_GID -m $USERNAME && \
+    echo "$USERNAME:autobike" | chpasswd && \
+    adduser $USERNAME sudo
 
 ENV HOME=/home/$USERNAME
 RUN chown -R $USERNAME:$USERNAME $HOME

@@ -1,0 +1,45 @@
+<?xml version="1.0" ?>
+<robot name="My robot">
+    <webots>
+        <device reference="ds0" type="DistanceSensor">
+            <ros>
+                <topicName>/left_sensor</topicName>
+                <alwaysOn>true</alwaysOn>
+            </ros>
+        </device>
+        <device reference="ds1" type="DistanceSensor">
+            <ros>
+                <topicName>/right_sensor</topicName>
+                <alwaysOn>true</alwaysOn>
+            </ros>
+        </device>
+        <device reference="our_lidar" type="Lidar">
+            <ros>
+                <topicName>/lidar</topicName>
+                <alwaysOn>true</alwaysOn>
+            </ros>
+        </device>
+        <device reference="gps" type="GPS">
+            <ros>
+                <topicName>/gps</topicName>
+                <alwaysOn>true</alwaysOn>
+            </ros>
+        </device>
+        <device reference="gyro" type="Gyro">
+            <ros>
+                <topicName>/gyro</topicName>
+                <alwaysOn>true</alwaysOn>
+            </ros>
+        </device>
+        <device reference="camera" type="Camera">
+            <ros>
+                <topicName>/camera/image_raw</topicName>
+                <alwaysOn>true</alwaysOn>
+                <updateRate>30.0</updateRate>
+                <cameraInfoTopicName>/camera/camera_info</cameraInfoTopicName>
+                <frameName>camera_link</frameName>
+            </ros>
+        </device>
+        <plugin type="sim.my_robot_driver.MyRobotDriver" />
+    </webots>
+</robot>

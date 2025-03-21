@@ -1,0 +1,76 @@
+import os
+import launch
+from launch_ros.actions import Node
+from launch import LaunchDescription
+from ament_index_python.packages import get_package_share_directory
+from webots_ros2_driver.webots_launcher import WebotsLauncher
+from webots_ros2_driver.webots_controller import WebotsController
+
+
+def generate_launch_description():
+    package_dir = get_package_share_directory('sim')
+    robot_description_path = os.path.join(package_dir, 'resource', 'my_robot.urdf')
+
+    webots = WebotsLauncher(
+        world=os.path.join(package_dir, 'worlds', 'my_world.wbt')
+    )
+
+    my_robot_driver = WebotsController(
+        robot_name='my_robot',
+        parameters=[
+            {'robot_description': robot_description_path},
+        ]
+    )
+
+    obstacle_avoider = Node(
+        package='sim',
+        executable='obstacle_avoider',
+    )
+
+    # NOTE: executable is the same as "entry_point" as listed in setup.py for package
+    waypoints_generator = Node(
+        package='waypoints',
+        executable='waypoints',
+        name='waypoints_generator',
+        parameters=[{
+            'simulation_mode': True
+        }]
+    )
+
+    localization = Node(
+        package='djikstra',
+        executable='djikstra',
+    )
+
+    pointcloud_to_grid_node = Node(
+        package='pointcloud_to_grid',
+        executable='pointcloud_to_grid_node',
+        output='screen',
+        parameters=[
+            {'cloud_in_topic': '/pointcloud'},  # Set your topic here
+            {'position_x': 0.0},
+            {'position_y': 0.0},
+            {'verbose1': False},
+            {'verbose2': False},
+            {'cell_size': 0.1},
+            {'length_x': 10.0},
+            {'length_y': 10.0},
+            {'mapi_topic_name': 'intensity_grid'},
+            {'maph_topic_name': 'height_grid'},
+        ]
+    )
+
+    return LaunchDescription([
+        webots,
+        my_robot_driver,
+        obstacle_avoider,
+        waypoints_generator,
+        localization,
+        pointcloud_to_grid_node,
+        launch.actions.RegisterEventHandler(
+            event_handler=launch.event_handlers.OnProcessExit(
+                target_action=webots,
+                on_exit=[launch.actions.EmitEvent(event=launch.events.Shutdown())],
+            )
+        )
+    ])

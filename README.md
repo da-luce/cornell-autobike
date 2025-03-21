@@ -3,6 +3,8 @@
 [![codecov](https://codecov.io/gh/da-luce/cornell-autobike/graph/badge.svg?token=DG2EJ0SJPB)](https://codecov.io/gh/da-luce/cornell-autobike)
 ![Test Status](https://github.com/da-luce/cornell-autobike/actions/workflows/test.yml/badge.svg)
 
+![Webots Simulation](./assets/webots.png)
+
 - [Autobike Software](#autobike-software)
   - [Important Links](#important-links)
   - [Installation](#installation)
@@ -10,18 +12,10 @@
     - [Linux](#linux)
     - [Windows](#windows)
     - [X Window Forwarding](#x-window-forwarding)
-      - [MacOS](#macos-1)
-      - [Linux](#linux-1)
-      - [Windows](#windows-1)
   - [Running the Software](#running-the-software)
     - [1. Build the Image](#1-build-the-image)
     - [2. Run in a Container](#2-run-in-a-container)
     - [3. Working with ROS2](#3-working-with-ros2)
-      - [Getting Started](#getting-started)
-      - [Building](#building)
-      - [Running a Package](#running-a-package)
-      - [Visualizing with ROSBoard](#visualizing-with-rosboard)
-      - [Other ROS GUIs](#other-ros-guis)
     - [4. Testing and Code Quality](#4-testing-and-code-quality)
   - [Best Practices](#best-practices)
     - [Adding Dependencies](#adding-dependencies)
@@ -327,6 +321,37 @@ For Apple Silicon, using a VNC server inside the container is an alternative sol
 
 A potential solution for visualizing built-in ROS message types in these environments is to use ROSboard. ROSboard renders ROS data types using WebGL directly in a web browser, bypassing the need for complex GUI forwarding or VNC setups. This approach works cross-platform, offering a lightweight and responsive alternative for visualizing ROS topics. More work is needed if we are rending custom data types though.
 
+#### Guacamole
+
+1. Start docker demon
+2. `docker compose up -d`
+3. Go to `http://localhost:8080/guacamole`
+4. Open a root shell to dev container and run: `service xrdp start`
+  Can use: `docker exec -it --user root autobike_dev bash`
+
+  i. Username: `user`
+  ii. Password: `password`
+5. Login to the desktop GUI
+  i. Username: `bichael`
+  ii. Password: `autobike`
+6. In a terminal, start `bash` (the default shell is wacky)
+7. Install this stuff in the container:
+
+  ```bash
+  apt update
+  apt install ros-humble-rviz2
+  apt install libogre-1.12-dev
+  ldconfig -p | grep libOgreMain
+  ```
+
+8. Source ROS again: `source /opt/ros/humble/setup.bash`
+9. `rviz2` should work
+10. Very helpful: `https://gazebosim.org/docs/latest/ros_installation/`:
+
+  ```bash
+  apt-get install ros-${ROS_DISTRO}-ros-gz
+  ```
+
 ### 4. Testing and Code Quality
 
 We use [black](https://github.com/psf/black) for formatting, [pylint](https://pypi.org/project/pylint/) for linting, and [mypy](https://mypy.readthedocs.io/en/stable/) for type checking. If you are using [VS Code](https://code.visualstudio.com/), the provided [VS Code settings](.vscode/settings.json) should automatically setup everything you need. Just make sure you have the [recommended extensions](./.vscode/extensions.json) installed.
@@ -392,6 +417,21 @@ src/
 ---
 
 ## Architecture
+
+```mermaid
+flowchart TD
+
+    gps(GPS) --> |/gps - sensor_msgs/NavSatFix| localization
+    kinetics(Kinetics) --> |/kinetics - nav_msgs/Odometry - and maybe more| pure_pursuit
+    waypoints(Waypoints) --> |/GPS_path - nav_msgs/Path| localization
+
+    %% Processing Layers
+    lidar(LiDAR) -->|/pointcloud - sensor_msgs/PointCloud2| filtering
+    filtering(pointcloud_to_grid) -->|/occupancy - nav_msgs/OccupancyGrid| localization
+    localization(Localization) -->|/path - nav_msgs/Path| pure_pursuit
+    pure_pursuit(Pure Pursuit) --> |/steering - geometry_msgs/Twist| output
+    output(Output Driver)
+```
 
 ```mermaid
 flowchart TD

@@ -3,6 +3,7 @@ services:
   # Autobike development
   autobike:
     container_name: autobike_dev
+    platform: linux/amd64
     image: autobike
     hostname: bike_dev
     build:
@@ -11,26 +12,26 @@ services:
     tty: true
     command: bash
     networks:
-      - rosnet
+      - x11
     environment:
-      - DISPLAY=host.docker.internal:0
+      - DISPLAY=novnc:0.0
+    depends_on:
+      - novnc
     volumes:
       - ./:/usr/local/autobike
 
-  # ROSboard
-  rosboard:
-    container_name: rosboard
-    image: autobike
-    hostname: bike_dev
-    build:
-      context: .
-    command: bash -c "cd /usr/local/rosboard/ && ./run"
+  # NoVNC for x11 apps
+  novnc:
+    image: theasp/novnc:latest
+    environment:
+      # Adjust to your screen size
+      - DISPLAY_WIDTH=1600
+      - DISPLAY_HEIGHT=968
+      - RUN_XTERM=no
     ports:
-      - 8888:8888
+      - "8080:8080"
     networks:
-      - rosnet
-    depends_on:
-      - autobike
+      - x11
 
 networks:
-  rosnet:
+  x11:

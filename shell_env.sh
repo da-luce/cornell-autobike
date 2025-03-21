@@ -23,3 +23,9 @@ alias clean='(cd $WORKDIR && rm -rf build/ install/ log/)'
 # Other
 alias python=python3
 alias ros_test='(cd $WORKDIR && ros2 run demo_nodes_cpp talker)'
+
+# Required for rviz2 to work properly
+source /opt/ros/humble/setup.bash
+
+# Required for Webots
+export USER=$(whoami)

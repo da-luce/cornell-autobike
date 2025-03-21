@@ -37,7 +37,6 @@ dependencies = [
 ]
 
 [tool.setuptools]
-# packages = ["my_package"] # Replace with the actual package(s) in your project
 zip-safe = false
 
 [tool.pytest.ini_options]
