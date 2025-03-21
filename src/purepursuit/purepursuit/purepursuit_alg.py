@@ -59,7 +59,7 @@ class PurePursuitController(Node):
         # Note: transforms3d uses [w, x, y, z] format for quaternions
         euler = quat2euler([quat.w, quat.x, quat.y, quat.z], axes='sxyz')
         return euler
-    
+
     def path_callback(self, path_msg):
         """Store the latest path"""
         self.current_path = path_msg.poses

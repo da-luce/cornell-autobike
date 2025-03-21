@@ -42,6 +42,11 @@ def generate_launch_description():
         executable='djikstra',
     )
 
+    purepursuit = Node(
+        package='purepursuit',
+        executable='purepursuit',
+    )
+
     pointcloud_to_grid_node = Node(
         package='pointcloud_to_grid',
         executable='pointcloud_to_grid_node',
@@ -66,6 +71,7 @@ def generate_launch_description():
         obstacle_avoider,
         waypoints_generator,
         localization,
+        purepursuit,
         pointcloud_to_grid_node,
         launch.actions.RegisterEventHandler(
             event_handler=launch.event_handlers.OnProcessExit(

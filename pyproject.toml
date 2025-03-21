@@ -18,6 +18,9 @@ dependencies = [
 	"requests==2.32.3",
 	"pykalman==0.9.7",
 
+	# Purepursuit
+	"transforms3d==0.4.2",
+
 	# Mapping and routing
 	"pyroutelib3==1.7.2",
 	"tkintermapview==1.29",

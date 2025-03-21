@@ -28,8 +28,8 @@ setup(
     license='MIT',
     entry_points={
         'console_scripts': [
-            'purepursuit = purepursuit.alg:main',
-            'once = purepursuit.alg:main',
+            'purepursuit = purepursuit.purepursuit_alg:main',
+            'once = purepursuit.purepursuit_alg:main',
         ],
     },
     data_files=[
