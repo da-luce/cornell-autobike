@@ -6,7 +6,7 @@ import pytest
 import rclpy
 from geometry_msgs.msg import Twist
 from nav_msgs.msg import Path
-from purepursuit.purepursuit.alg import PurePursuitController  # Import the controller
+from purepursuit.purepursuit.purepursuit_alg import PurePursuitController  # Import the controller
 from rclpy.duration import Duration
 from rclpy.node import Node
 from geometry_msgs.msg import PoseStamped, Pose, Point

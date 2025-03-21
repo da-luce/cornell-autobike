@@ -7,6 +7,16 @@ from std_msgs.msg import Float32
 HALF_DISTANCE_BETWEEN_WHEELS = 0.045
 WHEEL_RADIUS = 0.025
 
+# Simulation output data (for processing)
+POINTCLOUD_OUT = '/pointcloud'  # PointCloud2 from LiDAR
+GPS_OUT = '/gps'                # NavSatFix from GPS
+GYRO_OUT = '/gyro'              # Imu from Gyroscope
+CAMERA_OUT = '/camera'          # Image from optical camera
+
+# Input data (commands to bike)
+PUREPURSUIT_IN = '/steering_angle' # twist from purepursuit
+MANUAL_IN = '/cmd_vel'             # manual velocity commands
+
 class MyRobotDriver:
     def init(self, webots_node, properties):
         self.__robot = webots_node.robot
@@ -20,25 +30,24 @@ class MyRobotDriver:
         self.__right_motor.setPosition(float('inf'))
         self.__right_motor.setVelocity(0)
 
-
         self.__target_twist = Twist()
 
         rclpy.init(args=None)
         self.__node = rclpy.create_node('my_robot_driver')
 
         # Subscriptions (manual commands)
-        self.__node.create_subscription(Twist, '/cmd_vel', self.__cmd_vel_callback, 1)
+        self.__node.create_subscription(Twist, MANUAL_IN, self.__cmd_vel_callback, 1)
         self.__node.create_subscription(LaserScan, '/lidar', self.__lidar_callback, 1)
         self.__node.create_subscription(Float32, '/angle', self.__angle_callback, 1)
 
         # Publishers (LiDAR and GPS data)
         self.__pointcloud_publisher = self.__node.create_publisher(PointCloud2, '/pointcloud', 10)
         # GPS publisher
-        self.__gps_publisher = self.__node.create_publisher(NavSatFix, '/gps', 10)
+        self.__gps_publisher = self.__node.create_publisher(NavSatFix, GPS_OUT, 10)
         # Gyroscope publisher
-        self.__gyro_publisher = self.__node.create_publisher(Imu, '/gyro', 10)
+        self.__gyro_publisher = self.__node.create_publisher(Imu, GYRO_OUT, 10)
         #Camera Publisher
-        self.__camera_publisher = self.__node.create_publisher(Image, '/camera', 10)
+        self.__camera_publisher = self.__node.create_publisher(Image, CAMERA_OUT, 10)
 
 
         # Initialize GPS
