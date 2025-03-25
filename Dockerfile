@@ -39,7 +39,7 @@ RUN apt install -y \
     libogre-1.12-dev
 
 # Webots
-RUN apt install -y ros-humble-webots-ros2
+# RUN apt install -y ros-humble-webots-ros2
 
 # pointcloud_to_grid package
 RUN apt-get update

@@ -4,7 +4,7 @@ services:
   autobike:
     container_name: autobike_dev
     platform: linux/amd64
-    image: autobike
+    image: daluce/cornell-autobike:integrated
     hostname: bike_dev
     build:
       context: .

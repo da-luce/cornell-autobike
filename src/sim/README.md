@@ -43,3 +43,13 @@ v TODO: update robot driver to listen to output of pure pursuit container :D
 ## Resources
 
 * Following [this](https://docs.ros.org/en/humble/Tutorials/Advanced/Simulators/Webots/Setting-Up-Simulation-Webots-Basic.html) tutorial! other versions of ROS WILL NOT WORK!!!
+
+## Running on Windows Notes (WSL2 Backend for Docker)
+
+- Building image on Windows sucks... just push the working, built image to docker hub and pull from there
+- Webots-Ros driver is conviced you are running on WSL (even though it's an Ubuntu image), and does a bunch of incorrect stuff
+    - Solution: deleted/commented out some lines containing incorrect WSL paths in driver code (copied and built webots-ros drivers locally)
+- The option to automatically install Webots chooses the Winodws C: drive, which breaks things
+    - Solution: download and install webots-R2023b-x86-64.tar.bz2 locally, set WEBOTS_HOME env var to the location
+- Resulting sim is just as slow as on laptops
+    - Solution: use a Linux dual boot :(
