@@ -17,6 +17,8 @@ class PurePursuitController(Node):
 
     def __init__(self):
         super().__init__('pure_pursuit_controller')
+        #self.publisher_ = self.create_publisher(Twist, '/cmd_vel', 10)
+        self.publisher_ = self.create_publisher(Twist, '/steering_vector', 10)
 
         # Subscriptions
         self.subscription_pose = self.create_subscription(
@@ -26,7 +28,7 @@ class PurePursuitController(Node):
             Twist, '/robot_twist', self.twist_callback, 10
         )
 
-        self.publisher_ = self.create_publisher(Path, '/steering_angle', 10)
+    #    self.publisher_ = self.create_publisher(Path, '/steering_angle', 10)
         self.get_logger().info("Pure pursuit node started")
 
         # Parameters
