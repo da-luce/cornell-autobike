@@ -3,9 +3,10 @@ from typing import List, Optional, Tuple
 
 import numpy as np
 import rclpy
-from geometry_msgs.msg import PoseStamped
+from geometry_msgs.msg import Point, PoseStamped
 from nav_msgs.msg import OccupancyGrid, Path
 from rclpy.node import Node
+from visualization_msgs.msg import Marker
 
 
 class DijkstraPathPlanner(Node):
@@ -26,6 +27,9 @@ class DijkstraPathPlanner(Node):
         # Publisher setup for ROS2
         self.publisher_ = self.create_publisher(
             Path, 'Path', 10)
+
+        # Publisher for the visualization marker used for RViz (visualizing the path)
+        self.marker_publisher = self.create_publisher(Marker, 'visualization_marker', 10)
 
         self.get_logger().info("Dijkstra path planner node started")
 
@@ -51,10 +55,11 @@ class DijkstraPathPlanner(Node):
         self.grid = grid
 
         if self.grid is not None:
-            self.get_logger().info(f"received grid of {self.grid}")
+
             path = self.dijkstra(self.start, self.end)
             if path:
                 self.path_callback(path)
+                self.publish_marker(path)
             else:
                 self.get_logger().error("No path found from start to end")
 
@@ -125,6 +130,38 @@ class DijkstraPathPlanner(Node):
             path_msg.poses.append(pose_stamped)
 
         return path_msg
+
+    def publish_marker(self, path: List[Tuple[int, int]]):
+            """
+            Publish a visualization marker (LINE_STRIP) that displays the computed path.
+            This marker is intended for viewing in RViz over the occupancy grid.
+            """
+            marker = Marker()
+            marker.header.frame_id = "map"
+            marker.header.stamp = self.get_clock().now().to_msg()
+            marker.ns = "path_visualization"
+            marker.id = 0
+            marker.type = Marker.LINE_STRIP
+            marker.action = Marker.ADD
+            marker.scale.x = 0.1  # Line width
+
+            # Set marker color to blue. (You can adjust this as desired.)
+            marker.color.r = 0.0
+            marker.color.g = 0.0
+            marker.color.b = 1.0
+            marker.color.a = 1.0  # Fully opaque
+
+            # Convert each waypoint to a Point message and add to the marker.
+            for row, col in path:
+                point = Point()
+                point.x = float(row)
+                point.y = float(col)
+                point.z = 0.0
+                marker.points.append(point)
+
+            self.marker_publisher.publish(marker)
+            self.get_logger().info(f"🖌 Published visualization marker with {len(marker.points)} points")
+
 
 
 def main(args=None):
