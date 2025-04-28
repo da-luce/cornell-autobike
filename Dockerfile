@@ -40,6 +40,11 @@ RUN apt install -y \
 
 # Webots
 RUN apt install -y ros-humble-webots-ros2
+# install 2023b version manually
+RUN apt-get update && apt-get install -y wget && \
+    wget https://github.com/cyberbotics/webots/releases/download/R2025a/webots_2025a_amd64.deb && \
+    apt install -y ./webots_2025a_amd64.deb && \
+    rm ./webots_2025a_amd64.deb
 
 # pointcloud_to_grid package
 RUN apt-get update
@@ -51,7 +56,8 @@ RUN apt-get install -y python3.10-tk
 # Copy Python project files and install dependencies
 ENV PYTHONPATH="$WORKDIR:${PYTHONPATH}"
 COPY pyproject.toml .
-RUN pip install .
+# added another flag to avoid transforms3d from crashing
+RUN pip install --ignore-installed transforms3d==0.4.2
 
 # Run the container as a non-root user for better security
 ARG USERNAME=bichael
