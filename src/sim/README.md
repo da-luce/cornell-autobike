@@ -10,8 +10,11 @@
 
 1. `docker exec -it --user root autobike_dev bash`
 2. `build`
-3. `ros2 launch sim robot_launch.py`
-4. Install Webots with `y` if necessary
+3. `export WEBOTS_HOME=/usr/local/webots`
+#### check if webots_home was correctly exported: echo should print "/usr/local/webots"
+4. `echo $WEBOTS_HOME`
+5. `source install/setup.bash`
+6. `ros2 launch sim robot_launch.py`
 
 ### (c) In a web browser, open the GUI
 

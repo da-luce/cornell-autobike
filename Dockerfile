@@ -40,7 +40,7 @@ RUN apt install -y \
 
 # Webots
 RUN apt install -y ros-humble-webots-ros2
-# install 2023b version manually
+# install 2025a version manually
 RUN apt-get update && apt-get install -y wget && \
     wget https://github.com/cyberbotics/webots/releases/download/R2025a/webots_2025a_amd64.deb && \
     apt install -y ./webots_2025a_amd64.deb && \
