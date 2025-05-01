@@ -57,7 +57,7 @@ RUN apt-get install -y python3.10-tk
 ENV PYTHONPATH="$WORKDIR:${PYTHONPATH}"
 COPY pyproject.toml .
 # added another flag to avoid transforms3d from crashing
-RUN pip install --ignore-installed transforms3d==0.4.2
+RUN pip install --ignore-installed transforms3d==0.4.2 .
 
 # Run the container as a non-root user for better security
 ARG USERNAME=bichael

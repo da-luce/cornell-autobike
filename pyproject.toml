@@ -24,7 +24,7 @@ dependencies = [
 	# Mapping and routing
 	"pyroutelib3==1.7.2",
 	"tkintermapview==1.29",
-	"overpass==0.7",
+	"overpass==0.7.0",
 	# This dependency requires some annoying binaries to be installed. See Dockerfile.
 	"osmnx==1.9.4",
 
