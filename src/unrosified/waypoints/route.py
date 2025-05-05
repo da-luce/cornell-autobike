@@ -268,7 +268,7 @@ def main():
     # Route the bike
     print("Routing bike...", end="", flush=True)
     route, success = test_route(
-        start_marker.position, end_marker.position, "src/waypoints/ithaca.osm"
+        start_marker.position, end_marker.position, "src/waypoints/map.osm"
     )
     if success and len(route) > 1:
         print("✅")
